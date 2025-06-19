@@ -1,0 +1,4 @@
+0) refactoring del codice per farlo funzionare con un nuovo gioco
+1) implementare il gioco
+1.5) da pensare al pretrain
+2) testare il gioco
