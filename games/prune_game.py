@@ -95,11 +95,6 @@ def _patch_llama_block(block: nn.Module):
 #  PruneGame
 # =============================================================================
 class PruneGame:
-    """
-    Alphaprune environment con board (3×L) di gate binari e reward
-    sparsity – β·KL, dove la KL è calcolata in modo incrementale alla EvoPress.
-    """
-
     @staticmethod
     def _ensure_patched(model: nn.Module):
         for blk in model.modules():

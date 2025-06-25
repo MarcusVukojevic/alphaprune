@@ -55,7 +55,7 @@ class AlphaZero:
 
             pol_loss, val_loss = self.model.fwd_train(xx, ss, aa, vv)
             loss = pol_loss + val_loss
-
+            print("Loss: ", loss)
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
