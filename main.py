@@ -18,16 +18,16 @@ args = {
     "target_sparsity"  : 0.90,         # 50 %
     "ppl_tolerance_frac": 0.05,       # +0.5 % di ppl accettata
     "beta"             : 5.0,         # coeff. penalità Δppl
-    "R_limit"          : 300,          # mosse max per episodio
-    "num_searches"     : 128, #64
-    "top_k"            : 64, #64
+    "R_limit"          : 30,          # mosse max per episodio
+    "num_searches"     : 64, #64
+    "top_k"            : 32, #64
     "C"                : 1.5,
     "batch_size"       : 32, #16
-    "num_iterations"   : 10,
-    "num_selfPlay_iterations": 10,
-    "num_epochs": 5,
-    "beta": 3.0,           # peso KL nel reward
-    "kl_threshold": 0.05   # τ per l’early-abort EvoPress
+    "num_iterations"   : 50,
+    "num_selfPlay_iterations": 100,
+    "num_epochs": 50,
+    "beta": 1.0,           # peso KL nel reward
+    "kl_threshold": 0.1   # τ per l’early-abort EvoPress
 }
 
 #!TODO: da guardare anche la ucb perché non mi quadra il 1- 

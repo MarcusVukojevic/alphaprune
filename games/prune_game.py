@@ -127,7 +127,7 @@ class PruneGame:
         # data
         self.tokenizer = self.model_victim.tokenizer
         # n_:samples era a 512
-        self.calib_dataset = load_dataset(nam_dive=args["name_dataset"], tokenizer=self.tokenizer,split="validation", nsamples=10, seq_len=128)
+        self.calib_dataset = load_dataset(name=args["name_dataset"], tokenizer=self.tokenizer,split="validation", nsamples=10, seq_len=128)
         self._cache_reference_logits(batch_size=4)
 
         # params / targets
