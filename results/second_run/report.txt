@@ -1,0 +1,7 @@
+ho provato a fare un test è più grande
+
+pro -> la ppl è scesa di un botto
+
+contro -> la loss non scende affatto
+
+vedo modello e loss su un mini test
