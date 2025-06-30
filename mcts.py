@@ -2,6 +2,12 @@
 import torch
 from node import Node
 
+
+TOGGLE     = 0   # commuta un gate      (arg = gate_id)
+SKIP_BLOCK = 1   # spegne MHA+FFN layer (arg = layer_id)
+NO_RES     = 2   # spegne solo residuo  (arg = layer_id)
+PASS       = 3   # no-op
+
 class MCTS:
     def __init__(self, game, args, model):
         self.game   = game
@@ -35,20 +41,36 @@ class MCTS:
 
         # azione con più visite
         best_child = max(root.children, key=lambda c: c.visit_count)
+        print(f"[root] visits:", {tuple(c.action_taken.tolist()): c.visit_count for c in root.children[:6]})
+        print(f"[root] Q:", {tuple(c.action_taken.tolist()): round(c.get_q(),3) for c in root.children[:6]})
         return best_child.action_taken
 
-    # ------------------------------------------------------------
     def _expand(self, node):
         # ----- prepara input per la rete ------ #
         enc = self.game.get_encoded_state(node.state).unsqueeze(0)   # (1,T,N)
         scl = self.game.get_scalar().unsqueeze(0)                    # (1,1)
 
-        dev = next(self.model.parameters()).device   # << nuovo modo
+        dev = next(self.model.parameters()).device
         enc, scl = enc.to(dev), scl.to(dev)
 
         # ----- inference ------ #
         acts, priors, _ = self.model.fwd_infer(enc, scl, top_k=self.K)
-        acts, priors = acts[0], priors[0]     # (K,2) , (K,)
+        acts, priors = acts[0], priors[0]         # (K,2) , (K,)
+
+        # ---------- filtro PASS nelle prime 3 mosse -----------------
+        if self.game.time_stamp < 3:
+            mask = acts[:, 1] != PASS             # op == 3  → PASS
+            if mask.any():                        # se rimane qualcosa
+                acts, priors = acts[mask], priors[mask]
+            else:                                 # erano tutti PASS → tieni il primo
+                acts, priors = acts[:1], priors[:1]
+
+        # ---------- Dirichlet noise sulla radice --------------------
+        if node.parent is None:
+            eps   = self.args.get("root_dir_eps", 0.3)
+            alpha = self.args.get("root_dir_alpha", 0.3)
+            noise = torch.distributions.Dirichlet(torch.full_like(priors, alpha)).sample()
+            priors = priors * (1 - eps) + noise * eps
 
         # ----- genera figli ------ #
         for a, p in zip(acts, priors):

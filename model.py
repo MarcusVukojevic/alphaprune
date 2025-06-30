@@ -19,16 +19,8 @@ import torch.nn.functional as F
 # -----------------------------------------------------------------------------
 
 class PruneModel(nn.Module):
-    def __init__(
-        self,
-        num_blocks: int,            # N = 3 × L
-        history_len: int,           # R_limit (not used directly)
-        d_model: int = 128,
-        n_heads: int = 4,
-        n_layers: int = 2,
-        dim_feedforward: int = 256,
-        num_ops: int = 4,           # TOGGLE, SKIP_BLOCK, NO_RES, PASS
-    ):
+    def __init__( self, num_blocks: int,  history_len: int, d_model: int = 128, n_heads: int = 4, n_layers: int = 2, dim_feedforward: int = 256, num_ops: int = 4, ):
+        
         super().__init__()
         self.num_blocks  = num_blocks
         self.num_ops     = num_ops
@@ -55,7 +47,7 @@ class PruneModel(nn.Module):
             nn.Linear(d_model, dim_feedforward),
             nn.ReLU(inplace=True),
             nn.Linear(dim_feedforward, 1),
-            nn.Tanh(),
+            # nn.Tanh(), lo levo perchè il reward troppo schiacciato 
         )
 
         self._init_weights()

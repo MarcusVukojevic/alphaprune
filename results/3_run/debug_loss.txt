@@ -1,0 +1,114 @@
+Inizio traning con:  {'name_model': 'distilgpt2', 'eightbit': False, 'name_dataset': 'wikitext', 'device': 'cuda', 'target_sparsity': 0.9, 'ppl_tolerance_frac': 0.05, 'beta': 1.0, 'R_limit': 30, 'num_searches': 10, 'top_k': 10, 'C': 1.5, 'batch_size': 12, 'num_iterations': 50, 'num_selfPlay_iterations': 10, 'num_epochs': 2, 'kl_threshold': 0.1}
+[utils] distilgpt2:    786 blocchi da 64 neuroni
+[utils] text dataset ('wikitext', 'wikitext-2-raw-v1') – 10 sequenze da 128
+PPL baseline (distilgpt2 full): 1441.50
+
+
+--> inizio ad imparare
+
+[Iter 0  Ep 1]  pol=3.5214  val=0.1931  tot=3.7145
+[Iter 0  Ep 2]  pol=3.1514  val=0.0240  tot=3.1754
+[Iter 1  Ep 1]  pol=2.8014  val=0.0311  tot=2.8326
+[Iter 1  Ep 2]  pol=2.6435  val=0.0284  tot=2.6719
+[Iter 2  Ep 1]  pol=2.2651  val=0.0289  tot=2.2940
+[Iter 2  Ep 2]  pol=2.0027  val=0.0243  tot=2.0270
+[Iter 3  Ep 1]  pol=1.3700  val=0.0288  tot=1.3987
+[Iter 3  Ep 2]  pol=1.0762  val=0.0293  tot=1.1054
+[Iter 4  Ep 1]  pol=0.7482  val=0.0259  tot=0.7741
+[Iter 4  Ep 2]  pol=0.4843  val=0.0303  tot=0.5146
+[Iter 5  Ep 1]  pol=0.3417  val=0.0233  tot=0.3650
+[Iter 5  Ep 2]  pol=0.2790  val=0.0173  tot=0.2963
+[Iter 6  Ep 1]  pol=0.0795  val=0.0198  tot=0.0994
+[Iter 6  Ep 2]  pol=0.0522  val=0.0168  tot=0.0690
+[Iter 7  Ep 1]  pol=0.0862  val=0.0152  tot=0.1014
+[Iter 7  Ep 2]  pol=0.0667  val=0.0210  tot=0.0877
+[Iter 8  Ep 1]  pol=0.0177  val=0.0126  tot=0.0303
+[Iter 8  Ep 2]  pol=0.0222  val=0.0106  tot=0.0328
+[Iter 9  Ep 1]  pol=0.0204  val=0.0110  tot=0.0313
+[Iter 9  Ep 2]  pol=0.0525  val=0.0146  tot=0.0671
+[Iter 10  Ep 1]  pol=0.0535  val=0.0115  tot=0.0650
+[Iter 10  Ep 2]  pol=0.0393  val=0.0093  tot=0.0485
+[Iter 11  Ep 1]  pol=0.0058  val=0.0085  tot=0.0143
+[Iter 11  Ep 2]  pol=0.0333  val=0.0101  tot=0.0433
+[Iter 12  Ep 1]  pol=0.0105  val=0.0082  tot=0.0187
+[Iter 12  Ep 2]  pol=0.0260  val=0.0071  tot=0.0331
+[Iter 13  Ep 1]  pol=0.0253  val=0.0082  tot=0.0335
+[Iter 13  Ep 2]  pol=0.0114  val=0.0067  tot=0.0181
+[Iter 14  Ep 1]  pol=0.0114  val=0.0073  tot=0.0187
+[Iter 14  Ep 2]  pol=0.0073  val=0.0066  tot=0.0140
+[Iter 15  Ep 1]  pol=0.0082  val=0.0067  tot=0.0148
+[Iter 15  Ep 2]  pol=0.0125  val=0.0075  tot=0.0200
+[Iter 16  Ep 1]  pol=0.0361  val=0.0064  tot=0.0425
+[Iter 16  Ep 2]  pol=0.0105  val=0.0056  tot=0.0160
+[Iter 17  Ep 1]  pol=0.0351  val=0.0062  tot=0.0413
+[Iter 17  Ep 2]  pol=0.0657  val=0.0056  tot=0.0713
+[Iter 18  Ep 1]  pol=0.0055  val=0.0053  tot=0.0108
+[Iter 18  Ep 2]  pol=0.0210  val=0.0070  tot=0.0280
+[Iter 19  Ep 1]  pol=0.0381  val=0.0048  tot=0.0429
+[Iter 19  Ep 2]  pol=0.0558  val=0.0052  tot=0.0609
+[Iter 20  Ep 1]  pol=0.0097  val=0.0061  tot=0.0159
+[Iter 20  Ep 2]  pol=0.0047  val=0.0048  tot=0.0094
+[Iter 21  Ep 1]  pol=0.0021  val=0.0061  tot=0.0082
+[Iter 21  Ep 2]  pol=0.0158  val=0.0048  tot=0.0207
+[Iter 22  Ep 1]  pol=0.0140  val=0.0047  tot=0.0188
+[Iter 22  Ep 2]  pol=0.0117  val=0.0047  tot=0.0163
+[Iter 23  Ep 1]  pol=0.0171  val=0.0055  tot=0.0227
+[Iter 23  Ep 2]  pol=0.0156  val=0.0047  tot=0.0203
+[Iter 24  Ep 1]  pol=0.0017  val=0.0039  tot=0.0056
+[Iter 24  Ep 2]  pol=0.0014  val=0.0040  tot=0.0054
+[Iter 25  Ep 1]  pol=0.0268  val=0.0049  tot=0.0318
+[Iter 25  Ep 2]  pol=0.0120  val=0.0050  tot=0.0171
+[Iter 26  Ep 1]  pol=0.0152  val=0.0041  tot=0.0194
+[Iter 26  Ep 2]  pol=0.0006  val=0.0041  tot=0.0046
+[Iter 27  Ep 1]  pol=0.0006  val=0.0036  tot=0.0042
+[Iter 27  Ep 2]  pol=0.0051  val=0.0036  tot=0.0087
+[Iter 28  Ep 1]  pol=0.0209  val=0.0042  tot=0.0251
+[Iter 28  Ep 2]  pol=0.0034  val=0.0035  tot=0.0069
+[Iter 29  Ep 1]  pol=0.0366  val=0.0031  tot=0.0397
+[Iter 29  Ep 2]  pol=0.0034  val=0.0030  tot=0.0064
+[Iter 30  Ep 1]  pol=0.0015  val=0.0033  tot=0.0049
+[Iter 30  Ep 2]  pol=0.0034  val=0.0031  tot=0.0065
+[Iter 31  Ep 1]  pol=0.0031  val=0.0028  tot=0.0060
+[Iter 31  Ep 2]  pol=0.0031  val=0.0027  tot=0.0058
+[Iter 32  Ep 1]  pol=0.0011  val=0.0033  tot=0.0045
+[Iter 32  Ep 2]  pol=0.0009  val=0.0031  tot=0.0040
+[Iter 33  Ep 1]  pol=0.0001  val=0.0025  tot=0.0027
+[Iter 33  Ep 2]  pol=0.0001  val=0.0028  tot=0.0028
+[Iter 34  Ep 1]  pol=0.0001  val=0.0025  tot=0.0026
+[Iter 34  Ep 2]  pol=0.0002  val=0.0028  tot=0.0030
+[Iter 35  Ep 1]  pol=0.0001  val=0.0028  tot=0.0029
+[Iter 35  Ep 2]  pol=0.0002  val=0.0026  tot=0.0029
+[Iter 36  Ep 1]  pol=0.0005  val=0.0022  tot=0.0027
+[Iter 36  Ep 2]  pol=0.0030  val=0.0021  tot=0.0051
+[Iter 37  Ep 1]  pol=0.0626  val=0.0023  tot=0.0649
+[Iter 37  Ep 2]  pol=0.0026  val=0.0029  tot=0.0056
+[Iter 38  Ep 1]  pol=0.0016  val=0.0024  tot=0.0039
+[Iter 38  Ep 2]  pol=0.0009  val=0.0031  tot=0.0040
+[Iter 39  Ep 1]  pol=0.0139  val=0.0023  tot=0.0161
+[Iter 39  Ep 2]  pol=0.0002  val=0.0023  tot=0.0025
+[Iter 40  Ep 1]  pol=0.0169  val=0.0025  tot=0.0194
+[Iter 40  Ep 2]  pol=0.0008  val=0.0023  tot=0.0032
+[Iter 41  Ep 1]  pol=0.0002  val=0.0043  tot=0.0045
+[Iter 41  Ep 2]  pol=0.0003  val=0.0026  tot=0.0029
+[Iter 42  Ep 1]  pol=0.0009  val=0.0018  tot=0.0028
+[Iter 42  Ep 2]  pol=0.0001  val=0.0015  tot=0.0016
+[Iter 43  Ep 1]  pol=0.0004  val=0.0017  tot=0.0021
+[Iter 43  Ep 2]  pol=0.0003  val=0.0016  tot=0.0018
+[Iter 44  Ep 1]  pol=0.0003  val=0.0018  tot=0.0021
+[Iter 44  Ep 2]  pol=0.0030  val=0.0017  tot=0.0047
+[Iter 45  Ep 1]  pol=0.0117  val=0.0018  tot=0.0135
+[Iter 45  Ep 2]  pol=0.0067  val=0.0016  tot=0.0082
+[Iter 46  Ep 1]  pol=0.0011  val=0.0021  tot=0.0032
+[Iter 46  Ep 2]  pol=0.0024  val=0.0019  tot=0.0043
+[Iter 47  Ep 1]  pol=0.0252  val=0.0016  tot=0.0268
+[Iter 47  Ep 2]  pol=0.1799  val=0.0024  tot=0.1823
+[Iter 48  Ep 1]  pol=0.0356  val=0.0062  tot=0.0418
+[Iter 48  Ep 2]  pol=0.0050  val=0.0038  tot=0.0087
+[Iter 49  Ep 1]  pol=0.0039  val=0.0022  tot=0.0060
+[Iter 49  Ep 2]  pol=0.0013  val=0.0022  tot=0.0035
+
+📈  curva loss salvata in →  loss_curve.png
+
+
+PPL modello potato: 1441.50
+🔖  plot salvato in → final_gate_state.png

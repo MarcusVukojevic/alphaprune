@@ -28,6 +28,7 @@ class ResidualGate(nn.Module):
     def forward(self, x):
         return self.alpha * x
 
+MIN_LOG = -100.0  
 # =============================================================================
 #  Patch helpers
 # =============================================================================
@@ -69,25 +70,46 @@ def _patch_gpt2_block(block: nn.Module):
 def _patch_llama_block(block: nn.Module):
     if all(hasattr(block, g) for g in ("g_mha", "g_ffn", "g_res")):
         return
-    block.g_mha, block.g_ffn, block.g_res = ResidualGate(), ResidualGate(), ResidualGate()
+
+    block.g_mha, block.g_ffn, block.g_res = (
+        ResidualGate(), ResidualGate(), ResidualGate()
+    )
 
     sa, mlp = block.self_attn, block.mlp
     ln_in, ln_post = block.input_layernorm, block.post_attention_layernorm
 
-    def fwd(self, hidden_states, attention_mask=None, position_ids=None,
-            past_key_value=None, output_attentions=False, use_cache=False, **kw):
+    def fwd(
+        self,
+        hidden_states,
+        attention_mask=None,
+        position_ids=None,
+        past_key_value=None,
+        output_attentions=False,
+        use_cache=False,
+        **kw,
+    ):
         residual = hidden_states
-        attn_out = sa(
-            ln_in(hidden_states),
+
+        attn_out, present = sa(                       # <- la MHA originale restituisce
+            ln_in(hidden_states),                     #    (attn_out, present_kv, attn_w)
             attention_mask=attention_mask,
             position_ids=position_ids,
             past_key_value=past_key_value,
             output_attentions=output_attentions,
             use_cache=use_cache,
-        )[0]
+        )[:2]                                         # teniamo solo out e present
+
         hidden_states = hidden_states + block.g_mha(attn_out)
-        hidden_states = block.g_res(residual) + block.g_ffn(mlp(ln_post(hidden_states)))
-        return (hidden_states,)
+        hidden_states = block.g_res(residual) + block.g_ffn(
+            mlp(ln_post(hidden_states))
+        )
+
+        # ------- RISPETTA la firma ufficiale -----------------
+        if output_attentions:
+            # restituisce anche l’attenzione → serve terzo elem.
+            return (hidden_states, present, None)
+        else:
+            return (hidden_states, present)
 
     block.forward = types.MethodType(fwd, block)
 
@@ -120,6 +142,8 @@ class PruneGame:
 
         # model + gates
         self.model_victim = PruneGame._ensure_patched(load_model(args["name_model"], device=self.device, eightbit=args.get("eightbit", False)))
+       
+        self.model_victim.config.use_cache = False 
         self.state, self.gates = PruneGame._collect_gates(self.model_victim)
         self.state = self.state.to(self.device)
         self.initial_state = self.state.clone()
@@ -144,18 +168,35 @@ class PruneGame:
         self.reward = 0.0
 
 
-    @torch.no_grad()
+    """@torch.no_grad()
     def _cache_reference_logits(self, batch_size: int = 4):
         ref_logits, inputs = [], []
         loader = self.calib_dataset  # already token tensors
         for i in trange(0, len(loader), batch_size, desc="Cache gold logits", leave=False):
             j = min(i + batch_size, len(loader))
             inp = torch.cat(loader[i:j]).long().to(self.device)
-            logits = self.model_victim(inp).logits.detach().cpu()
+            logits = self.model_victim(inp, use_cache=False).logits.detach().cpu()
             ref_logits.append(logits)
             inputs.append(inp.cpu())
         self.ref_logits   = torch.cat(ref_logits)   # N × T × V   (cpu)
-        self.calib_inputs = torch.cat(inputs).long().to(self.device)    # N × T       (cpu)
+        self.calib_inputs = torch.cat(inputs).long().to(self.device)    # N × T       (cpu)"""
+    @torch.no_grad()
+    def _cache_reference_logits(self, batch_size: int = 4):
+        ref_lp, inputs = [], []
+        loader = self.calib_dataset
+        for i in trange(0, len(loader), batch_size, desc="Cache gold logits", leave=False):
+            j   = min(i + batch_size, len(loader))
+            inp = torch.cat(loader[i:j]).long().to(self.device)
+
+            # fp32 + log_softmax per evitare overflow/-inf
+            logits = self.model_victim(inp, use_cache=False).logits.float()
+            lp     = torch.log_softmax(logits, dim=-1).cpu()   # (B,T,V)
+
+            ref_lp.append(lp)
+            inputs.append(inp.cpu())
+
+        self.ref_logits   = torch.cat(ref_lp)          # già log-prob
+        self.calib_inputs = torch.cat(inputs).long().to(self.device)
 
     # ------------------------------------------------------------------ gates
     def _toggle_gate(self, gid: int):
@@ -211,7 +252,7 @@ class PruneGame:
             nxt[layer*3 + 2] = 0
         return nxt
     
-    @torch.no_grad()
+    """@torch.no_grad()
     def sparse_incremental_kl(self,batch_size: int = 4,window: int = 1024,penalty: float = 1.5) -> float:
         tau = self.tau                        
         total_kl, total_tok = 0.0, 0
@@ -220,7 +261,7 @@ class PruneGame:
         for i in trange(0, len(self.calib_inputs), batch_size, leave=False, desc="Sparse inc-KL"):
             inp = self.calib_inputs[i:i+batch_size].to(dev)          
             ref = self.ref_logits[i:i+batch_size].to(dev)            
-            out = self.model_victim(inp).logits                      
+            out = self.model_victim(inp, use_cache=False).logits                      
 
             for t in range(0, inp.size(1)-1, window):
                 j = min(t + window, inp.size(1)-1)
@@ -238,10 +279,50 @@ class PruneGame:
                 if total_kl > tau * total_tok:       # early check per uscire
                     return tau * penalty             # oppure total_kl/total_tok
 
-        return total_kl / max(total_tok, 1)          # KL media esatta (≤ τ)
-
-
+        return total_kl / max(total_tok, 1)          # KL media esatta (≤ τ)"""
     @torch.no_grad()
+    def sparse_incremental_kl(self, batch_size: int = 4,
+                            window: int = 1024, penalty: float = 1.5) -> float:
+        tau       = self.tau
+        tot_kl    = 0.0
+        tot_tok   = 0
+        dev       = next(self.model_victim.parameters()).device
+
+        for i in trange(0, len(self.calib_inputs), batch_size,
+                        leave=False, desc="Sparse inc-KL"):
+            inp = self.calib_inputs[i:i+batch_size].to(dev)
+
+            ref_lp = self.ref_logits[i:i+batch_size].to(dev)           # log-prob fp32
+            out_lp = torch.log_softmax(
+                        self.model_victim(inp, use_cache=False)
+                            .logits.float(), dim=-1)                   # log-prob fp32
+
+            # --- SOSTITUISCI ±inf CON VALORE FINITO ---------------------------
+            ref_lp = torch.where(torch.isfinite(ref_lp), ref_lp,
+                                torch.full_like(ref_lp, MIN_LOG))
+            out_lp = torch.where(torch.isfinite(out_lp), out_lp,
+                                torch.full_like(out_lp, MIN_LOG))
+
+            # ------------------------------------------------------------------
+            for t in range(0, inp.size(1)-1, window):
+                j   = min(t + window, inp.size(1)-1)
+                tgt = inp[:, t:j].unsqueeze(-1)                        # (B,L,1)
+
+                log_p = ref_lp[:, t:j, :].gather(-1, tgt)              # (B,L,1)
+                log_q = out_lp[:, t:j, :].gather(-1, tgt)
+
+                kl_chunk = (log_q - log_p).mean().item() * (-1)
+                n_tok    = tgt.numel()
+
+                tot_kl  += kl_chunk * n_tok
+                tot_tok += n_tok
+                if tot_kl > tau * tot_tok:       # early-stop
+                    return tau * penalty
+
+        return tot_kl / max(tot_tok, 1)
+
+
+    """@torch.no_grad()
     def perform_action(self, action: torch.Tensor):
         self._apply_action_in_place(action)
         self.time_stamp += 1
@@ -254,6 +335,39 @@ class PruneGame:
         self.reward = sparsity - self.beta * self.kl_div
 
         self.state_history.appendleft(self.state.clone())
+        return self.state"""
+    
+    def perform_action(self, action: torch.Tensor):
+        # --- stati prima del colpo
+        sparsity_before = 1.0 - self.state.float().mean().item()
+        kl_before       = self.kl_div
+
+        # --- applica la mossa ----------------------------------------------
+        self._apply_action_in_place(action)
+        self.time_stamp += 1
+        self.history.append(action.clone())
+
+        if action[1].item() != PASS:              # solo se tocca un gate
+            self.kl_div = self.sparse_incremental_kl()
+
+        sparsity_after = 1.0 - self.state.float().mean().item()
+
+        # --- reward shaping  -----------------------------------------------
+        Δs = sparsity_after - sparsity_before     # >0 se hai spento qualcosa
+        Δk = self.kl_div - kl_before             # >=0 quasi sempre
+
+        step_reward = 100 * Δs - self.beta * Δk
+        # piccola penalità se fa PASS senza progresso
+        if action[1].item() == PASS and Δs < 1e-5:
+            step_reward -= 1
+
+        # reward cumulativo usato in get_value_and_terminated
+        self.reward += step_reward
+
+        if self.time_stamp % 3 == 0:   # ogni 3 mosse
+            print(f"  step{self.time_stamp:2d}  Δs={Δs:.4f}  Δk={Δk:.4f}  r_step={step_reward:.4f}  R_tot={self.reward:.4f}")
+        
+        self.state_history.appendleft(self.state.clone())
         return self.state
 
 
@@ -264,7 +378,7 @@ class PruneGame:
         sparsity = 1.0 - state.float().mean().item()
         return sparsity >= self.target_sparsity and self.kl_div <= self.tau
 
-    def get_value_and_terminated(self, state, node_num_parents=None):
+    """def get_value_and_terminated(self, state, node_num_parents=None):
         if node_num_parents is None:                     # real game
             done = self.check_win(state) or self.time_stamp >= self.R_limit
             #print(done)
@@ -272,7 +386,16 @@ class PruneGame:
         else:                                            # rollout
             done = self.check_win(state) or node_num_parents >= self.R_limit
             #print(done)
-            return (0.0 if self.check_win(state) else -1.0) if done else 0.0, done
+            return (0.0 if self.check_win(state) else -1.0) if done else 0.0, done"""
+    def get_value_and_terminated(self, state, node_num_parents=None):
+        """
+        Ritorna SEMPRE il reward cumulativo raggiunto finora.
+        Così l’MCTS vede subito se la mossa corrente è stata utile.
+        """
+        done = self.check_win(state) or \
+            (self.time_stamp >= self.R_limit if node_num_parents is None
+                                                else node_num_parents >= self.R_limit)
+        return self.reward, done
 
     def get_encoded_state(self, state: torch.Tensor):
 
@@ -317,10 +440,30 @@ class PruneGame:
             inp = torch.cat(loader[i:j]).long().to(dev)
 
             # label = input stesso (language modelling causale)
-            outputs = self.model_victim(inp, labels=inp)
+            outputs = self.model_victim(inp, labels=inp, use_cache=False)
             loss = outputs.loss               # media per token sul batch
             total_nll += loss.item() * inp.numel()
             total_tok += inp.numel()
 
         ppl = math.exp(total_nll / total_tok)
         return ppl
+    
+
+    @torch.no_grad()
+    def plot_gate_state(self, fname="gate_state.png"):
+        import matplotlib.pyplot as plt
+        n_layers = self.state.numel() // 3
+        mat = self.state.view(n_layers, 3).cpu().numpy()
+
+        fig, ax = plt.subplots(figsize=(4, n_layers * 0.35 + 1.5))
+        im = ax.imshow(mat, cmap=plt.cm.get_cmap("Greys", 2), vmin=0, vmax=1)
+        ax.set_xticks([0, 1, 2])
+        ax.set_xticklabels(["MHA", "FFN", "RES"])
+        ax.set_yticks(range(n_layers))
+        ax.set_yticklabels([f"L{i}" for i in range(n_layers)])
+        ax.set_title("Gate state (1=ON, 0=OFF)")
+        plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+        plt.tight_layout()
+        plt.savefig(fname, dpi=150)
+        plt.close()
+        print(f"🔖  plot salvato in → {fname}")

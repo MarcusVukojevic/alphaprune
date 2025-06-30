@@ -64,3 +64,9 @@ class Node:
         self.value_sum   += value
         if self.parent is not None:
             self.parent.backpropagate(value)
+
+    def get_q(self) -> float:
+        """Media dei valori back-propagati (Q-value) di questo nodo."""
+        if self.visit_count == 0:
+            return 0.0
+        return self.value_sum / self.visit_count

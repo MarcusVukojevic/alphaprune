@@ -1,0 +1,7 @@
+
+
+fixato loss e tutto, plottato il grafico e impara, l'unico problema è che adesso non fa nessuna mossa  :) 
+
+rimosso tanh, normalizzato le loss
+
+ora provo a fare penalty se non fa nessuna mossa
