@@ -32,20 +32,20 @@ args_big = {
 
 
 args_mini = {
-    "name_model"       : "meta-llama/Llama-2-7b-hf",   # qualsiasi LLM HF
+    "name_model"       : "distilgpt2",#"meta-llama/Llama-2-7b-hf",   # qualsiasi LLM HF
     "eightbit"         : False, 
     "name_dataset"     : "wikitext",
-    "device"           : "cuda",       # "cpu" o "mps" 
-    "target_sparsity"  : 0.50,         # 50 %
-    "ppl_tolerance_frac": 0.05,       # +0.5 % di ppl accettata
+    "device"           : "mps",       # "cpu" o "mps" 
+    "target_sparsity"  : 0.20,         # 50 %
+    "ppl_tolerance_frac": 0.1,       # +0.5 % di ppl accettata
     "beta"             : 5.0,         # coeff. penalità Δppl
     "R_limit"          : 30,          # mosse max per episodio
     "num_searches"     : 10, #64
     "top_k"            : 10, #64
     "C"                : 1.5,
     "batch_size"       : 12, #16
-    "num_iterations"   : 10,
-    "num_selfPlay_iterations": 10,
+    "num_iterations"   : 50,
+    "num_selfPlay_iterations": 20,
     "num_epochs": 2,
     "beta": 0.5,           # peso KL nel reward
     "kl_threshold": 0.5,   # τ per l’early-abort EvoPress

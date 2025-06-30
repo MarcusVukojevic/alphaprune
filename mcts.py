@@ -69,7 +69,12 @@ class MCTS:
         if node.parent is None:
             eps   = self.args.get("root_dir_eps", 0.3)
             alpha = self.args.get("root_dir_alpha", 0.3)
-            noise = torch.distributions.Dirichlet(torch.full_like(priors, alpha)).sample()
+            
+            if priors.device.type == "mps":
+                conc  = torch.full((priors.numel(),), alpha, dtype=priors.dtype, device="cpu")
+                noise = torch.distributions.Dirichlet(conc).sample().to(priors.device)
+            else:                                             # CUDA o CPU normale
+                noise = torch.distributions.Dirichlet(torch.full_like(priors, alpha)).sample()
             priors = priors * (1 - eps) + noise * eps
 
         # ----- genera figli ------ #

@@ -281,8 +281,7 @@ class PruneGame:
 
         return total_kl / max(total_tok, 1)          # KL media esatta (≤ τ)"""
     @torch.no_grad()
-    def sparse_incremental_kl(self, batch_size: int = 4,
-                            window: int = 1024, penalty: float = 1.5) -> float:
+    def sparse_incremental_kl(self, batch_size: int = 4, window: int = 1024, penalty: float = 1.5) -> float:
         tau       = self.tau
         tot_kl    = 0.0
         tot_tok   = 0
@@ -338,34 +337,35 @@ class PruneGame:
         return self.state"""
     
     def perform_action(self, action: torch.Tensor):
-        # --- stati prima del colpo
+        # -- stato pre-mossa
         sparsity_before = 1.0 - self.state.float().mean().item()
         kl_before       = self.kl_div
+        ϕ_before        = sparsity_before - self.beta * kl_before
 
-        # --- applica la mossa ----------------------------------------------
+        # -- applica mossa
         self._apply_action_in_place(action)
         self.time_stamp += 1
         self.history.append(action.clone())
 
-        if action[1].item() != PASS:              # solo se tocca un gate
+        if action[1].item() != PASS:          # ricalcola KL solo se è cambiato qualcosa
             self.kl_div = self.sparse_incremental_kl()
 
         sparsity_after = 1.0 - self.state.float().mean().item()
+        ϕ_after        = sparsity_after - self.beta * self.kl_div
+        step_reward    = ϕ_after - ϕ_before   # delta obiettivo
 
-        # --- reward shaping  -----------------------------------------------
-        Δs = sparsity_after - sparsity_before     # >0 se hai spento qualcosa
-        Δk = self.kl_div - kl_before             # >=0 quasi sempre
+        # -- PASS penalty adattiva ------------------------------------
+        if action[1].item() == PASS:
+            near_goal = (self.kl_div <= 1.2 * self.tau) and \
+                        (sparsity_after >= 0.9 * self.target_sparsity)
+            if not near_goal:
+                consec_pass = sum(a[1].item() == PASS for a in self.history[-4:])
+                step_reward -= 0.5 * (1 + consec_pass)
 
-        step_reward = 100 * Δs - self.beta * Δk
-        # piccola penalità se fa PASS senza progresso
-        if action[1].item() == PASS and Δs < 1e-5:
-            step_reward -= 1
-
-        # reward cumulativo usato in get_value_and_terminated
         self.reward += step_reward
 
-        if self.time_stamp % 3 == 0:   # ogni 3 mosse
-            print(f"  step{self.time_stamp:2d}  Δs={Δs:.4f}  Δk={Δk:.4f}  r_step={step_reward:.4f}  R_tot={self.reward:.4f}")
+        if self.time_stamp % 3 == 0:   # ogni 3 mosse Δs={Δs:.4f}  Δk={Δk:.4f}
+            print(f"  step{self.time_stamp:2d} r_step={step_reward:.4f}  R_tot={self.reward:.4f}")
         
         self.state_history.appendleft(self.state.clone())
         return self.state
