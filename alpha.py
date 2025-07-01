@@ -4,7 +4,7 @@ import math
 import torch
 from tqdm import trange
 import matplotlib.pyplot as plt
-
+from collections import deque
 from mcts import MCTS
 
 
@@ -14,9 +14,10 @@ class AlphaZero:
     – running loss meter (policy / value / total)
     – automatic PNG plot of the loss curves at the end of training
     """
-    def __init__(self, model, optimizer, game, args):
+    def __init__(self, model, optimizer, game, scheduler, args):
         self.model = model
         self.optimizer = optimizer
+        self.scheduler = scheduler
         self.game = game
         self.args = args
         self.mcts = MCTS(game, args, model)
@@ -29,6 +30,8 @@ class AlphaZero:
         # ----------------- loss tracking ----------------------------------
         self.curve = []  # [(iter, ep, pol, val, tot), ...]
         self._reset_loss_meter()
+
+        self.replay = deque(maxlen=self.args.get("replay_size", 1000))
 
     # ====================== helpers: reward stats =========================
     def _update_ret_stats(self, returns: torch.Tensor):
@@ -60,33 +63,53 @@ class AlphaZero:
         self.curve.append((iter_id, ep_id, m_pol, m_val, m_tot))
         self._reset_loss_meter()
 
-    # ============================== self‑play =============================
     @torch.no_grad()
     def self_play(self):
-        memory = []
-        state = self.game.get_initial_state()
+        """
+        Esegue un episodio completo di self-play:
+        • ad ogni stato usa MCTS per scegliere l’azione
+        • salva (encoded_state, scalar, π) prima di muovere
+        • applica l’azione all’ambiente
+        • al termine propaga lo stesso reward finale a tutti i frame
+        Ritorna:
+            List[Tuple[Tensor, Tensor, Tensor, Tensor]]
+            con shape  (T,N) , (1,) , (N*ops,) , (1,)
+        """
+        trajectory = []                              # [(enc, scal, π), …]
+        state      = self.game.get_initial_state()
 
         while True:
-            action = self.mcts.search(state)  # tensor([block, op])
-            enc = self.game.get_encoded_state(state)  # (T, N)
-            scal = self.game.get_scalar()  # (1,)
-            memory.append((enc, scal, action))
-            #memory.append((enc, scal, action, torch.tensor([self.game.reward]))) forse più informativo questo
+            # -------- 1) ricerca e scelta azione ----------------------------
+            action = self.mcts.search(state)         # tensor([gate_id, op])
 
-            # step environment
-            state = self.game.perform_action(action)
+            # -------- 2) log root policy π ---------------------------------
+            enc  = self.game.get_encoded_state(state)   # (T, N)
+            scal = self.game.get_scalar()               # (1,)
+
+            N_ops  = self.model.num_ops * enc.size(-1)  # N*ops
+            visits = torch.zeros(N_ops, device=enc.device)
+            for child in self.mcts.last_root.children:
+                b, o = child.action_taken               # gate_id, op
+                visits[b * self.model.num_ops + o] = child.visit_count
+            pi = visits / visits.sum()                  # (N*ops,)
+
+            trajectory.append((enc.cpu(), scal.cpu(), pi.cpu()))
+
+            # -------- 3) esegui l’azione nell’ambiente ---------------------
+            state  = self.game.perform_action(action)
             reward, done = self.game.get_value_and_terminated(state)
             if done:
-                final_reward = reward
                 break
 
-        # broadcast final reward to every frame
-        return [(st, sc, act, torch.tensor([final_reward])) for st, sc, act in memory]
+        final_r = torch.tensor([reward])               # (1,)
+        # broadcast del reward finale a tutti i frame
+        return [(st, sc, pi, final_r) for st, sc, pi in trajectory]
 
-    # ============================== training ==============================
+
     def train_on_memory(self, memory, *, iter_id: int, ep_id: int):
         random.shuffle(memory)
         B = self.args["batch_size"]
+        lam_H = self.args.get("entropy_bonus", 0.02)
 
         for i in range(0, len(memory), B):
             batch = memory[i : i + B]
@@ -98,41 +121,48 @@ class AlphaZero:
             aa = torch.stack(actions).to(dev)
             vv = torch.stack(returns).to(dev)
 
-            # -------- reward normalisation --------------------------------
+            # ------- reward normalisation ----------------
             self._update_ret_stats(vv)
             vv_norm = (vv - self.ret_mean) / self._ret_std()
 
-            # forward / backward -------------------------------------------
-            pol_loss, val_loss = self.model.fwd_train(xx, ss, aa, vv_norm)
-            loss = pol_loss + val_loss
+            # ------- forward / backward ------------------
+            loss, pol, val, ent = self.model.fwd_train(xx, ss, aa, vv_norm, lambda_H=lam_H)
 
-            self._log_batch_loss(pol_loss, val_loss)
+            #self._log_batch_loss(pol, val, ent)      # <-- aggiungi entropia
+            self._log_batch_loss(pol.item(), val.item(), ent.item())
 
             self.optimizer.zero_grad()
             loss.backward()
+
+            # grad-clip DOPO backward
+            torch.nn.utils.clip_grad_norm_(self.model.parameters(),
+                                        max_norm=self.args.get("grad_clip", 1.0))
+
             self.optimizer.step()
 
-        # flush meter & store curve
+        # scheduler una volta per epoca
+        self.scheduler.step()
         self._flush_loss_meter(iter_id, ep_id)
+
 
     # ============================== loop =================================
     def learn(self):
         for it in range(self.args["num_iterations"]):
-            # ---------- collect fresh games ------------------------------
+            # -------- self-play ----------------------------------------
             self.model.eval()
-            memory = []
-            for _ in trange(self.args["num_selfPlay_iterations"], desc=f"Iter {it} – self‑play"):
-                memory += self.self_play()
+            for _ in trange(self.args["num_selfPlay_iterations"], desc=f"Iter {it} – self-play"):
+                episode = self.self_play()          # lista di tuples
+                self.replay.extend(episode)         # append nella FIFO
 
-            # ---------- supervised / RL update --------------------------
+            # -------- training -----------------------------------------
             self.model.train()
             for ep in range(self.args["num_epochs"]):
-                self.train_on_memory(memory, iter_id=it, ep_id=ep + 1)
-
-            # ---------- optional: checkpoint ---------------------------
-            os.makedirs("models", exist_ok=True)
-            torch.save(self.model.state_dict(), f"models/model_iter{it}.pt")
-
+                # campiona un minibatch random dal replay
+                batch = random.sample(self.replay, k=min(self.args["batch_size"], len(self.replay)))
+                self.train_on_memory(batch, iter_id=it, ep_id=ep + 1)
+        
+        os.makedirs("models", exist_ok=True)
+        torch.save(self.model.state_dict(), f"models/model_iter{it}.pt")
         # after all iterations – plot loss curves
         self._save_loss_plot("loss_curve.png")
 
