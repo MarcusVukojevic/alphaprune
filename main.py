@@ -32,7 +32,7 @@ args_big = {
 
 
 args_mini = {
-    "name_model"       :  "distilgpt2",#"meta-llama/Llama-2-7b-hf",  # qualsiasi LLM HF
+    "name_model"       : "meta-llama/Llama-2-7b-hf",  #  "distilgpt2",# qualsiasi LLM HF
     "eightbit"         : False, 
     "name_dataset"     : "wikitext",
     "device"           : "cuda",       # "cpu" o "mps" 
