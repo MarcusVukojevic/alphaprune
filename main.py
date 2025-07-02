@@ -32,7 +32,7 @@ args_big = {
 
 
 args_mini = {
-    "name_model"       : "meta-llama/Llama-2-7b-hf",  #"distilgpt2",# # qualsiasi LLM HF
+    "name_model"       :  "distilgpt2",#"meta-llama/Llama-2-7b-hf",  # qualsiasi LLM HF
     "eightbit"         : False, 
     "name_dataset"     : "wikitext",
     "device"           : "cuda",       # "cpu" o "mps" 
@@ -69,6 +69,7 @@ n_blocks = game.initial_state.numel()
 
 ppl_baseline = game.compute_perplexity(full_eval=True)
 print(f"PPL baseline: {ppl_baseline:.2f}\n\n")
+
 model = PruneModel(num_blocks=n_blocks, history_len=args['R_limit'],d_model=128, n_heads=8, n_layers=5).to(args["device"])
 optim = torch.optim.AdamW(model.parameters(), lr=args['lr'])
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optim, T_max=args["num_epochs"])

@@ -6,7 +6,58 @@ from typing import Iterable, List
 import torch
 from datasets import load_dataset
 from transformers import AutoTokenizer
+def build_calib_dataset(
+        ds_name: str,
+        tokenizer,
+        split: str = "validation",
+        nsamples: int = 100,
+        seq_len: int = 128,
+        pad_short: bool = False,          # ← True = pad, False = scarta chunk corti
+):
+    """
+    ds_name:
+        • "wikitext"                  → wikitext-2-raw-v1 di default
+        • "wikitext-2-raw-v1"         → esplicito
+        • "wikitext/wikitext-2-raw-v1"
+        • qualunque altro dataset HF con campo 'text'
+    """
+    # ──────────────────── carica dataset ─────────────────────
+    if ds_name.startswith("wikitext"):
+        _, *cfg = ds_name.split("/")
+        cfg = cfg[0] if cfg else "wikitext-2-raw-v1"
+        raw = load_dataset("wikitext", cfg, split=split)
+    else:
+        raw = load_dataset(ds_name, split=split)
 
+    bos = tokenizer.bos_token_id or tokenizer.cls_token_id
+    eos = tokenizer.eos_token_id
+    pad = tokenizer.eos_token_id
+
+    samples = []
+    for txt in raw["text"]:
+        if not txt.strip():
+            continue
+
+        ids = [bos] + tokenizer(txt, add_special_tokens=False).input_ids + [eos]
+
+        # spezzetta in chunk
+        for i in range(0, len(ids), seq_len):
+            chunk = ids[i : i + seq_len]
+
+            # --- garantisci lunghezza fissa ------------------
+            if len(chunk) < seq_len:
+                if pad_short:
+                    chunk = F.pad(torch.tensor(chunk),
+                                  (0, seq_len - len(chunk)),
+                                  value=pad).tolist()
+                else:
+                    continue        # scarta i pezzi corti
+
+            samples.append(torch.tensor(chunk))
+            if len(samples) == nsamples:
+                return samples
+
+    return samples
 
 
 # We advise against using this data loading method as it introduces bias towards shorter sequences

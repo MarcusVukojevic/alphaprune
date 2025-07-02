@@ -49,7 +49,7 @@ class AlphaZero:
     def _reset_loss_meter(self):
         self._loss_pol, self._loss_val = [], []
 
-    def _log_batch_loss(self, pol_loss, val_loss):
+    def _log_batch_loss(self, pol_loss, val_loss, entr_loss):
         self._loss_pol.append(pol_loss.item())
         self._loss_val.append(val_loss.item())
 
@@ -128,8 +128,7 @@ class AlphaZero:
             # ------- forward / backward ------------------
             loss, pol, val, ent = self.model.fwd_train(xx, ss, aa, vv_norm, lambda_H=lam_H)
 
-            #self._log_batch_loss(pol, val, ent)      # <-- aggiungi entropia
-            self._log_batch_loss(pol.item(), val.item(), ent.item())
+            self._log_batch_loss(pol, val, ent) 
 
             self.optimizer.zero_grad()
             loss.backward()

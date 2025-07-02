@@ -1,0 +1,17 @@
+Inizio traning con:  {'name_model': 'meta-llama/Llama-2-7b-hf', 'eightbit': False, 'name_dataset': 'wikitext', 'device': 'cuda', 'target_sparsity': 0.7, 'ppl_tolerance_frac': 0.2, 'beta': 0.8, 'R_limit': 40, 'num_searches': 96, 'top_k': 64, 'C': 1.5, 'batch_size': 4, 'num_iterations': 3, 'num_selfPlay_iterations': 1, 'num_epochs': 1, 'kl_threshold': 0.5, 'root_dir_eps': 0.15, 'root_dir_alpha': 0.3, 'lr': 0.0002, 'entropy_bonus': 0.02, 'grad_clip': 1.0}
+[utils] meta-llama/Llama-2-7b-hf:    21748 blocchi da 64 neuroni
+PPL baseline: 9.17
+
+
+--> inizio ad imparare
+
+[Iter 0  Ep 1]  pol=5.0360  val=8.5169  tot=13.5529
+[Iter 1  Ep 1]  pol=4.0146  val=2.9119  tot=6.9265
+[Iter 2  Ep 1]  pol=5.3160  val=0.2908  tot=5.6069
+
+📈  curva loss salvata in →  loss_curve.png
+
+
+PPL modello potato: 48.11
+Sparsity finale   : 17.19%
+🔖  plot salvato in → final_gate_state.png

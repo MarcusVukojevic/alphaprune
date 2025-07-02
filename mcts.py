@@ -3,10 +3,9 @@ import torch
 from node import Node
 
 
-TOGGLE     = 0   # commuta un gate      (arg = gate_id)
-SKIP_BLOCK = 1   # spegne MHA+FFN layer (arg = layer_id)
-NO_RES     = 2   # spegne solo residuo  (arg = layer_id)
-PASS       = 3   # no-op
+TOGGLE = 0
+SKIP_BLOCK = 1
+PASS   = 2
 
 class MCTS:
     def __init__(self, game, args, model):

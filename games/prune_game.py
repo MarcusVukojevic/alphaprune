@@ -9,12 +9,14 @@ from tqdm import trange
 import math
 from utils import load_model, load_dataset
 from .patches import _patch_gpt2_block, _patch_llama_block, ResidualGate
+from utils_datasets import build_calib_dataset
 
+TOGGLE          = 0
+SKIP_BLOCK      = 1
+PASS            = 2
 
-TOGGLE     = 0   # commuta un gate      (arg = gate_id)
-SKIP_BLOCK = 1   # spegne MHA+FFN layer (arg = layer_id)
-NO_RES     = 2   # spegne solo residuo  (arg = layer_id)
-PASS       = 3   # no-op
+GATES_PER_LAYER = 2
+
 MIN_LOG = -100.0  
 
 class PruneGame:
@@ -25,17 +27,20 @@ class PruneGame:
                 _patch_gpt2_block(blk)
             elif hasattr(blk, "self_attn") and hasattr(blk, "mlp") and hasattr(blk, "input_layernorm"):
                 _patch_llama_block(blk)
+
         return model
     
     @staticmethod
-    def _collect_gates(model) -> Tuple[torch.Tensor, List[ResidualGate]]:
-        ptrs: List[ResidualGate] = []
+    def _collect_gates(model):
+        ptrs = []
         for blk in model.modules():
-            if all(hasattr(blk, g) for g in ("g_mha", "g_ffn", "g_res")):
-                ptrs.extend([blk.g_mha, blk.g_ffn, blk.g_res])
+            if hasattr(blk, "g_mha") and hasattr(blk, "g_ffn"):
+                ptrs.extend([blk.g_mha, blk.g_ffn])   # sempre due per layer
         if not ptrs:
             raise ValueError("Patch failed – no gates found.")
-        return torch.ones(len(ptrs), dtype=torch.int8), ptrs
+        state = torch.ones(len(ptrs), dtype=torch.int8)
+        return state, ptrs
+
 
     def __init__(self, args):
         self.args   = args
@@ -43,7 +48,7 @@ class PruneGame:
 
         # model + gates
         self.model_victim = PruneGame._ensure_patched(load_model(args["name_model"], device=self.device, eightbit=args.get("eightbit", False)))
-       
+        
         self.model_victim.config.use_cache = False 
         self.state, self.gates = PruneGame._collect_gates(self.model_victim)
         self.state = self.state.to(self.device)
@@ -51,8 +56,10 @@ class PruneGame:
 
         # data
         self.tokenizer = self.model_victim.tokenizer
+
         # n_:samples era a 512
-        self.calib_dataset = load_dataset(name=args["name_dataset"], tokenizer=self.tokenizer,split="validation", nsamples=1024, seq_len=128)
+        #self.calib_dataset = load_dataset(name=args["name_dataset"], tokenizer=self.tokenizer,split="validation", nsamples=100, seq_len=128)
+        self.calib_dataset = build_calib_dataset(args["name_dataset"], self.tokenizer, split="validation", nsamples=100, seq_len=128)
         self._cache_reference_logits(batch_size=4)
 
         # params / targets
@@ -84,19 +91,18 @@ class PruneGame:
     @torch.no_grad()
     def _cache_reference_logits(self, batch_size: int = 4):
         ref_lp, inputs = [], []
-        loader = self.calib_dataset
-        for i in trange(0, len(loader), batch_size, desc="Cache gold logits", leave=False):
-            j   = min(i + batch_size, len(loader))
-            inp = torch.cat(loader[i:j]).long().to(self.device)
+        for i in trange(0, len(self.calib_dataset), batch_size,
+                        desc="Cache gold logits", leave=False):
+            j   = min(i + batch_size, len(self.calib_dataset))
+            inp = torch.stack(self.calib_dataset[i:j], dim=0).long().to(self.device)
 
-            # fp32 + log_softmax per evitare overflow/-inf
             logits = self.model_victim(inp, use_cache=False).logits.float()
-            lp     = torch.log_softmax(logits, dim=-1).cpu()   # (B,T,V)
+            lp     = torch.log_softmax(logits, dim=-1).cpu()   # (B,L,V)
 
             ref_lp.append(lp)
             inputs.append(inp.cpu())
 
-        self.ref_logits   = torch.cat(ref_lp)          # già log-prob
+        self.ref_logits   = torch.cat(ref_lp)          # log-prob di riferimento
         self.calib_inputs = torch.cat(inputs).long().to(self.device)
 
     # ------------------------------------------------------------------ gates
@@ -107,7 +113,7 @@ class PruneGame:
         self.state[gid] = new
 
     def _skip_block(self, layer: int):
-        for gid in (layer * 3, layer * 3 + 1):
+        for gid in range(layer*GATES_PER_LAYER, (layer+1)*GATES_PER_LAYER):
             if self.state[gid]:
                 self._toggle_gate(gid)
 
@@ -121,22 +127,22 @@ class PruneGame:
         if op == TOGGLE:
             self._toggle_gate(gid)
         elif op == SKIP_BLOCK:
-            layer = gid // 3
-            self._skip_block(layer)
-        elif op == NO_RES:
-            layer = gid // 3
-            self._no_residual(layer)
-        elif op != PASS:
-            raise ValueError(op)
-
+            self._skip_block(gid // GATES_PER_LAYER)
+        elif op == PASS:          # compatibile con output legacy (op == 3)
+            pass
+        else:                     # qualsiasi altro codice ≈ PASS
+            pass
+    
     def get_initial_state(self):
         self.state.copy_(self.initial_state)
-        for g in self.gates: g.alpha.data.fill_(1.0)
-        self.time_stamp = 0
+        for g in self.gates:
+            g.alpha.data.fill_(1.0)
+        
+        self.time_stamp   = 0
         self.history.clear()
-        self.kl_div = 0.0
-        self.reward = 0.0
-        self.state_history = deque(maxlen=self.R_limit-1)
+        self.kl_div       = 0.0
+        self.reward       = 0.0
+        self.state_history = deque(maxlen=self.R_limit - 1)
         return self.state
 
     def get_next_state(self, state: torch.Tensor, action: torch.Tensor):
@@ -145,14 +151,12 @@ class PruneGame:
         if op == TOGGLE:
             nxt[gid] ^= 1
         elif op == SKIP_BLOCK:
-            layer = gid // 3
-            nxt[layer*3    ] = 0
-            nxt[layer*3 + 1] = 0
-        elif op == NO_RES:
-            layer = gid // 3
-            nxt[layer*3 + 2] = 0
+            layer = gid // GATES_PER_LAYER
+            for g in range(layer * GATES_PER_LAYER,
+                        (layer + 1) * GATES_PER_LAYER):
+                nxt[g] = 0
         return nxt
-    
+        
     """@torch.no_grad()
     def sparse_incremental_kl(self,batch_size: int = 4,window: int = 1024,penalty: float = 1.5) -> float:
         tau = self.tau                        
@@ -318,6 +322,7 @@ class PruneGame:
                 g.alpha.data.fill_(1.0)
             self.state.fill_(1)
 
+        
         self.model_victim.eval()
         total_nll, total_tok = 0.0, 0
 
@@ -325,13 +330,13 @@ class PruneGame:
         dev = self.device
         for i in range(0, len(loader), batch_size):
             j = min(i + batch_size, len(loader))
-            inp = torch.cat(loader[i:j]).long().to(dev)
+            #inp = torch.cat(loader[i:j]).long().to(dev)
+            inp = torch.stack(loader[i:j], dim=0).long().to(dev)
 
-            # label = input stesso (language modelling causale)
             outputs = self.model_victim(inp, labels=inp, use_cache=False)
-            loss = outputs.loss               # media per token sul batch
-            total_nll += loss.item() * inp.numel()
-            total_tok += inp.numel()
+            loss    = outputs.loss.float()           # già shiftata
+            total_nll += loss.item() * (inp.size(1)-1)
+            total_tok += (inp.size(1)-1)
 
         ppl = math.exp(total_nll / total_tok)
         return ppl
@@ -340,13 +345,12 @@ class PruneGame:
     @torch.no_grad()
     def plot_gate_state(self, fname="gate_state.png"):
         import matplotlib.pyplot as plt
-        n_layers = self.state.numel() // 3
-        mat = self.state.view(n_layers, 3).cpu().numpy()
-
+        n_layers = self.state.numel() // GATES_PER_LAYER
+        mat = self.state.view(n_layers, GATES_PER_LAYER).cpu().numpy()
         fig, ax = plt.subplots(figsize=(4, n_layers * 0.35 + 1.5))
         im = ax.imshow(mat, cmap=plt.cm.get_cmap("Greys", 2), vmin=0, vmax=1)
-        ax.set_xticks([0, 1, 2])
-        ax.set_xticklabels(["MHA", "FFN", "RES"])
+        ax.set_xticks([0, 1])
+        ax.set_xticklabels(["MHA", "FFN"])
         ax.set_yticks(range(n_layers))
         ax.set_yticklabels([f"L{i}" for i in range(n_layers)])
         ax.set_title("Gate state (1=ON, 0=OFF)")
