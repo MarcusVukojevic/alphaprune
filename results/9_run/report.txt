@@ -1,0 +1,38 @@
+1)
+
+sto facendo un po di giri per vedere come cambia. Ho implementato il sampling per la kl ed è passato da 20 min a 5min per iterazione
+i risultati sono in primo_giro. Top ma la ppl ancora è troppo alta (ho fatto solo 3 iterazioni eh)
+
+ora sto facendo partire un'altro test con il leaf-batching dove al posto di chiedere al modello ogni volta che vede una foglia il value e policy
+, raccolgo dei batch di x foglie e chiedo al modello in batch. Dovrebbe andare più velocemente.
+
+2) 
+
+ok sto guardando i dati prelimiari, sembra che sia migliorato di 1 minuto. Da considerarte che comunque sono al max 12 num_searches per foglia.
+ Sicuramente possiamo vederne i benefici se aumentiamo. Top
+
+Aggiunto anche i plot per reward e cose, adesso faccio un test un po più grande per vedere come funzia, sperem...
+
+3)
+
+allora meglio del run numero due ma la ppl è un po troppo alta siamo sui 900 vs i 12k del secondo punto ma rispetto all'inizio che è un 9 è un po too much
+una cosa che non vedo è il reward salire all'aumentare dei run, oscilla in base agli episodi e la value loss oscilla pure, l'entropy loss e la policy loss è sempre uguale
+
+secondo me dove un'attimo rivedere la funzione di reward + policy-value come sono calcolati e vedere se si può cambiare
+
+una cosa che è venuta fuori cmq è che longer is better quindi magari provo una combinazione in cui runno per più di 10 episodi e vedo che succede
+
+sto provando una versione in cui ho aumentato il numero di iterazioni (che prima era 10) mentre ho diminuito il numero di numero di self-play.
+Questo perché se ho tante self-play cmq gioca con il sapere che ha in quel momento, quidi fa gli stessi errori. Il fatto che faccia meno iterazioni di self-play
+gli permette di provare la policy attuale per meno tempo e ottimizzarla direttamente, senza aspettare 120 episodi di stessi errori
+
+prima di lanciarne una nuova, ho controllato meglio il codice e ho sostuito due cose:  
+        1) il reward che la value network (NON IN PERFORM ACTION) sta cercando di imparare è l'expected reward dell'episodio mentre quello dovrei fare è un data questa posiuzione - dammi il reward expected
+        2) nel modello facevo una media della storia non so per quale motivo, ma non ha senso devo usarla tutta
+
+adesso faccio un run, ho messo 50 episodi piuttosto di 100 perché ci mette 20min ad episodio --> 20min*100 sono 2000 minuti che sono 33 ore
+ho anche aumentato il batching delle foglie così vedo se ci mette < 20 min. 
+
+4) 
+
+Top ho raddoppiato il mcts_batch_size e ci mette circa 10 min! la metà! Top. Ora aspetto i risultati tra circa 8 ore 

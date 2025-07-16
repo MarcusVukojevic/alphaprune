@@ -18,5 +18,5 @@ source /home/marcus.vukojevic/.bashrc
 conda activate ambiente
 
 # Eseguire lo script Python
-python ~/alphatensor/parallel_main.py
+python ~/alphaprune/main.py > debug_loss_2.txt
 

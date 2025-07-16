@@ -1,7 +1,0 @@
-Inizio traning con:  {'name_model': 'distilgpt2', 'eightbit': False, 'name_dataset': 'wikitext', 'device': 'cuda', 'target_sparsity': 0.7, 'ppl_tolerance_frac': 0.2, 'beta': 0.8, 'R_limit': 40, 'num_searches': 96, 'top_k': 64, 'C': 1.5, 'batch_size': 48, 'num_iterations': 30, 'num_selfPlay_iterations': 120, 'num_epochs': 10, 'kl_threshold': 0.5, 'root_dir_eps': 0.15, 'root_dir_alpha': 0.3, 'lr': 0.0002, 'entropy_bonus': 0.02, 'grad_clip': 1.0}
-[utils] distilgpt2:    786 blocchi da 64 neuroni
-PPL baseline: 65.49
-
-
---> inizio ad imparare
-

@@ -1,94 +1,104 @@
-# mcts.py  – versione aggiornata
 import torch
 from node import Node
 
-
-TOGGLE = 0
-SKIP_BLOCK = 1
-PASS   = 2
-
 class MCTS:
     def __init__(self, game, args, model):
-        self.game   = game
-        self.args   = args
-        self.model  = model
-        self.Cpuct  = args.get("C", 1.0)
-        self.K      = args.get("top_k", 64)
+        self.game = game
+        self.args = args
+        self.model = model
+        self.Cpuct = args.get("C", 1.0)
+        # NUOVO: Dimensione del batch per le inferenze durante la ricerca MCTS
+        self.mcts_batch_size = args.get("mcts_batch_size", 8)
 
-    # ------------------------------------------------------------
     @torch.no_grad()
     def search(self, root_state):
+        # 1. Preparazione Iniziale
         root = Node(state=root_state, parent=None, action_taken=None, prior=1.0)
-        self._expand(root)                       # primo livello
+        self.last_root = root
+        
+        # Espandi la radice per prima cosa, da sola, per avere le policy iniziali e applicare il rumore
+        # (Questo conta come la prima simulazione)
+        self._expand_batch_and_propagate([root])
+        sims_done = 1
 
-        self.last_root = root = Node(state=root_state, parent=None, action_taken=None, prior=1.0)
-        root_v = self._expand(root)              # primo livello: stima V(s₀)
+        # 2. Ciclo di Ricerca Principale (finché non esauriamo il budget di simulazioni)
+        while sims_done < self.args["num_searches"]:
+            leaves_to_expand = []
+            
+            # FASE A: Raccolta di un batch di nodi "foglia"
+            for _ in range(self.mcts_batch_size):
+                node = root
+                
+                # Selezione: scendi lungo l'albero fino a un nodo foglia
+                while node.children:
+                    node = node.select(self.Cpuct)
 
-        for _ in range(self.args["num_searches"]):
-            node = root
-            # 1) SELEZIONE
-            while node.children:
-                node = node.select(self.Cpuct)
+                # Controlla se il nodo è terminale (fine partita)
+                reward, done = self.game.get_value_and_terminated(node.state)
+                if done:
+                    # Se è terminale, propaga il suo valore reale e non espanderlo.
+                    # Questo è cruciale per evitare blocchi.
+                    node.backpropagate(reward)
+                    sims_done += 1
+                else:
+                    # Se non è terminale, è una foglia da espandere.
+                    leaves_to_expand.append(node)
+                
+                # Se abbiamo esaurito il budget durante la raccolta, esci
+                if sims_done + len(leaves_to_expand) >= self.args["num_searches"]:
+                    break
+            
+            # Se non abbiamo raccolto foglie (es. tutti i percorsi portano a nodi terminali), usciamo
+            if not leaves_to_expand:
+                break
 
-            # 2) VALORE & TERMINAZIONE
-            reward, done = self.game.get_value_and_terminated(node.state)
+            # FASE B & C: Espansione del batch e backpropagation
+            self._expand_batch_and_propagate(leaves_to_expand)
+            sims_done += len(leaves_to_expand)
 
-            ## 3) ESPANSIONE
-            #if not done:
-            #    self._expand(node)
-            #    reward, _ = self.game.get_value_and_terminated(node.state)
-
-            if not done:
-                leaf_v = self._expand(node)
-                reward = leaf_v                       # valore stimato
-
-            # 4) BACK-PROP
-            node.backpropagate(reward)
-
-        # azione con più visite
+        # 3. Scelta finale dell'azione
         best_child = max(root.children, key=lambda c: c.visit_count)
-        #print(f"[root] visits:", {tuple(c.action_taken.tolist()): c.visit_count for c in root.children[:6]})
-        #print(f"[root] Q:", {tuple(c.action_taken.tolist()): round(c.get_q(),3) for c in root.children[:6]})
         return best_child.action_taken
 
-    def _expand(self, node):
-        # ----- prepara input per la rete ------ #
-        enc = self.game.get_encoded_state(node.state).unsqueeze(0)   # (1,T,N)
-        scl = self.game.get_scalar().unsqueeze(0)                    # (1,1)
 
+    def _expand_batch_and_propagate(self, nodes):
+        """
+        Funzione helper che prende una lista di nodi, esegue l'inferenza in batch,
+        espande ogni nodo con la sua policy e propaga il suo valore.
+        """
+        if not nodes:
+            return
+
+        # Prepara l'input per la rete in un unico batch
         dev = next(self.model.parameters()).device
-        enc, scl = enc.to(dev), scl.to(dev)
+        
+        # La chiamata a get_encoded_state usa la storia del gioco principale, che è una semplificazione
+        # ma è consistente con il design attuale del tuo codice.
+        encoded_states = torch.stack([self.game.get_encoded_state(n.state) for n in nodes])
+        scalars = torch.stack([self.game.get_scalar() for n in nodes]) # Scalari sono uguali per tutti i nodi di una ricerca
+        
+        # Esegui una sola inferenza per l'intero batch
+        action_probs, priors_batch, values_batch = self.model.fwd_infer(
+            encoded_states, 
+            scalars, 
+            top_k=self.args.get("top_k", 32)
+        )
 
+        # Per ogni nodo nel batch, espandi e propaga
+        for i, node in enumerate(nodes):
+            actions, priors, value = action_probs[i], priors_batch[i], values_batch[i].item()
 
-        # ----- inference ------ #
-        #acts, priors, _ = self.model.fwd_infer(enc, scl, top_k=self.K)
-        # patch
-        acts, priors, leaf_v = self.model.fwd_infer(enc, scl, top_k=self.K)
-        acts, priors = acts[0], priors[0]         # (K,2) , (K,)
-
-        #  filtro PASS nelle prime 3 mosse 
-        if self.game.time_stamp < 3:
-            mask = acts[:, 1] != PASS             # op == 3  → PASS
-            if mask.any():                        # se rimane qualcosa
-                acts, priors = acts[mask], priors[mask]
-            else:                                 # erano tutti PASS → tieni il primo
-                acts, priors = acts[:1], priors[:1]
-
-        #  Dirichlet noise sulla radice per migliorare la scelta delle azioni
-        if node.parent is None:
-            eps   = self.args.get("root_dir_eps", 0.3)
-            alpha = self.args.get("root_dir_alpha", 0.3)
-            
-            if priors.device.type == "mps":
-                conc  = torch.full((priors.numel(),), alpha, dtype=priors.dtype, device="cpu")
-                noise = torch.distributions.Dirichlet(conc).sample().to(priors.device)
-            else:                                          
+            # Applica rumore di Dirichlet solo se stiamo espandendo la radice
+            if node.parent is None:
+                eps   = self.args.get("root_dir_eps", 0.3)
+                alpha = self.args.get("root_dir_alpha", 0.3)
                 noise = torch.distributions.Dirichlet(torch.full_like(priors, alpha)).sample()
-            priors = priors * (1 - eps) + noise * eps
+                priors = priors * (1 - eps) + noise * eps
 
-        # ----- genera figli ------ #
-        for a, p in zip(acts, priors):
-            child_state = self.game.get_next_state(node.state.clone(), a)
-            node.add_child(child_state, action=a.clone(), prior=p.item())
-
-        return leaf_v.item()
+            # Aggiungi i figli al nodo
+            for action, prior in zip(actions, priors):
+                child_state = self.game.get_next_state(node.state, action)
+                node.add_child(child_state, action=action, prior=prior.item())
+            
+            # Propaga il valore stimato dalla rete
+            node.backpropagate(value)

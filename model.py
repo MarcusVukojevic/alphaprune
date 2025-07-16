@@ -16,27 +16,22 @@ import torch.nn.functional as F
 # -----------------------------------------------------------------------------
 
 class PruneModel(nn.Module):
-    def __init__(
-        self,
-        num_blocks: int,
-        history_len: int,
-        d_model: int = 128,
-        n_heads: int = 4,
-        n_layers: int = 2,
-        dim_feedforward: int = 256,
-        num_ops: int = 4,
-    ):
+    def __init__( self, num_blocks: int, history_len: int, d_model: int = 128, n_heads: int = 4, n_layers: int = 2, dim_feedforward: int = 256, num_ops: int = 3,):
         super().__init__()
-        self.num_blocks = num_blocks          # N token
-        self.num_ops    = num_ops
-        self.d_model    = d_model
+        self.num_blocks = num_blocks
+        self.num_ops = num_ops
+        self.d_model = d_model
 
-        # ------------------------------------------------ token embeddings
-        self.gate_emb   = nn.Embedding(num_blocks, d_model)  # id fissi 0..N-1
-        self.state_emb  = nn.Linear(1, d_model)              # stato 0/1
-        self.scalar_emb = nn.Linear(1, d_model)              # contesto globale
+        # 1. Embedding per l'ID di ogni porta (0, 1, ..., N-1)
+        self.gate_emb = nn.Embedding(num_blocks, d_model)
+        
+        # 2. Embedding per la storia degli stati (0/1) di ogni porta
+        self.history_emb = nn.Linear(history_len, d_model)
+        
+        # 3. Embedding per il contesto globale (es. passi rimanenti)
+        self.scalar_emb = nn.Linear(1, d_model)
+        
 
-        # ------------------------------------------------ encoder
         enc_layer = nn.TransformerEncoderLayer(
             d_model=d_model, nhead=n_heads,
             dim_feedforward=dim_feedforward,
@@ -44,9 +39,9 @@ class PruneModel(nn.Module):
         )
         self.encoder = nn.TransformerEncoder(enc_layer, num_layers=n_layers)
 
-        # ------------------------------------------------ heads
+        # --- Heads ---
         self.policy_head = nn.Linear(d_model, num_ops)
-        self.value_head  = nn.Sequential(
+        self.value_head = nn.Sequential(
             nn.Linear(d_model, dim_feedforward),
             nn.ReLU(inplace=True),
             nn.Linear(dim_feedforward, 1),
@@ -54,92 +49,82 @@ class PruneModel(nn.Module):
 
         self._init_weights()
 
-    # ------------------------------------------------ weights init
     def _init_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Linear):
                 nn.init.xavier_uniform_(m.weight)
-                nn.init.zeros_(m.bias)
+                if m.bias is not None:
+                    nn.init.zeros_(m.bias)
             elif isinstance(m, nn.Embedding):
                 nn.init.normal_(m.weight, mean=0.0, std=0.02)
 
-    # ------------------------------------------------ forward
     def forward(self, encoded_state: torch.Tensor, scalars: torch.Tensor):
-        """
-        encoded_state: (B, T, N)  float ∈{0,1}
-        scalars      : (B, 1)     float   (es. mosse rimaste)
-        ritorna: logits (B, N, num_ops) , value (B,)
-        """
         B, T, N = encoded_state.shape
         assert N == self.num_blocks, "Mismatch board size"
+        assert T == self.history_emb.in_features, "Mismatch history length"
 
-        # -------- stato corrente (media sui frame)
-        state_now = encoded_state.mean(dim=1)               # (B, N)
+        # 1. Permuta l'input per avere la storia come feature per ogni porta
+        gate_histories = encoded_state.permute(0, 2, 1) # Shape: (B, N, T)
 
-        # -------- embeddings token
-        gate_ids   = torch.arange(N, device=encoded_state.device)   # (N,)
-        token_emb  = self.gate_emb(gate_ids)                        # (N, d)
-        token_emb  = token_emb.unsqueeze(0).expand(B, N, -1)        # (B,N,d)
+        # 2. Applica l'embedding sulla storia per ottenere le feature di stato
+        state_features = self.history_emb(gate_histories) # Shape: (B, N, d_model)
 
-        state_emb  = self.state_emb(state_now.unsqueeze(-1))        # (B,N,d)
+        # 3. Aggiungi l'embedding dell'ID della porta
+        gate_ids = torch.arange(N, device=encoded_state.device).expand(B, -1) # (B, N)
+        gate_id_features = self.gate_emb(gate_ids) # Shape: (B, N, d_model) <-- NOME CORRETTO
+        
+        # 4. Aggiungi il contesto scalare
+        ctx_features = self.scalar_emb(scalars).unsqueeze(1) # Shape: (B, 1, d_model)
 
-        # -------- embedding contesto globale scalars
-        ctx        = self.scalar_emb(scalars)                       # (B,d)
-        ctx        = ctx.unsqueeze(1)                               # (B,1,d)
-        x          = token_emb + state_emb + ctx                    # broadcast
+        # 5. Combina le feature per l'input del Transformer
+        x = state_features + gate_id_features + ctx_features # Broadcasting su N
 
-        # -------- transformer encoder
-        x = self.encoder(x)                                         # (B,N,d)
-
-        # -------- heads
-        logits = self.policy_head(x)                                # (B,N,ops)
-        value  = self.value_head(x.mean(dim=1)).squeeze(-1)         # (B,)
+        # Passa nel Transformer e negli heads
+        x = self.encoder(x)
+        logits = self.policy_head(x)
+        value = self.value_head(x.mean(dim=1)).squeeze(-1)
 
         return logits, value
 
-    # ------------------------------------------------ train step
     def fwd_train(
         self,
-        states : torch.Tensor,   # (B,T,N)
-        scalars: torch.Tensor,   # (B,1)
-        pi     : torch.Tensor,   # (B, N*ops)
-        returns: torch.Tensor,   # (B,1)
-        lambda_H: float = 0.02   # <-- bonus entropia (default 0.02)
+        states: torch.Tensor,
+        scalars: torch.Tensor,
+        pi: torch.Tensor,
+        returns: torch.Tensor,
+        lambda_H: float = 0.02
     ):
         B = states.size(0)
-        logits, value = self.forward(states, scalars)        # (B,N,ops)
-        logits_flat   = logits.view(B, -1)                   # (B,N*ops)
+        logits, value = self.forward(states, scalars)
+        logits_flat = logits.view(B, -1)
 
-        # --- policy loss -----------------------------------
         log_probs = F.log_softmax(logits_flat, dim=-1)
-        probs     = log_probs.exp()
-        pol_loss  = -(pi * log_probs).sum(dim=1).mean()
+        pol_loss = -(pi * log_probs).sum(dim=-1).mean()
+        
+        probs = log_probs.exp()
+        ent_loss = (probs * log_probs).sum(dim=-1).mean() # Nota: l'entropia è negativa, la loss è -H
 
-        # --- entropy bonus ---------------------------------
-        ent_loss  = -(probs * log_probs).sum(dim=1).mean()   # = –H
+        val_loss = F.mse_loss(value, returns.squeeze(-1))
 
-        # --- value loss ------------------------------------
-        val_loss  = F.mse_loss(value, returns.squeeze(-1))
-
-        total_loss = pol_loss + val_loss + lambda_H * ent_loss
+        total_loss = pol_loss + val_loss - (lambda_H * ent_loss) # Sottraggo perché ent_loss = -H
         return total_loss, pol_loss.detach(), val_loss.detach(), ent_loss.detach()
 
-
-    # ------------------------------------------------ inference (top-k)
     @torch.no_grad()
-    def fwd_infer(self,
-                  states : torch.Tensor,  # (B,T,N)
-                  scalars: torch.Tensor,  # (B,1)
-                  top_k  : int = 64):
-        logits, value = self.forward(states, scalars)               # (B,N,ops)
+    def fwd_infer(
+        self,
+        states: torch.Tensor,
+        scalars: torch.Tensor,
+        top_k: int = 32
+    ):
+        logits, value = self.forward(states, scalars)
         B, N, _ = logits.shape
-        priors   = torch.softmax(logits.view(B, -1), dim=-1)        # (B,N*ops)
+        priors = torch.softmax(logits.view(B, -1), dim=-1)
 
-        K      = min(top_k, priors.size(-1))
-        top_p, top_idx = torch.topk(priors, k=K, dim=-1)            # (B,K)
+        K = min(top_k, priors.size(-1))
+        top_p, top_idx = torch.topk(priors, k=K, dim=-1)
 
-        block_idx = (top_idx // self.num_ops).long()                # (B,K)
-        op_idx    = (top_idx  % self.num_ops).long()                # (B,K)
-        actions   = torch.stack([block_idx, op_idx], dim=-1)        # (B,K,2)
+        block_idx = (top_idx // self.num_ops).long()
+        op_idx = (top_idx % self.num_ops).long()
+        actions = torch.stack([block_idx, op_idx], dim=-1)
 
         return actions, top_p, value

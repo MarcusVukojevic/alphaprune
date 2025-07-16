@@ -1,0 +1,45 @@
+Inizio traning con:  {'name_model': 'meta-llama/Llama-2-7b-hf', 'eightbit': False, 'name_dataset': 'wikitext', 'device': 'cuda', 'target_sparsity': 0.7, 'ppl_tolerance_frac': 0.2, 'beta': 0.8, 'R_limit': 40, 'num_searches': 12, 'top_k': 32, 'C': 1.5, 'batch_size': 48, 'num_iterations': 3, 'num_selfPlay_iterations': 12, 'num_epochs': 10, 'kl_threshold': 0.5, 'root_dir_eps': 0.15, 'root_dir_alpha': 0.3, 'lr': 0.0002, 'entropy_bonus': 0.02, 'grad_clip': 1.0, 'mcts_batch_size': 8}
+[utils] meta-llama/Llama-2-7b-hf:    21748 blocchi da 64 neuroni
+PPL baseline: 9.17
+
+
+modellio compilato e pront! 
+--> inizio ad imparare
+
+[Iter 0  Ep 1]  pol=5.2512  val=11.4891  tot=16.7404
+[Iter 0  Ep 2]  pol=5.2133  val=1.7867  tot=7.0000
+[Iter 0  Ep 3]  pol=4.8784  val=4.0034  tot=8.8818
+[Iter 0  Ep 4]  pol=4.7441  val=2.4727  tot=7.2168
+[Iter 0  Ep 5]  pol=5.0243  val=1.5099  tot=6.5343
+[Iter 0  Ep 6]  pol=4.7966  val=1.1820  tot=5.9786
+[Iter 0  Ep 7]  pol=4.8801  val=1.5104  tot=6.3904
+[Iter 0  Ep 8]  pol=5.1318  val=1.1328  tot=6.2646
+[Iter 0  Ep 9]  pol=5.1728  val=1.0925  tot=6.2654
+[Iter 0  Ep 10]  pol=5.0927  val=0.8572  tot=5.9499
+[Iter 1  Ep 1]  pol=5.0546  val=0.9228  tot=5.9774
+[Iter 1  Ep 2]  pol=4.7271  val=1.1887  tot=5.9158
+[Iter 1  Ep 3]  pol=4.6587  val=0.8083  tot=5.4670
+[Iter 1  Ep 4]  pol=4.9386  val=1.1735  tot=6.1121
+[Iter 1  Ep 5]  pol=4.4803  val=1.3656  tot=5.8459
+[Iter 1  Ep 6]  pol=4.9130  val=1.8643  tot=6.7773
+[Iter 1  Ep 7]  pol=4.8023  val=1.5730  tot=6.3753
+[Iter 1  Ep 8]  pol=4.8490  val=1.8537  tot=6.7027
+[Iter 1  Ep 9]  pol=4.9958  val=1.9200  tot=6.9159
+[Iter 1  Ep 10]  pol=4.8379  val=1.0557  tot=5.8935
+[Iter 2  Ep 1]  pol=4.5603  val=1.8283  tot=6.3886
+[Iter 2  Ep 2]  pol=4.9253  val=2.6694  tot=7.5947
+[Iter 2  Ep 3]  pol=4.7913  val=2.7720  tot=7.5634
+[Iter 2  Ep 4]  pol=4.9050  val=4.3944  tot=9.2994
+[Iter 2  Ep 5]  pol=4.6542  val=3.8054  tot=8.4595
+[Iter 2  Ep 6]  pol=4.5347  val=3.4722  tot=8.0068
+[Iter 2  Ep 7]  pol=4.7917  val=2.2276  tot=7.0194
+[Iter 2  Ep 8]  pol=4.6805  val=2.3560  tot=7.0365
+[Iter 2  Ep 9]  pol=4.6706  val=2.3566  tot=7.0272
+[Iter 2  Ep 10]  pol=4.9809  val=2.3163  tot=7.2973
+
+📈  curva loss salvata in →  loss_curve.png
+
+
+PPL modello potato: 12292.49
+Sparsity finale   : 32.81%
+🔖  plot salvato in → final_gate_state.png

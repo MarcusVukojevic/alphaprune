@@ -1,0 +1,80 @@
+Inizio traning con:  {'name_model': 'meta-llama/Llama-2-7b-hf', 'eightbit': False, 'name_dataset': 'wikitext', 'device': 'cuda', 'target_sparsity': 0.3, 'ppl_tolerance_frac': 0.2, 'R_limit': 60, 'num_searches': 64, 'top_k': 64, 'C': 1.5, 'batch_size': 48, 'num_iterations': 5, 'num_selfPlay_iterations': 50, 'num_epochs': 10, 'beta': 2, 'kl_threshold': 0.5, 'root_dir_eps': 0.15, 'root_dir_alpha': 0.3, 'lr': 0.0002, 'entropy_bonus': 0.02, 'grad_clip': 1.0, 'mcts_batch_size': 128}
+[utils] meta-llama/Llama-2-7b-hf:    21748 blocchi da 64 neuroni
+PPL baseline: 9.17
+
+
+modellio compilato e pront! 
+--> inizio ad imparare
+
+
+--- Iteration 0: Self-Play ---
+--- Iteration 0: Training (Avg Reward: 5.1163) ---
+[Iter 0  Ep 1]  pol=4.6412  val=87.8226  ent=-3.4617
+[Iter 0  Ep 2]  pol=5.0623  val=27.2341  ent=-3.4323
+[Iter 0  Ep 3]  pol=4.9603  val=2.3497  ent=-3.4034
+[Iter 0  Ep 4]  pol=4.9736  val=6.7181  ent=-3.4706
+[Iter 0  Ep 5]  pol=4.8621  val=12.4948  ent=-3.4471
+[Iter 0  Ep 6]  pol=4.6305  val=12.8432  ent=-3.4617
+[Iter 0  Ep 7]  pol=4.7351  val=9.2332  ent=-3.4478
+[Iter 0  Ep 8]  pol=4.7407  val=5.7148  ent=-3.4204
+[Iter 0  Ep 9]  pol=4.8863  val=5.6214  ent=-3.4595
+[Iter 0  Ep 10]  pol=4.5659  val=4.5787  ent=-3.4686
+
+--- Iteration 1: Self-Play ---
+--- Iteration 1: Training (Avg Reward: 5.3455) ---
+[Iter 1  Ep 1]  pol=4.8925  val=3.3489  ent=-3.4524
+[Iter 1  Ep 2]  pol=4.8064  val=3.4245  ent=-3.4644
+[Iter 1  Ep 3]  pol=4.9253  val=3.4702  ent=-3.4994
+[Iter 1  Ep 4]  pol=4.8049  val=2.7125  ent=-3.4520
+[Iter 1  Ep 5]  pol=4.8061  val=1.3958  ent=-3.4488
+[Iter 1  Ep 6]  pol=5.1050  val=1.4573  ent=-3.4561
+[Iter 1  Ep 7]  pol=4.7046  val=3.0743  ent=-3.4653
+[Iter 1  Ep 8]  pol=4.9028  val=6.4810  ent=-3.4252
+[Iter 1  Ep 9]  pol=4.8443  val=8.0649  ent=-3.4718
+[Iter 1  Ep 10]  pol=5.0240  val=13.4715  ent=-3.4673
+
+--- Iteration 2: Self-Play ---
+--- Iteration 2: Training (Avg Reward: 5.4205) ---
+[Iter 2  Ep 1]  pol=4.9207  val=8.4285  ent=-3.4868
+[Iter 2  Ep 2]  pol=4.6087  val=6.7622  ent=-3.4586
+[Iter 2  Ep 3]  pol=4.9333  val=4.1987  ent=-3.5106
+[Iter 2  Ep 4]  pol=5.0300  val=1.0645  ent=-3.5069
+[Iter 2  Ep 5]  pol=4.2924  val=1.2341  ent=-3.4992
+[Iter 2  Ep 6]  pol=4.8344  val=1.6072  ent=-3.5387
+[Iter 2  Ep 7]  pol=5.0527  val=2.2046  ent=-3.5197
+[Iter 2  Ep 8]  pol=4.5190  val=2.1716  ent=-3.4809
+[Iter 2  Ep 9]  pol=4.8855  val=1.8113  ent=-3.4730
+[Iter 2  Ep 10]  pol=4.8822  val=1.6758  ent=-3.5072
+
+--- Iteration 3: Self-Play ---
+--- Iteration 3: Training (Avg Reward: 5.1473) ---
+[Iter 3  Ep 1]  pol=4.6851  val=1.8726  ent=-3.5182
+[Iter 3  Ep 2]  pol=5.0528  val=1.5834  ent=-3.5056
+[Iter 3  Ep 3]  pol=4.7222  val=1.5333  ent=-3.4652
+[Iter 3  Ep 4]  pol=4.8785  val=1.2056  ent=-3.5151
+[Iter 3  Ep 5]  pol=5.0416  val=1.3108  ent=-3.4829
+[Iter 3  Ep 6]  pol=4.8396  val=1.4084  ent=-3.4996
+[Iter 3  Ep 7]  pol=4.4117  val=2.6093  ent=-3.5198
+[Iter 3  Ep 8]  pol=4.7355  val=3.9143  ent=-3.6103
+[Iter 3  Ep 9]  pol=4.8473  val=5.5894  ent=-3.5512
+[Iter 3  Ep 10]  pol=4.4525  val=5.7773  ent=-3.5821
+
+--- Iteration 4: Self-Play ---
+--- Iteration 4: Training (Avg Reward: 5.1510) ---
+[Iter 4  Ep 1]  pol=4.9290  val=5.8398  ent=-3.5333
+[Iter 4  Ep 2]  pol=4.4910  val=3.0663  ent=-3.5733
+[Iter 4  Ep 3]  pol=4.6402  val=1.5399  ent=-3.5591
+[Iter 4  Ep 4]  pol=4.7171  val=1.3286  ent=-3.5540
+[Iter 4  Ep 5]  pol=4.8010  val=1.4534  ent=-3.5273
+[Iter 4  Ep 6]  pol=4.7121  val=2.0736  ent=-3.5753
+[Iter 4  Ep 7]  pol=4.5442  val=1.3482  ent=-3.5555
+[Iter 4  Ep 8]  pol=4.5270  val=1.4164  ent=-3.5525
+[Iter 4  Ep 9]  pol=4.9877  val=0.9090  ent=-3.5738
+[Iter 4  Ep 10]  pol=4.4646  val=1.7829  ent=-3.5812
+
+📈 Curva di training salvata in → loss_curve.png
+
+
+PPL modello potato: 11958.78
+Sparsity finale   : 31.25%
+🔖  plot salvato in → final_gate_state.png

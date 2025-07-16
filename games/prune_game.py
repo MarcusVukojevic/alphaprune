@@ -10,10 +10,11 @@ import math
 from utils import load_model, load_dataset
 from .patches import _patch_gpt2_block, _patch_llama_block, ResidualGate
 from utils_datasets import build_calib_dataset
+import random
+
 
 TOGGLE          = 0
-SKIP_BLOCK      = 1
-PASS            = 2
+PASS            = 1
 
 GATES_PER_LAYER = 2
 
@@ -75,37 +76,25 @@ class PruneGame:
         self.state_history = deque(maxlen=self.R_limit-1)
         self.reward = 0.0
 
+        self.fail_penalty = args.get("fail_penalty", 5.0)
+        self.pass_cap     = args.get("pass_cap", 20) 
+        self.consec_pass  = 0                       
 
-    """@torch.no_grad()
-    def _cache_reference_logits(self, batch_size: int = 4):
-        ref_logits, inputs = [], []
-        loader = self.calib_dataset  # already token tensors
-        for i in trange(0, len(loader), batch_size, desc="Cache gold logits", leave=False):
-            j = min(i + batch_size, len(loader))
-            inp = torch.cat(loader[i:j]).long().to(self.device)
-            logits = self.model_victim(inp, use_cache=False).logits.detach().cpu()
-            ref_logits.append(logits)
-            inputs.append(inp.cpu())
-        self.ref_logits   = torch.cat(ref_logits)   # N × T × V   (cpu)
-        self.calib_inputs = torch.cat(inputs).long().to(self.device)    # N × T       (cpu)"""
+
     @torch.no_grad()
     def _cache_reference_logits(self, batch_size: int = 4):
         ref_lp, inputs = [], []
-        for i in trange(0, len(self.calib_dataset), batch_size,
-                        desc="Cache gold logits", leave=False):
+        for i in trange(0, len(self.calib_dataset), batch_size, desc="Cache gold logits", leave=False):
             j   = min(i + batch_size, len(self.calib_dataset))
             inp = torch.stack(self.calib_dataset[i:j], dim=0).long().to(self.device)
-
             logits = self.model_victim(inp, use_cache=False).logits.float()
-            lp     = torch.log_softmax(logits, dim=-1).cpu()   # (B,L,V)
-
+            lp = torch.log_softmax(logits, dim=-1).cpu()   # (B,L,V)
             ref_lp.append(lp)
             inputs.append(inp.cpu())
 
         self.ref_logits   = torch.cat(ref_lp)          # log-prob di riferimento
         self.calib_inputs = torch.cat(inputs).long().to(self.device)
 
-    # ------------------------------------------------------------------ gates
     def _toggle_gate(self, gid: int):
         gate = self.gates[gid]
         new = 1 - int(self.state[gid].item())
@@ -117,17 +106,10 @@ class PruneGame:
             if self.state[gid]:
                 self._toggle_gate(gid)
 
-    def _no_residual(self, layer: int):
-        gid = layer * 3 + 2
-        if self.state[gid]:
-            self._toggle_gate(gid)
-
     def _apply_action_in_place(self, action: torch.Tensor):
         gid, op = map(int, action)
         if op == TOGGLE:
             self._toggle_gate(gid)
-        elif op == SKIP_BLOCK:
-            self._skip_block(gid // GATES_PER_LAYER)
         elif op == PASS:          # compatibile con output legacy (op == 3)
             pass
         else:                     # qualsiasi altro codice ≈ PASS
@@ -143,6 +125,7 @@ class PruneGame:
         self.kl_div       = 0.0
         self.reward       = 0.0
         self.state_history = deque(maxlen=self.R_limit - 1)
+        self.consec_pass  = 0
         return self.state
 
     def get_next_state(self, state: torch.Tensor, action: torch.Tensor):
@@ -150,96 +133,65 @@ class PruneGame:
         nxt = state.clone()
         if op == TOGGLE:
             nxt[gid] ^= 1
-        elif op == SKIP_BLOCK:
-            layer = gid // GATES_PER_LAYER
-            for g in range(layer * GATES_PER_LAYER,
-                        (layer + 1) * GATES_PER_LAYER):
-                nxt[g] = 0
         return nxt
         
-    """@torch.no_grad()
-    def sparse_incremental_kl(self,batch_size: int = 4,window: int = 1024,penalty: float = 1.5) -> float:
-        tau = self.tau                        
+    @torch.no_grad()
+    def sparse_incremental_kl(self, batch_size: int = 4, window: int = 1024, penalty: float = 1.5,sample_frac: float = 0.25) -> float:
+
+        tau = self.tau
         total_kl, total_tok = 0.0, 0
         dev = next(self.model_victim.parameters()).device
 
-        for i in trange(0, len(self.calib_inputs), batch_size, leave=False, desc="Sparse inc-KL"):
-            inp = self.calib_inputs[i:i+batch_size].to(dev)          
-            ref = self.ref_logits[i:i+batch_size].to(dev)            
-            out = self.model_victim(inp, use_cache=False).logits                      
+        # --- Logica per il sotto-campionamento (Sampling) ---
+        num_total_batches = len(self.calib_inputs) // batch_size
+        # Assicurati di campionare almeno un batch
+        num_batches_to_sample = max(1, int(num_total_batches * sample_frac))
 
-            for t in range(0, inp.size(1)-1, window):
-                j = min(t + window, inp.size(1)-1)
+        all_batch_indices = list(range(num_total_batches))
+        sampled_indices = random.sample(all_batch_indices, num_batches_to_sample)
+        # --- Fine della logica di sampling ---
 
-                tgt  = inp[:, t:j].unsqueeze(-1)         
-                log_p= ref[:, t:j, :].gather(-1, tgt)    
-                log_q= out[:, t:j, :].log_softmax(-1).gather(-1, tgt)
+        # Itera solo sui batch campionati casualmente
+        for batch_idx in sampled_indices:
+            i = batch_idx * batch_size
+            j = i + batch_size
 
-                kl_chunk = (log_q - log_p).mean().item() * (-1)
-                n_tok    = tgt.numel()
+            # Carica il batch corrente di input e log-prob di riferimento
+            inp = self.calib_inputs[i:j].to(dev)
+            ref_lp = self.ref_logits[i:j].to(dev)
+            
+            # Calcola le log-prob del modello potato
+            out_logits = self.model_victim(inp, use_cache=False).logits.float()
+            out_lp = torch.log_softmax(out_logits, dim=-1)
 
-                total_kl  += kl_chunk * n_tok
+            # Gestisci i valori ±inf per evitare NaN nel calcolo della KL
+            ref_lp = torch.nan_to_num(ref_lp, nan=MIN_LOG, posinf=MIN_LOG, neginf=MIN_LOG)
+            out_lp = torch.nan_to_num(out_lp, nan=MIN_LOG, posinf=MIN_LOG, neginf=MIN_LOG)
+
+            # Calcola la KL per finestre di token per gestire la memoria
+            for t in range(0, inp.size(1) - 1, window):
+                win_end = min(t + window, inp.size(1) - 1)
+                target_tokens = inp[:, t:win_end].unsqueeze(-1)
+
+                # Raccogli le log-prob per i token target
+                log_p = ref_lp[:, t:win_end, :].gather(-1, target_tokens)
+                log_q = out_lp[:, t:win_end, :].gather(-1, target_tokens)
+
+                # Calcola la KL divergence per il chunk corrente
+                kl_chunk = (log_p - log_q).mean().item() # KL(P || Q)
+                n_tok = target_tokens.numel()
+
+                total_kl += kl_chunk * n_tok
                 total_tok += n_tok
-
-                if total_kl > tau * total_tok:       # early check per uscire
-                    return tau * penalty             # oppure total_kl/total_tok
-
-        return total_kl / max(total_tok, 1)          # KL media esatta (≤ τ)"""
-    @torch.no_grad()
-    def sparse_incremental_kl(self, batch_size: int = 4, window: int = 1024, penalty: float = 1.5) -> float:
-        tau       = self.tau
-        tot_kl    = 0.0
-        tot_tok   = 0
-        dev       = next(self.model_victim.parameters()).device
-
-        for i in trange(0, len(self.calib_inputs), batch_size,
-                        leave=False, desc="Sparse inc-KL"):
-            inp = self.calib_inputs[i:i+batch_size].to(dev)
-
-            ref_lp = self.ref_logits[i:i+batch_size].to(dev)           # log-prob fp32
-            out_lp = torch.log_softmax(
-                        self.model_victim(inp, use_cache=False)
-                            .logits.float(), dim=-1)                   # log-prob fp32
-
-            # --- SOSTITUISCI ±inf CON VALORE FINITO ---------------------------
-            ref_lp = torch.where(torch.isfinite(ref_lp), ref_lp,
-                                torch.full_like(ref_lp, MIN_LOG))
-            out_lp = torch.where(torch.isfinite(out_lp), out_lp,
-                                torch.full_like(out_lp, MIN_LOG))
-
-            # ------------------------------------------------------------------
-            for t in range(0, inp.size(1)-1, window):
-                j   = min(t + window, inp.size(1)-1)
-                tgt = inp[:, t:j].unsqueeze(-1)                        # (B,L,1)
-
-                log_p = ref_lp[:, t:j, :].gather(-1, tgt)              # (B,L,1)
-                log_q = out_lp[:, t:j, :].gather(-1, tgt)
-
-                kl_chunk = (log_q - log_p).mean().item() * (-1)
-                n_tok    = tgt.numel()
-
-                tot_kl  += kl_chunk * n_tok
-                tot_tok += n_tok
-                if tot_kl > tau * tot_tok:       # early-stop
+                
+                # Controllo per l'uscita anticipata se la KL supera la soglia
+                if (total_kl / max(total_tok, 1)) > tau:
                     return tau * penalty
 
-        return tot_kl / max(tot_tok, 1)
+        # Ritorna la KL media calcolata sul sotto-campione
+        return total_kl / max(total_tok, 1)
 
 
-    """@torch.no_grad()
-    def perform_action(self, action: torch.Tensor):
-        self._apply_action_in_place(action)
-        self.time_stamp += 1
-        self.history.append(action.clone())
-
-        if action[1].item() != PASS:
-            self.kl_div = self.sparse_incremental_kl()
-
-        sparsity = 1.0 - self.state.float().mean().item()
-        self.reward = sparsity - self.beta * self.kl_div
-
-        self.state_history.appendleft(self.state.clone())
-        return self.state"""
     
     def perform_action(self, action: torch.Tensor):
         # -- stato pre-mossa
@@ -258,6 +210,7 @@ class PruneGame:
         sparsity_after = 1.0 - self.state.float().mean().item()
         ϕ_after        = sparsity_after - self.beta * self.kl_div
         step_reward    = ϕ_after - ϕ_before   # delta obiettivo
+
         # -- PASS penalty adattiva ------------------------------------
         if action[1].item() == PASS:
             near_goal = (self.kl_div <= 1.2 * self.tau) and \
@@ -265,12 +218,11 @@ class PruneGame:
             if not near_goal:
                 consec_pass = sum(a[1].item() == PASS for a in self.history[-4:])
                 step_reward -= 0.5 * (1 + consec_pass)
+            self.consec_pass += 1
+        else:
+            self.consec_pass = 0
 
         self.reward += step_reward
-
-        if self.time_stamp % 3 == 0:   # ogni 3 mosse Δs={Δs:.4f}  Δk={Δk:.4f}
-            #print(f"  step{self.time_stamp:2d} r_step={step_reward:.4f}  R_tot={self.reward:.4f}")
-            pass
         
         self.state_history.appendleft(self.state.clone())
         return self.state
@@ -282,12 +234,29 @@ class PruneGame:
     def check_win(self, state):
         sparsity = 1.0 - state.float().mean().item()
         return sparsity >= self.target_sparsity and self.kl_div <= self.tau #abbiamo vinto se abbiamo raggiunto la sparsity e la kl_div ottimale
+    
+    def _state_value(self, state):
+        sparsity = 1.0 - state.float().mean().item()
+        phi = sparsity - self.beta * self.kl_div
+        return phi
+    
+    #def get_value_and_terminated(self, state, node_num_parents=None):
+    #    done = self.check_win(state) or \
+    #        (self.time_stamp >= self.R_limit if node_num_parents is None
+    #                                            else node_num_parents >= self.R_limit)
+    #    return self._state_value(state), done
+    
 
     def get_value_and_terminated(self, state, node_num_parents=None):
-        done = self.check_win(state) or \
-            (self.time_stamp >= self.R_limit if node_num_parents is None
-                                                else node_num_parents >= self.R_limit)
-        return self.reward, done
+        win   = self.check_win(state)
+        limit = self.time_stamp >= self.R_limit if node_num_parents is None \
+                                            else node_num_parents >= self.R_limit
+        pass_stop = (self.consec_pass >= self.pass_cap) and not win
+        done  = win or limit or pass_stop
+        # shaping ⟹ penalità finale se non vinci
+        if done and not win:
+                self.reward -= self.fail_penalty
+        return self._state_value(state), done
 
     def get_encoded_state(self, state: torch.Tensor):
 
