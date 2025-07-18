@@ -1,5 +1,7 @@
 import torch
 from node import Node
+from graphviz import Digraph
+
 
 class MCTS:
     def __init__(self, game, args, model):
@@ -78,11 +80,7 @@ class MCTS:
         scalars = torch.stack([self.game.get_scalar() for n in nodes]) # Scalari sono uguali per tutti i nodi di una ricerca
         
         # Esegui una sola inferenza per l'intero batch
-        action_probs, priors_batch, values_batch = self.model.fwd_infer(
-            encoded_states, 
-            scalars, 
-            top_k=self.args.get("top_k", 32)
-        )
+        action_probs, priors_batch, values_batch = self.model.fwd_infer(encoded_states, scalars, top_k=self.args.get("top_k", 32))
 
         # Per ogni nodo nel batch, espandi e propaga
         for i, node in enumerate(nodes):
@@ -102,3 +100,58 @@ class MCTS:
             
             # Propaga il valore stimato dalla rete
             node.backpropagate(value)
+
+
+    def render_mcts_tree(self,
+            root: Node,
+            filename: str = "mcts_tree",
+            max_depth: int = 3,
+            draw_q: bool = True,
+            palette: tuple[str, ...] = (
+                "#dfe7fd", "#c7d7fd", "#bdd2ff", "#a6c1ff", "#8fb0ff",
+                "#779fff", "#5e8eff", "#447cff", "#2a6aff", "#0f58ff"),
+        ):
+        """
+        Disegna e salva (filename.png / .pdf / .svg) il sotto-albero MCTS con
+        radice `root`, limitando la profondità a `max_depth`.
+
+        Args
+        ----
+        root       : nodo radice (di norma `mcts.last_root`)
+        filename   : percorso (senza estensione) dove salvare l’immagine
+        max_depth  : profondità massima da visualizzare (ROOT=0)
+        draw_q     : se True mostra Q-value medio accanto a prior e visite
+        palette    : lista di colori (uno per livello di profondità)
+        """
+        dot = Digraph(comment="MCTS-Tree Render")
+        dot.attr(rankdir="TB", splines="polyline", nodesep="0.25")
+
+        def add_node(node: Node, depth: int):
+            if depth > max_depth:
+                return
+            node_id = str(id(node))
+
+            if node.action_taken is None:         # radice
+                label = "ROOT"
+            else:
+                b, o = node.action_taken
+                q = (node.value_sum / node.visit_count) if node.visit_count else 0.0
+                label = (
+                    f"b={b} o={o} | N={node.visit_count}"
+                    f" | P={node.prior:.2f}"
+                    + (f" | Q={q:.2f}" if draw_q else "")
+                )
+
+            dot.node(node_id,label=label,shape="box",style="filled,rounded",fontsize="10",fontname="Helvetica",fillcolor=palette[depth % len(palette)],)
+
+            for child in node.children:
+                child_id = str(id(child))
+                dot.edge(node_id, child_id)
+                add_node(child, depth + 1)
+
+        add_node(root, 0)
+
+        # `cleanup=True` rimuove il file .gv intermedio
+        dot.render(filename, format=filename.split(".")[-1] if "." in filename else "png", cleanup=True)
+        print(f"✅  Albero salvato in {filename}.png  (usa estensione .pdf o .svg se preferisci)")
+

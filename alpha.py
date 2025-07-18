@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 from collections import deque
 from mcts import MCTS
 
-
 class AlphaZero:
     def __init__(self, model, optimizer, game, scheduler, args):
         self.model = model
@@ -91,26 +90,30 @@ class AlphaZero:
 
             # Esegui la mossa
             state = self.game.perform_action(action)
+            print("azione: ", action)
             # La variabile 'reward' qui è l'accumulo, ma non la useremo come target finale
             reward, done = self.game.get_value_and_terminated(state)
             
-            trajectory.append((enc.cpu(), scal.cpu(), pi.cpu(), torch.tensor(reward, dtype=torch.float32)))
+            #trajectory.append((enc.cpu(), scal.cpu(), pi.cpu(), torch.tensor(reward, dtype=torch.float32)))
+            
+            trajectory.append((enc.cpu(), scal.cpu(), pi.cpu()))
             if done:
                 break
         
         # --- INIZIO MODIFICA ---
         # Alla fine della partita, calcola il valore oggettivo dello stato finale.
         # Questo valore è un target di training più stabile e pulito.
-        #final_sparsity = 1.0 - state.float().mean().item()
-        #final_kl_div = self.game.kl_div
-        #final_phi = final_sparsity - self.game.beta * final_kl_div
-        #
-        ## Questo è il nuovo "return" (z) che la value network imparerà a predire
-        #final_return_value = torch.tensor([final_phi])
+        final_sparsity = 1.0 - state.float().mean().item()
+        final_kl_div = self.game.kl_div
+        final_phi = final_sparsity - self.game.beta * final_kl_div
+        
+        # Questo è il nuovo "return" (z) che la value network imparerà a predire
+        final_return_value = torch.tensor([final_phi])
         # --- FINE MODIFICA ---
         
         # Propaga questo valore finale a tutti gli stati della traiettoria
-        return [(st, sc, pi, rew) for st, sc, pi, rew in trajectory]
+        #return [(st, sc, pi, rew) for st, sc, pi, rew in trajectory]
+        return [(st, sc, pi, final_return_value) for st, sc, pi in trajectory]
 
     def train_on_memory(self, memory, *, iter_id: int, ep_id: int):
         """Esegue un'epoca di training campionando dalla memoria di replay."""
@@ -154,7 +157,7 @@ class AlphaZero:
             for _ in trange(self.args["num_selfPlay_iterations"], desc=f"Iter {it} – self-play"):
                 episode = self.self_play()
                 self.replay.extend(episode)
-                episode_rewards.append(episode[-1][3]) # Salva il reward finale
+                episode_rewards.append(episode[-1][3].item()) # Salva il reward finale
 
             if episode_rewards:
                 self._current_iter_reward = sum(episode_rewards) / len(episode_rewards)
@@ -169,6 +172,7 @@ class AlphaZero:
         os.makedirs("models", exist_ok=True)
         torch.save(self.model.state_dict(), f"models/model_iter{it}.pt")
         self._save_loss_plot("loss_curve.png")
+        self.mcts.render_mcts_tree(self.mcts.last_root, filename="mcts_iter0", max_depth=4)
 
     def _save_loss_plot(self, fname: str):
         """Salva il grafico finale con loss e reward."""

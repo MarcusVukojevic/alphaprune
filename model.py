@@ -86,14 +86,7 @@ class PruneModel(nn.Module):
 
         return logits, value
 
-    def fwd_train(
-        self,
-        states: torch.Tensor,
-        scalars: torch.Tensor,
-        pi: torch.Tensor,
-        returns: torch.Tensor,
-        lambda_H: float = 0.02
-    ):
+    def fwd_train(self,states: torch.Tensor,scalars: torch.Tensor,pi: torch.Tensor,returns: torch.Tensor,lambda_H: float = 0.02):
         B = states.size(0)
         logits, value = self.forward(states, scalars)
         logits_flat = logits.view(B, -1)
@@ -110,12 +103,8 @@ class PruneModel(nn.Module):
         return total_loss, pol_loss.detach(), val_loss.detach(), ent_loss.detach()
 
     @torch.no_grad()
-    def fwd_infer(
-        self,
-        states: torch.Tensor,
-        scalars: torch.Tensor,
-        top_k: int = 32
-    ):
+    def fwd_infer(self,states: torch.Tensor,scalars: torch.Tensor,top_k: int = 32):
+        
         logits, value = self.forward(states, scalars)
         B, N, _ = logits.shape
         priors = torch.softmax(logits.view(B, -1), dim=-1)

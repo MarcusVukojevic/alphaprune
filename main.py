@@ -35,27 +35,27 @@ args_big = {
 
 
 args_mini = {
-    "name_model"       : "meta-llama/Llama-2-7b-hf",  #  "distilgpt2",# qualsiasi LLM HF
+    "name_model"       : "distilgpt2", #"meta-llama/Llama-2-7b-hf",  #  "distilgpt2",# qualsiasi LLM HF
     "eightbit"         : False, 
     "name_dataset"     : "wikitext",
     "device"           : "cuda",       # "cpu" o "mps" 
-    "target_sparsity"  : 0.50,         # 50 %
+    "target_sparsity"  : 0.10,         # 50 %
     "R_limit"          : 60,          # mosse max per episodio
     "num_searches"     : 64, #64
     "top_k"            : 64, #64
     "C"                : 1.5,
     "batch_size"       : 48, #16
-    "num_iterations"   : 3,
-    "num_selfPlay_iterations": 50,
-    "num_epochs": 10,
+    "num_iterations"   : 2,
+    "num_selfPlay_iterations": 5,
+    "num_epochs": 3,
     "beta": 2,           # peso KL nel reward
-    "kl_threshold": 0.02,   # τ per l’early-abort EvoPress e checkwin
+    "kl_threshold": 2000,   # τ per l’early-abort EvoPress e checkwin
     "root_dir_eps": 0.15,
     "root_dir_alpha": 0.3,
     "lr": 2e-4,
     "entropy_bonus": 0.02,
     "grad_clip": 1.0,
-    "mcts_batch_size": 128, 
+    "mcts_batch_size": 64, 
 }
 
 #!TODO: da guardare anche la ucb perché non mi quadra il 1- 
@@ -72,7 +72,21 @@ n_blocks = game.initial_state.numel()
 ppl_baseline = game.compute_perplexity(full_eval=True)
 print(f"PPL baseline: {ppl_baseline:.2f}\n\n")
 
-model = PruneModel(num_blocks=n_blocks, history_len=args['R_limit'],d_model=128, n_heads=8, n_layers=5).to(args["device"])
+#print(game.perform_action(torch.Tensor([4,0])))
+#print(game.perform_action(torch.Tensor([6,0])))
+#print(game.perform_action(torch.Tensor([8,0])))
+#print(game.kl_div)
+#print(game.reward)
+#
+#ppl_pruned = game.compute_perplexity()  
+#final_sparsity = 1.0 - game.state.float().mean().item()
+#print(f"\nPPL modello potato: {ppl_pruned:.2f}")
+#print(f"Sparsity finale   : {final_sparsity:.2%}") 
+#game.plot_gate_state("gugu.png")
+#exit()
+
+
+model = PruneModel(num_blocks=n_blocks, history_len=args['R_limit'], d_model=128, n_heads=8, n_layers=5).to(args["device"])
 if torch.version.cuda and torch.cuda.is_available():
     model = torch.compile(model, mode="reduce-overhead")
 print("modellio compilato e pront! ")
