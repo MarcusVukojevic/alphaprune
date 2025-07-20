@@ -37,6 +37,7 @@ class MCTS:
 
                 # Controlla se il nodo è terminale (fine partita)
                 reward, done = self.game.get_value_and_terminated(node.state)
+
                 if done:
                     # Se è terminale, propaga il suo valore reale e non espanderlo.
                     # Questo è cruciale per evitare blocchi.
@@ -70,9 +71,6 @@ class MCTS:
         """
         if not nodes:
             return
-
-        # Prepara l'input per la rete in un unico batch
-        dev = next(self.model.parameters()).device
         
         # La chiamata a get_encoded_state usa la storia del gioco principale, che è una semplificazione
         # ma è consistente con il design attuale del tuo codice.
@@ -87,11 +85,20 @@ class MCTS:
             actions, priors, value = action_probs[i], priors_batch[i], values_batch[i].item()
 
             # Applica rumore di Dirichlet solo se stiamo espandendo la radice
-            if node.parent is None:
-                eps   = self.args.get("root_dir_eps", 0.3)
-                alpha = self.args.get("root_dir_alpha", 0.3)
-                noise = torch.distributions.Dirichlet(torch.full_like(priors, alpha)).sample()
-                priors = priors * (1 - eps) + noise * eps
+            #if node.parent is None:
+            #    eps   = self.args.get("root_dir_eps", 0.3)
+            #    alpha = self.args.get("root_dir_alpha", 0.3)
+            #    
+            #    if self.args["device"] == "mps":
+            #        # 1. Costruiamo il tensore di concentrazioni su CPU
+            #        concentration_cpu = torch.full_like(priors, alpha, device="cpu")
+            #        # 2. Campioniamo su CPU
+            #        noise_cpu = torch.distributions.Dirichlet(concentration_cpu).sample()
+            #        # 3. Spostiamo il rumore sul device di priors
+            #        noise = noise_cpu.to(priors.device)
+            #    else:
+            #        noise = torch.distributions.Dirichlet(torch.full_like(priors, alpha)).sample()
+            #    priors = priors * (1 - eps) + noise * eps
 
             # Aggiungi i figli al nodo
             for action, prior in zip(actions, priors):
@@ -101,57 +108,79 @@ class MCTS:
             # Propaga il valore stimato dalla rete
             node.backpropagate(value)
 
-
-    def render_mcts_tree(self,
-            root: Node,
-            filename: str = "mcts_tree",
-            max_depth: int = 3,
-            draw_q: bool = True,
-            palette: tuple[str, ...] = (
-                "#dfe7fd", "#c7d7fd", "#bdd2ff", "#a6c1ff", "#8fb0ff",
-                "#779fff", "#5e8eff", "#447cff", "#2a6aff", "#0f58ff"),
-        ):
+    def render_mcts_tree(
+        self,
+        root: Node,
+        filename: str = "mcts_tree",
+        max_depth: int = 3,
+        draw_q: bool = True,
+        palette: tuple[str, ...] = (
+            "#dfe7fd", "#c7d7fd", "#bdd2ff", "#a6c1ff", "#8fb0ff",
+            "#779fff", "#5e8eff", "#447cff", "#2a6aff", "#0f58ff"
+        ),
+        orientation: str = "TB",
+        engine: str = "dot",
+        dpi: int = 300,
+        ranksep: float = 1.0,
+        nodesep: float = 0.5,
+    ):
         """
-        Disegna e salva (filename.png / .pdf / .svg) il sotto-albero MCTS con
-        radice `root`, limitando la profondità a `max_depth`.
+        Disegna e salva un sotto-albero MCTS completo, mostrando tutti i nodi fino a `max_depth`.
 
         Args
         ----
-        root       : nodo radice (di norma `mcts.last_root`)
-        filename   : percorso (senza estensione) dove salvare l’immagine
-        max_depth  : profondità massima da visualizzare (ROOT=0)
-        draw_q     : se True mostra Q-value medio accanto a prior e visite
-        palette    : lista di colori (uno per livello di profondità)
+        root        : nodo radice (ad es. mcts.last_root)
+        filename    : basename (senza estensione) del file di output
+        max_depth   : profondità massima da disegnare (ROOT=0)
+        draw_q      : se True mostra Q-value medio in ogni nodo
+        palette     : colori alternati per livelli di profondità
+        orientation : 'TB' (verticale) o 'LR' (orizzontale)
+        engine      : Graphviz layout engine (es. 'dot','twopi','circo')
+        dpi         : risoluzione immagine in DPI
+        ranksep     : spazio verticale fra livelli
+        nodesep     : spazio orizzontale fra nodi
         """
-        dot = Digraph(comment="MCTS-Tree Render")
-        dot.attr(rankdir="TB", splines="polyline", nodesep="0.25")
+        dot = Digraph(comment="MCTS-Tree", engine=engine)
+        dot.attr(rankdir=orientation, splines="polyline")
+        dot.graph_attr.update(
+            dpi=str(dpi),
+            ranksep=str(ranksep),
+            nodesep=str(nodesep),
+        )
 
-        def add_node(node: Node, depth: int):
+        def add_node(node: Node, depth: int = 0):
+            # Mostra tutti i nodi finché depth <= max_depth
             if depth > max_depth:
                 return
-            node_id = str(id(node))
-
-            if node.action_taken is None:         # radice
+            nid = str(id(node))
+            # Costruisci label con info complete
+            if node.action_taken is None:
                 label = "ROOT"
             else:
                 b, o = node.action_taken
-                q = (node.value_sum / node.visit_count) if node.visit_count else 0.0
-                label = (
-                    f"b={b} o={o} | N={node.visit_count}"
-                    f" | P={node.prior:.2f}"
-                    + (f" | Q={q:.2f}" if draw_q else "")
-                )
-
-            dot.node(node_id,label=label,shape="box",style="filled,rounded",fontsize="10",fontname="Helvetica",fillcolor=palette[depth % len(palette)],)
-
+                # visit_count, prior e Q-value
+                N = node.visit_count
+                P = node.prior
+                Q = (node.value_sum / N) if N else 0.0
+                label = f"b={b} o={o} | N={N} | P={P:.2f}"
+                if draw_q:
+                    label += f" | Q={Q:.2f}"
+            dot.node(
+                nid,
+                label=label,
+                shape="box",
+                style="filled,rounded",
+                fontsize="10",
+                fontname="Helvetica",
+                fillcolor=palette[depth % len(palette)],
+            )
             for child in node.children:
-                child_id = str(id(child))
-                dot.edge(node_id, child_id)
+                cid = str(id(child))
+                dot.edge(nid, cid)
                 add_node(child, depth + 1)
 
         add_node(root, 0)
 
-        # `cleanup=True` rimuove il file .gv intermedio
-        dot.render(filename, format=filename.split(".")[-1] if "." in filename else "png", cleanup=True)
-        print(f"✅  Albero salvato in {filename}.png  (usa estensione .pdf o .svg se preferisci)")
-
+        fmt = filename.split('.')[-1] if '.' in filename else 'png'
+        dot.render(filename, format=fmt, cleanup=True)
+        print(f"✅ Albero completo salvato in {filename}.{fmt}")

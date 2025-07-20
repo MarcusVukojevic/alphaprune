@@ -35,27 +35,27 @@ args_big = {
 
 
 args_mini = {
-    "name_model"       : "distilgpt2", #"meta-llama/Llama-2-7b-hf",  #  "distilgpt2",# qualsiasi LLM HF
+    "name_model"       : "meta-llama/Llama-2-7b-hf",  #  "distilgpt2",# qualsiasi LLM HF
     "eightbit"         : False, 
     "name_dataset"     : "wikitext",
     "device"           : "cuda",       # "cpu" o "mps" 
-    "target_sparsity"  : 0.10,         # 50 %
+    "target_sparsity"  : 0.40,         # 50 %
     "R_limit"          : 60,          # mosse max per episodio
     "num_searches"     : 64, #64
     "top_k"            : 64, #64
-    "C"                : 1.5,
+    "C"                : 3,#1.5,
     "batch_size"       : 48, #16
-    "num_iterations"   : 2,
-    "num_selfPlay_iterations": 5,
-    "num_epochs": 3,
+    "num_iterations"   : 50,
+    "num_selfPlay_iterations": 50,
+    "num_epochs": 7,
     "beta": 2,           # peso KL nel reward
-    "kl_threshold": 2000,   # τ per l’early-abort EvoPress e checkwin
-    "root_dir_eps": 0.15,
+    "kl_threshold": .2,   # τ per l’early-abort EvoPress e checkwin
+    "root_dir_eps": 0.7,
     "root_dir_alpha": 0.3,
     "lr": 2e-4,
     "entropy_bonus": 0.02,
     "grad_clip": 1.0,
-    "mcts_batch_size": 64, 
+    "mcts_batch_size": 3, 
 }
 
 #!TODO: da guardare anche la ucb perché non mi quadra il 1- 
@@ -72,9 +72,12 @@ n_blocks = game.initial_state.numel()
 ppl_baseline = game.compute_perplexity(full_eval=True)
 print(f"PPL baseline: {ppl_baseline:.2f}\n\n")
 
+#print(game.perform_action(torch.Tensor([3,0])))
 #print(game.perform_action(torch.Tensor([4,0])))
-#print(game.perform_action(torch.Tensor([6,0])))
+#print(game.perform_action(torch.Tensor([5,0])))
 #print(game.perform_action(torch.Tensor([8,0])))
+#print(game.perform_action(torch.Tensor([9,0])))
+#print(game.perform_action(torch.Tensor([11,0])))
 #print(game.kl_div)
 #print(game.reward)
 #

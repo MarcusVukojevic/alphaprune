@@ -249,12 +249,37 @@ class PruneModel(nn.Module):
 
     @torch.no_grad()
     def fwd_infer(self,states: torch.Tensor,scalars: torch.Tensor,top_k: int = 32,):
-        logits, value = self.forward(states, scalars)
-        B, N, _ = logits.shape
-        priors = torch.softmax(logits.view(B, -1), dim=-1)
+        """
+        Restituisce:
+          • actions  – tensor (B, K, 2)   [block_id, op_id]  (op_id == 0 ⇒ TOGGLE)
+          • priors   – tensor (B, K)      prior normalizzati
+          • value    – tensor (B,)        stima del valore
+        """
+        logits, value = self.forward(states, scalars)            # logits (B,N,num_ops)
+        priors = torch.softmax(logits.view(states.size(0), -1), dim=-1)  # (B, N·num_ops)
+
+        # ---------------------------------------------------------------------
+        # 1) Mantieni solo le azioni TOGGLE  (op_idx == 0)
+        # ---------------------------------------------------------------------
+        mask_toggle = torch.arange(self.num_ops, device=priors.device) \
+                         .repeat(self.num_blocks) == 0            # shape (N·num_ops,)
+        priors = priors[:, mask_toggle]                           # (B, N)
+
+        # 2) Dirichlet noise globale per incentivare esplorazione
+        alpha = 0.3
+        conc = torch.full_like(priors, alpha, device="cpu")       # campiono su CPU
+        noise = torch.distributions.Dirichlet(conc).sample().to(priors.device)
+        eps = 0.20
+        priors = (1.0 - eps) * priors + eps * noise
+
+        # 3) Normalizza di nuovo (potrebbero esserci underflow)
+        priors = priors / priors.sum(dim=-1, keepdim=True).clamp_min(1e-9)
+
+        # 4) Top-k e costruzione azioni   (op_id è sempre 0 ⇒ TOGGLE)
         K = min(top_k, priors.size(-1))
-        top_p, top_idx = torch.topk(priors, k=K, dim=-1)
-        block_idx = (top_idx // self.num_ops).long()
-        op_idx = (top_idx % self.num_ops).long()
-        actions = torch.stack([block_idx, op_idx], dim=-1)  # (B,K,2)
+        top_p, top_idx = torch.topk(priors, k=K, dim=-1)          # idx ∈ [0, N)
+        actions = torch.stack(
+            [top_idx, torch.zeros_like(top_idx)], dim=-1          # (B,K,2)
+        )
+
         return actions, top_p, value

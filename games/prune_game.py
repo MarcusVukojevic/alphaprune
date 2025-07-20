@@ -14,7 +14,6 @@ import random
 
 
 TOGGLE          = 0
-PASS            = 1
 
 GATES_PER_LAYER = 2
 
@@ -69,7 +68,7 @@ class PruneGame:
         self.beta = args.get("beta", 3.0)
 
         # runtime
-        self.kl_div = 0.0
+        self.kl_div = 10_000
         self.time_stamp = 0
         self.R_limit = args.get("R_limit", 120)
         self.history: List[torch.Tensor] = []
@@ -77,8 +76,6 @@ class PruneGame:
         self.reward = 0.0
 
         self.fail_penalty = args.get("fail_penalty", 5.0)
-        self.pass_cap     = args.get("pass_cap", 20) 
-        self.consec_pass  = 0                       
 
 
     @torch.no_grad()
@@ -110,9 +107,7 @@ class PruneGame:
         gid, op = map(int, action)
         if op == TOGGLE:
             self._toggle_gate(gid)
-        elif op == PASS:          # compatibile con output legacy (op == 3)
-            pass
-        else:                     # qualsiasi altro codice ≈ PASS
+        else:                    
             pass
     
     def get_initial_state(self):
@@ -190,8 +185,6 @@ class PruneGame:
 
         # Ritorna la KL media calcolata sul sotto-campione
         return total_kl / max(total_tok, 1)
-
-
     
     def perform_action(self, action: torch.Tensor):
         # -- stato pre-mossa
@@ -204,23 +197,12 @@ class PruneGame:
         self.time_stamp += 1
         self.history.append(action.clone())
 
-        if action[1].item() != PASS:          # ricalcola KL solo se è cambiato qualcosa
-            self.kl_div = self.sparse_incremental_kl()
+        
+        self.kl_div = self.sparse_incremental_kl()
 
         sparsity_after = 1.0 - self.state.float().mean().item()
         ϕ_after        = sparsity_after - self.beta * self.kl_div
         step_reward    = ϕ_after - ϕ_before   # delta obiettivo
-
-        # -- PASS penalty adattiva ------------------------------------
-        if action[1].item() == PASS:
-            near_goal = (self.kl_div <= 1.2 * self.tau) and \
-                        (sparsity_after >= 0.9 * self.target_sparsity)
-            if not near_goal:
-                consec_pass = sum(a[1].item() == PASS for a in self.history[-4:])
-                step_reward -= 0.5 * (1 + consec_pass)
-            self.consec_pass += 1
-        else:
-            self.consec_pass = 0
 
         self.reward += step_reward
         
@@ -250,13 +232,12 @@ class PruneGame:
     def get_value_and_terminated(self, state, node_num_parents=None):
         win   = self.check_win(state)
         limit = self.time_stamp >= self.R_limit if node_num_parents is None \
-                                            else node_num_parents >= self.R_limit
-        pass_stop = (self.consec_pass >= self.pass_cap) and not win
-        done  = win or limit or pass_stop
-        # shaping ⟹ penalità finale se non vinci
+                                           else node_num_parents >= self.R_limit
+        done  = win or limit
         if done and not win:
-                self.reward -= self.fail_penalty
+            self.reward -= self.fail_penalty       # shaping
         return self._state_value(state), done
+
 
     def get_encoded_state(self, state: torch.Tensor):
 

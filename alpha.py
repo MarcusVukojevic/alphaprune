@@ -90,7 +90,7 @@ class AlphaZero:
 
             # Esegui la mossa
             state = self.game.perform_action(action)
-            print("azione: ", action)
+            
             # La variabile 'reward' qui è l'accumulo, ma non la useremo come target finale
             reward, done = self.game.get_value_and_terminated(state)
             
@@ -99,7 +99,8 @@ class AlphaZero:
             trajectory.append((enc.cpu(), scal.cpu(), pi.cpu()))
             if done:
                 break
-        
+            
+        #self.mcts.render_mcts_tree(self.mcts.last_root, filename="mcts_iter0.png", max_depth=500)    
         # --- INIZIO MODIFICA ---
         # Alla fine della partita, calcola il valore oggettivo dello stato finale.
         # Questo valore è un target di training più stabile e pulito.
@@ -172,7 +173,6 @@ class AlphaZero:
         os.makedirs("models", exist_ok=True)
         torch.save(self.model.state_dict(), f"models/model_iter{it}.pt")
         self._save_loss_plot("loss_curve.png")
-        self.mcts.render_mcts_tree(self.mcts.last_root, filename="mcts_iter0", max_depth=4)
 
     def _save_loss_plot(self, fname: str):
         """Salva il grafico finale con loss e reward."""
