@@ -110,3 +110,43 @@ print(f"\nPPL modello potato: {ppl_pruned:.2f}")
 print(f"Sparsity finale   : {final_sparsity:.2%}") 
 
 game.plot_gate_state("final_gate_state.png")
+
+
+
+
+# -------------------------------------------------------------------
+#  E V A L U A T I O N   (stesso script, dopo il training)
+# -------------------------------------------------------------------
+print("\n======  E V A L U A T I O N  ======\n")
+from mcts import MCTS
+
+# 1) nuova scacchiera
+eval_game = PruneGame(args)                       # stato tutto ON
+
+# 2) nuovo modello + pesi addestrati
+eval_model = model
+eval_model.eval()                                                 # no grad
+
+# 3) MCTS “greedy”: niente Dirichlet e poche simulazioni veloci
+eval_args = args
+mcts_eval = MCTS(eval_game, eval_args, eval_model)
+
+state = eval_game.get_initial_state()
+while True:
+    action = mcts_eval.search(state)              # azione migliore
+    print(action)
+    state  = eval_game.perform_action(action)     # applicala
+    _, done = eval_game.get_value_and_terminated(state)
+    if done:
+        break
+
+# ---- metriche finali ---------------------------------------------
+ppl_pruned = eval_game.compute_perplexity()                 # dopo potatura
+spars_f    = 1.0 - state.float().mean().item()
+
+print(f"[EVAL] PPL baseline : {ppl_baseline:.2f}")
+print(f"[EVAL] PPL pruned   : {ppl_pruned:.2f}")
+print(f"[EVAL] Sparsity     : {spars_f:.2%}")
+
+eval_game.plot_gate_state("eval_gate_state.png")
+print("✅  evaluation completa – vedi eval_gate_state.png")
