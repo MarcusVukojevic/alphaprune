@@ -39,7 +39,7 @@ args_mini = {
     "eightbit"         : False, 
     "name_dataset"     : "wikitext",
     "device"           : "cuda",       # "cpu" o "mps" 
-    "target_sparsity"  : 0.40,         # 50 %
+    "target_sparsity"  : 0.30,         # 50 %
     "R_limit"          : 60,          # mosse max per episodio
     "num_searches"     : 64, #64
     "top_k"            : 64, #64
