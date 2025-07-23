@@ -35,17 +35,17 @@ args_big = {
 
 
 args_mini = {
-    "name_model"       : "meta-llama/Llama-2-7b-hf",  #  "distilgpt2",# qualsiasi LLM HF
+    "name_model"       : "distilgpt2", # "meta-llama/Llama-2-7b-hf",  #  "distilgpt2",# qualsiasi LLM HF
     "eightbit"         : False, 
     "name_dataset"     : "wikitext",
-    "device"           : "cuda",       # "cpu" o "mps" 
+    "device"           : "mps",       # "cpu" o "mps" 
     "target_sparsity"  : 0.30,         # 50 %
     "R_limit"          : 60,          # mosse max per episodio
-    "num_searches"     : 64, #64
-    "top_k"            : 64, #64
+    "num_searches"     : 15, #64
+    "top_k"            : 3, #64
     "C"                : 3,#1.5,
     "batch_size"       : 48, #16
-    "num_iterations"   : 50,
+    "num_iterations"   : 5,
     "num_selfPlay_iterations": 50,
     "num_epochs": 7,
     "beta": 2,           # peso KL nel reward
@@ -92,24 +92,22 @@ print(f"PPL baseline: {ppl_baseline:.2f}\n\n")
 model = PruneModel(num_blocks=n_blocks, history_len=args['R_limit'], d_model=128, n_heads=8, n_layers=5).to(args["device"])
 if torch.version.cuda and torch.cuda.is_available():
     model = torch.compile(model, mode="reduce-overhead")
-print("modellio compilato e pront! ")
+print("modellio compilato e pronto per giocare!")
 
 
 optim = torch.optim.AdamW(model.parameters(), lr=args['lr'])
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optim, T_max=args["num_epochs"])
-
-
 alpha = AlphaZero(model, optim, game, scheduler, args)
 
 print("--> inizio ad imparare\n")
 alpha.learn()
-
-ppl_pruned = game.compute_perplexity()  
-final_sparsity = 1.0 - game.state.float().mean().item()
-print(f"\nPPL modello potato: {ppl_pruned:.2f}")
-print(f"Sparsity finale   : {final_sparsity:.2%}") 
-
-game.plot_gate_state("final_gate_state.png")
+print("--> finito di imparare\n")
+#ppl_pruned = game.compute_perplexity()  
+#final_sparsity = 1.0 - game.state.float().mean().item()
+#print(f"\nPPL modello potato: {ppl_pruned:.2f}")
+#print(f"Sparsity finale   : {final_sparsity:.2%}") 
+#
+#game.plot_gate_state("final_gate_state.png")
 
 
 

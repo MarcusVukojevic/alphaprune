@@ -13,10 +13,8 @@ from utils_datasets import build_calib_dataset
 import random
 
 
-TOGGLE          = 0
-
+TOGGLE = 0
 GATES_PER_LAYER = 2
-
 MIN_LOG = -100.0  
 
 class PruneGame:
@@ -186,28 +184,37 @@ class PruneGame:
         # Ritorna la KL media calcolata sul sotto-campione
         return total_kl / max(total_tok, 1)
     
-    def perform_action(self, action: torch.Tensor):
-        # -- stato pre-mossa
-        sparsity_before = 1.0 - self.state.float().mean().item()
-        kl_before       = self.kl_div
-        ϕ_before        = sparsity_before - self.beta * kl_before
+    #def perform_action(self, action: torch.Tensor):
+    #    # -- stato pre-mossa
+    #    sparsity_before = 1.0 - self.state.float().mean().item()
+    #    kl_before  = self.kl_div
+    #    ϕ_before  = sparsity_before - self.beta * kl_before
 
-        # -- applica mossa
+    #    # -- applica mossa
+    #    self._apply_action_in_place(action)
+    #    self.time_stamp += 1
+    #    self.history.append(action.clone())
+
+    #    
+    #    self.kl_div = self.sparse_incremental_kl()
+
+    #    sparsity_after = 1.0 - self.state.float().mean().item()
+    #    ϕ_after        = sparsity_after - self.beta * self.kl_div
+    #    step_reward    = ϕ_after - ϕ_before   # delta obiettivo
+
+    #    self.reward += step_reward
+    #    
+    #    self.state_history.appendleft(self.state.clone())
+    #    return self.state
+    
+    def perform_action(self, action):
         self._apply_action_in_place(action)
         self.time_stamp += 1
         self.history.append(action.clone())
 
-        
         self.kl_div = self.sparse_incremental_kl()
-
-        sparsity_after = 1.0 - self.state.float().mean().item()
-        ϕ_after        = sparsity_after - self.beta * self.kl_div
-        step_reward    = ϕ_after - ϕ_before   # delta obiettivo
-
-        self.reward += step_reward
-        
         self.state_history.appendleft(self.state.clone())
-        return self.state
+        return self.state      
 
 
     def get_scalar(self):
@@ -221,13 +228,6 @@ class PruneGame:
         sparsity = 1.0 - state.float().mean().item()
         phi = sparsity - self.beta * self.kl_div
         return phi
-    
-    #def get_value_and_terminated(self, state, node_num_parents=None):
-    #    done = self.check_win(state) or \
-    #        (self.time_stamp >= self.R_limit if node_num_parents is None
-    #                                            else node_num_parents >= self.R_limit)
-    #    return self._state_value(state), done
-    
 
     def get_value_and_terminated(self, state, node_num_parents=None):
         win   = self.check_win(state)

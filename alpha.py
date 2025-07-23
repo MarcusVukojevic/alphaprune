@@ -101,19 +101,15 @@ class AlphaZero:
                 break
             
         #self.mcts.render_mcts_tree(self.mcts.last_root, filename="mcts_iter0.png", max_depth=500)    
-        # --- INIZIO MODIFICA ---
-        # Alla fine della partita, calcola il valore oggettivo dello stato finale.
-        # Questo valore è un target di training più stabile e pulito.
-        final_sparsity = 1.0 - state.float().mean().item()
-        final_kl_div = self.game.kl_div
-        final_phi = final_sparsity - self.game.beta * final_kl_div
         
-        # Questo è il nuovo "return" (z) che la value network imparerà a predire
-        final_return_value = torch.tensor([final_phi])
-        # --- FINE MODIFICA ---
-        
-        # Propaga questo valore finale a tutti gli stati della traiettoria
-        #return [(st, sc, pi, rew) for st, sc, pi, rew in trajectory]
+        final_sparsity = 1.0 - state.float().mean().item()   # s
+        final_kl = self.game.kl_div                    # KL
+        penalty = max(0.0, self.args["target_sparisty"] - final_sparsity)
+        # reward:  φ  − λ·penalty     (più **alto** è meglio)
+        r = (final_sparsity - self.game.beta * final_kl) - self.lambda_penalty * penalty
+        final_return_value = torch.tensor([r], dtype=torch.float32)
+
+
         return [(st, sc, pi, final_return_value) for st, sc, pi in trajectory]
 
     def train_on_memory(self, memory, *, iter_id: int, ep_id: int):
