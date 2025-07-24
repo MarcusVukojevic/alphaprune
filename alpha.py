@@ -104,9 +104,10 @@ class AlphaZero:
         
         final_sparsity = 1.0 - state.float().mean().item()   # s
         final_kl = self.game.kl_div                    # KL
-        penalty = max(0.0, self.args["target_sparisty"] - final_sparsity)
-        # reward:  φ  − λ·penalty     (più **alto** è meglio)
-        r = (final_sparsity - self.game.beta * final_kl) - self.lambda_penalty * penalty
+        penalty = max(0.0, self.args["target_sparsity"] - final_sparsity)
+
+
+        r = (final_sparsity - self.game.beta * final_kl) - self.args["beta"] * penalty
         final_return_value = torch.tensor([r], dtype=torch.float32)
 
 

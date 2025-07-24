@@ -38,15 +38,15 @@ args_mini = {
     "name_model"       : "distilgpt2", # "meta-llama/Llama-2-7b-hf",  #  "distilgpt2",# qualsiasi LLM HF
     "eightbit"         : False, 
     "name_dataset"     : "wikitext",
-    "device"           : "mps",       # "cpu" o "mps" 
+    "device"           : "cuda",       # "cpu" o "mps" 
     "target_sparsity"  : 0.30,         # 50 %
     "R_limit"          : 60,          # mosse max per episodio
-    "num_searches"     : 15, #64
+    "num_searches"     : 64, #64
     "top_k"            : 3, #64
     "C"                : 3,#1.5,
     "batch_size"       : 48, #16
-    "num_iterations"   : 5,
-    "num_selfPlay_iterations": 50,
+    "num_iterations"   : 1000,
+    "num_selfPlay_iterations": 20,
     "num_epochs": 7,
     "beta": 2,           # peso KL nel reward
     "kl_threshold": .2,   # τ per l’early-abort EvoPress e checkwin
@@ -69,6 +69,8 @@ game = PruneGame(args)
 
 n_blocks = game.initial_state.numel()
 
+args["top_k"] = n_blocks
+
 ppl_baseline = game.compute_perplexity(full_eval=True)
 print(f"PPL baseline: {ppl_baseline:.2f}\n\n")
 
@@ -80,7 +82,6 @@ print(f"PPL baseline: {ppl_baseline:.2f}\n\n")
 #print(game.perform_action(torch.Tensor([11,0])))
 #print(game.kl_div)
 #print(game.reward)
-#
 #ppl_pruned = game.compute_perplexity()  
 #final_sparsity = 1.0 - game.state.float().mean().item()
 #print(f"\nPPL modello potato: {ppl_pruned:.2f}")
@@ -112,9 +113,6 @@ print("--> finito di imparare\n")
 
 
 
-# -------------------------------------------------------------------
-#  E V A L U A T I O N   (stesso script, dopo il training)
-# -------------------------------------------------------------------
 print("\n======  E V A L U A T I O N  ======\n")
 from mcts import MCTS
 
@@ -138,8 +136,7 @@ while True:
     if done:
         break
 
-# ---- metriche finali ---------------------------------------------
-ppl_pruned = eval_game.compute_perplexity()                 # dopo potatura
+ppl_pruned = eval_game.compute_perplexity()              
 spars_f    = 1.0 - state.float().mean().item()
 
 print(f"[EVAL] PPL baseline : {ppl_baseline:.2f}")

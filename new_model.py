@@ -27,9 +27,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions.categorical import Categorical
 
-# =============================================================================
+
 # Positional‑encoding helper (sinusoidale, non trainabile)
-# =============================================================================
+
 
 def create_fixed_positional_encoding(n_position: int, n_embedding: int, device):
     pe = torch.zeros(n_position, n_embedding, device=device)
@@ -42,9 +42,9 @@ def create_fixed_positional_encoding(n_position: int, n_embedding: int, device):
     pe[:, 1::2] = torch.cos(positions * div_term)
     return pe
 
-# =============================================================================
+
 # Multi‑Head Attention building blocks (copiati dal tuo esempio)
-# =============================================================================
+
 
 class _Head(nn.Module):
     def __init__(self, c1: int, c2: int, d: int, causal_mask: bool = False):
@@ -95,9 +95,9 @@ class _MultiHeadAttention(nn.Module):
         out = x + self.ff(self.ln_ff(x))           # residual 2
         return out
 
-# =============================================================================
+
 # Quantile value head (uguale a prima, cambia solo nome classe public)
-# =============================================================================
+
 
 class _QuantileValueProj(nn.Module):
     def __init__(self, d_in: int, d_hidden: int = 512, n_quantiles: int = 8):
@@ -126,9 +126,9 @@ class _QuantileValueProj(nn.Module):
         huber = F.huber_loss(q_pred, y.unsqueeze(-1).expand_as(q_pred), reduction="none", delta=delta)
         return (torch.abs(taus - (diff < 0).float()) * huber).mean()
 
-# =============================================================================
+
 # Torso (embed + Transformer + FFN) ‑ invariato
-# =============================================================================
+
 
 class _PruneTorso(nn.Module):
     def __init__(self, num_blocks: int, history_len: int, d_model: int, n_heads: int, n_layers: int, dim_feedforward: int):
@@ -174,9 +174,9 @@ class _PruneTorso(nn.Module):
         x = x + self.post_ffn(x)
         return x  # (B,N,C)
 
-# =============================================================================
+
 # Attention‑powered Policy head
-# =============================================================================
+
 
 class _PolicyHeadAttn(nn.Module):
     def __init__(self, d_model: int, num_ops: int, n_heads: int = 8):
@@ -190,9 +190,9 @@ class _PolicyHeadAttn(nn.Module):
         logits = self.proj_logits(h)        # (B,N,num_ops)
         return logits
 
-# =============================================================================
+
 # Attention‑pooled Value head (learnable [V] token)
-# =============================================================================
+
 
 class _ValueHeadAttn(nn.Module):
     def __init__(self, d_model: int, d_hidden: int = 512, n_quantiles: int = 8, n_heads: int = 8):
@@ -209,12 +209,11 @@ class _ValueHeadAttn(nn.Module):
         q = self.proj(pooled.squeeze(1))               # (B,nq)
         return q
 
-# =============================================================================
-# Public PruneModel (API invariata)
-# =============================================================================
+
+
 
 class PruneModel(nn.Module):
-    def __init__(self,num_blocks: int,history_len: int,d_model: int = 128,n_heads: int = 4,n_layers: int = 2,dim_feedforward: int = 256,num_ops: int = 2,attn_heads: int = 8,):
+    def __init__(self,num_blocks: int,history_len: int,d_model: int = 128,n_heads: int = 4,n_layers: int = 2,dim_feedforward: int = 256,num_ops: int = 1,attn_heads: int = 8,):
         super().__init__()
         self.num_blocks = num_blocks
         self.num_ops = num_ops
@@ -223,10 +222,10 @@ class PruneModel(nn.Module):
         self.value_head  = _ValueHeadAttn(d_model, d_hidden=dim_feedforward*2, n_quantiles=8, n_heads=attn_heads)
 
     def forward(self, encoded_state: torch.Tensor, scalars: torch.Tensor):
-        emb = self.torso(encoded_state, scalars)            # (B,N,C)
-        logits = self.policy_head(emb)                      # (B,N,num_ops)
-        quant = self.value_head(emb)                        # (B,nq)
-        value = _QuantileValueProj.risk_adjust(quant)       # (B,)
+        emb = self.torso(encoded_state, scalars)        
+        logits = self.policy_head(emb)                  
+        quant = self.value_head(emb)                    
+        value = _QuantileValueProj.risk_adjust(quant)   
         return logits, value
 
     def fwd_train(self,states: torch.Tensor,scalars: torch.Tensor,pi: torch.Tensor,returns: torch.Tensor,lambda_H: float = 0.02,):
@@ -248,38 +247,18 @@ class PruneModel(nn.Module):
         return loss, pol_loss.detach(), val_loss.detach(), ent_loss.detach()
 
     @torch.no_grad()
-    def fwd_infer(self,states: torch.Tensor,scalars: torch.Tensor,top_k: int = 32,):
-        """
-        Restituisce:
-          • actions  – tensor (B, K, 2)   [block_id, op_id]  (op_id == 0 ⇒ TOGGLE)
-          • priors   – tensor (B, K)      prior normalizzati
-          • value    – tensor (B,)        stima del valore
-        """
-        logits, value = self.forward(states, scalars)            # logits (B,N,num_ops)
-        priors = torch.softmax(logits.view(states.size(0), -1), dim=-1)  # (B, N·num_ops)
+    def fwd_infer(self, states, scalars, top_k=32):
+        logits, value = self.forward(states, scalars)         # (B,N,1)
+        priors = torch.softmax(logits.squeeze(-1), dim=-1)    # (B,N)
 
-        # ---------------------------------------------------------------------
-        # 1) Mantieni solo le azioni TOGGLE  (op_idx == 0)
-        # ---------------------------------------------------------------------
-        mask_toggle = torch.arange(self.num_ops, device=priors.device) \
-                         .repeat(self.num_blocks) == 0            # shape (N·num_ops,)
-        priors = priors[:, mask_toggle]                           # (B, N)
-
-        # 2) Dirichlet noise globale per incentivare esplorazione
-        alpha = 0.3
-        conc = torch.full_like(priors, alpha, device="cpu")       # campiono su CPU
-        noise = torch.distributions.Dirichlet(conc).sample().to(priors.device)
-        eps = 0.20
-        priors = (1.0 - eps) * priors + eps * noise
-
-        # 3) Normalizza di nuovo (potrebbero esserci underflow)
+        # Dirichlet noise (facoltativo)
+        eps, alpha = 0.10, 0.3
+        noise = torch.distributions.Dirichlet(torch.full_like(priors, alpha)).sample()
+        priors = (1-eps)*priors + eps*noise
         priors = priors / priors.sum(dim=-1, keepdim=True).clamp_min(1e-9)
 
-        # 4) Top-k e costruzione azioni   (op_id è sempre 0 ⇒ TOGGLE)
         K = min(top_k, priors.size(-1))
-        top_p, top_idx = torch.topk(priors, k=K, dim=-1)          # idx ∈ [0, N)
-        actions = torch.stack(
-            [top_idx, torch.zeros_like(top_idx)], dim=-1          # (B,K,2)
-        )
+        top_p, top_idx = torch.topk(priors, K, dim=-1)        # (B,K)
+        actions = torch.stack([top_idx, torch.zeros_like(top_idx)], dim=-1)  # op_id sempre 0
 
         return actions, top_p, value
