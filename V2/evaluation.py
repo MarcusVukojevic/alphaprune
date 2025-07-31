@@ -4,25 +4,19 @@ from prune_game import PruneGame
 from mcts import MCTS
 
 def evaluate_current_model(model, args, save_plot: bool = True):
-    """
-    Crea un nuovo gioco, usa il modello corrente per decidere le mosse (via MCTS),
-    e alla fine stampa PPL, sparsity e reward. Ritorna anche un dict con i risultati.
-    """
-    # 1) Nuovo environment/gioco “vergine”
+    # cre un nuovo env
     game_eval = PruneGame(args)
     state = game_eval.reset_game()
 
-    # 2) Setup MCTS con gli stessi iperparametri
+    # sett mcts con gli stessi parametri
     mcts_eval = MCTS(game_eval, model, args)
 
-    # 3) Metriche baseline
     ppl_baseline = game_eval.initial_ppl
     sparsity_start = 1.0 - state.float().mean().item()
 
-    # 4) Loop decisionale (fino a done)
     while True:
-        action = mcts_eval.search(state)          # gid da togglare
-        state  = game_eval.do_action(action)      # aggiorna stato interno + ppl
+        action = mcts_eval.search(state)          
+        state  = game_eval.do_action(action)      
         state = game_eval.state
         reward, done = game_eval.get_value_and_terminated(state, depth=game_eval.numero_mossa)
         if done:
@@ -30,7 +24,7 @@ def evaluate_current_model(model, args, save_plot: bool = True):
 
     state = game_eval.state
     # 5) Metriche finali
-    ppl_final = game_eval.ppl
+    ppl_final = game_eval.compute_ppl()
     sparsity_f = 1.0 - state.float().mean().item()
     n_steps = game_eval.numero_mossa
 

@@ -1,0 +1,1844 @@
+Inizio traning con:  {'name_model': 'distilgpt2', 'eightbit': False, 'name_dataset': 'wikitext', 'device': 'cuda', 'target_sparsity': 0.5, 'R_limit': 60, 'num_searches': 64, 'top_k': 3, 'C': 3, 'batch_size': 48, 'num_iterations': 500, 'num_selfPlay_iterations': 500, 'num_epochs': 10, 'beta': 2, 'kl_threshold': 0.2, 'root_dir_eps': 0.2, 'root_dir_alpha': 0.3, 'lr': 0.0002, 'entropy_bonus': 0.02, 'grad_clip': 1.0, 'mcts_batch_size': 3}
+[utils] distilgpt2:    786 blocchi da 64 neuroni
+12
+PPL baseline: 65.49
+
+
+modellio compilato e pronto per giocare!
+--> inizio ad imparare
+
+
+--- Iteration 0: Self-Play ---
+--- Iteration 0: Training (Avg Reward: 3.0991) ---
+[Iter 0  Ep 1]  pol=2.6212  val=0.2089  ent=-2.3252
+[Iter 0  Ep 2]  pol=2.5924  val=0.2319  ent=-2.3532
+[Iter 0  Ep 3]  pol=2.5528  val=0.1773  ent=-2.3539
+[Iter 0  Ep 4]  pol=2.6014  val=0.1315  ent=-2.3647
+[Iter 0  Ep 5]  pol=2.6166  val=0.1912  ent=-2.3566
+[Iter 0  Ep 6]  pol=2.6374  val=0.1875  ent=-2.3515
+[Iter 0  Ep 7]  pol=2.6065  val=0.1956  ent=-2.3641
+[Iter 0  Ep 8]  pol=2.5742  val=0.2296  ent=-2.3754
+[Iter 0  Ep 9]  pol=2.5835  val=0.1159  ent=-2.3654
+[Iter 0  Ep 10]  pol=2.6143  val=0.1637  ent=-2.3661
+
+--- Iteration 1: Self-Play ---
+--- Iteration 1: Training (Avg Reward: 3.1440) ---
+[Iter 1  Ep 1]  pol=2.5911  val=0.1571  ent=-2.3735
+[Iter 1  Ep 2]  pol=2.5879  val=0.2438  ent=-2.3728
+[Iter 1  Ep 3]  pol=2.5668  val=0.2245  ent=-2.3725
+[Iter 1  Ep 4]  pol=2.5713  val=0.2040  ent=-2.3688
+[Iter 1  Ep 5]  pol=2.5902  val=0.1533  ent=-2.3733
+[Iter 1  Ep 6]  pol=2.5535  val=0.1148  ent=-2.3883
+[Iter 1  Ep 7]  pol=2.5896  val=0.1675  ent=-2.3795
+[Iter 1  Ep 8]  pol=2.5687  val=0.1360  ent=-2.3822
+[Iter 1  Ep 9]  pol=2.5581  val=0.1117  ent=-2.3954
+[Iter 1  Ep 10]  pol=2.5848  val=0.2215  ent=-2.3869
+
+--- Iteration 2: Self-Play ---
+--- Iteration 2: Training (Avg Reward: 3.4215) ---
+[Iter 2  Ep 1]  pol=2.5886  val=0.1587  ent=-2.3930
+[Iter 2  Ep 2]  pol=2.5651  val=0.1077  ent=-2.3938
+[Iter 2  Ep 3]  pol=2.5478  val=0.0835  ent=-2.4004
+[Iter 2  Ep 4]  pol=2.5791  val=0.1531  ent=-2.4099
+[Iter 2  Ep 5]  pol=2.5355  val=0.0948  ent=-2.4217
+[Iter 2  Ep 6]  pol=2.5401  val=0.1038  ent=-2.4151
+[Iter 2  Ep 7]  pol=2.5565  val=0.1883  ent=-2.4098
+[Iter 2  Ep 8]  pol=2.5000  val=0.1052  ent=-2.4155
+[Iter 2  Ep 9]  pol=2.5628  val=0.2097  ent=-2.4163
+[Iter 2  Ep 10]  pol=2.5520  val=0.1526  ent=-2.4082
+
+--- Iteration 3: Self-Play ---
+--- Iteration 3: Training (Avg Reward: 3.3789) ---
+[Iter 3  Ep 1]  pol=2.5299  val=0.0989  ent=-2.4159
+[Iter 3  Ep 2]  pol=2.5471  val=0.1595  ent=-2.4181
+[Iter 3  Ep 3]  pol=2.5148  val=0.1482  ent=-2.4149
+[Iter 3  Ep 4]  pol=2.5602  val=0.2716  ent=-2.4193
+[Iter 3  Ep 5]  pol=2.5741  val=0.2336  ent=-2.4156
+[Iter 3  Ep 6]  pol=2.5121  val=0.1356  ent=-2.4167
+[Iter 3  Ep 7]  pol=2.5037  val=0.1693  ent=-2.4216
+[Iter 3  Ep 8]  pol=2.4642  val=0.0629  ent=-2.4130
+[Iter 3  Ep 9]  pol=2.5308  val=0.1640  ent=-2.4123
+[Iter 3  Ep 10]  pol=2.5329  val=0.0526  ent=-2.4227
+
+--- Iteration 4: Self-Play ---
+--- Iteration 4: Training (Avg Reward: 4.1027) ---
+[Iter 4  Ep 1]  pol=2.5091  val=0.3198  ent=-2.4237
+[Iter 4  Ep 2]  pol=2.5257  val=0.3552  ent=-2.4261
+[Iter 4  Ep 3]  pol=2.5116  val=0.3281  ent=-2.4169
+[Iter 4  Ep 4]  pol=2.5651  val=0.5562  ent=-2.4268
+[Iter 4  Ep 5]  pol=2.5087  val=0.3406  ent=-2.4300
+[Iter 4  Ep 6]  pol=2.5275  val=0.2691  ent=-2.4320
+[Iter 4  Ep 7]  pol=2.5117  val=0.3551  ent=-2.4299
+[Iter 4  Ep 8]  pol=2.5451  val=0.3251  ent=-2.4274
+[Iter 4  Ep 9]  pol=2.5194  val=0.3625  ent=-2.4278
+[Iter 4  Ep 10]  pol=2.5012  val=0.4197  ent=-2.4263
+
+--- Iteration 5: Self-Play ---
+--- Iteration 5: Training (Avg Reward: 4.3270) ---
+[Iter 5  Ep 1]  pol=2.5078  val=0.3939  ent=-2.4281
+[Iter 5  Ep 2]  pol=2.5113  val=0.2417  ent=-2.4347
+[Iter 5  Ep 3]  pol=2.4664  val=0.2845  ent=-2.4250
+[Iter 5  Ep 4]  pol=2.5022  val=0.3110  ent=-2.4292
+[Iter 5  Ep 5]  pol=2.4967  val=0.2726  ent=-2.4320
+[Iter 5  Ep 6]  pol=2.5410  val=0.3319  ent=-2.4272
+[Iter 5  Ep 7]  pol=2.5050  val=0.3458  ent=-2.4302
+[Iter 5  Ep 8]  pol=2.4688  val=0.3071  ent=-2.4302
+[Iter 5  Ep 9]  pol=2.4937  val=0.3558  ent=-2.4328
+[Iter 5  Ep 10]  pol=2.5338  val=0.3258  ent=-2.4320
+
+--- Iteration 6: Self-Play ---
+--- Iteration 6: Training (Avg Reward: 4.8670) ---
+[Iter 6  Ep 1]  pol=2.4580  val=0.3380  ent=-2.4289
+[Iter 6  Ep 2]  pol=2.4642  val=0.1876  ent=-2.4346
+[Iter 6  Ep 3]  pol=2.4475  val=0.2816  ent=-2.4370
+[Iter 6  Ep 4]  pol=2.4289  val=0.2217  ent=-2.4314
+[Iter 6  Ep 5]  pol=2.4688  val=0.2487  ent=-2.4283
+[Iter 6  Ep 6]  pol=2.3934  val=0.2348  ent=-2.4263
+[Iter 6  Ep 7]  pol=2.4218  val=0.2333  ent=-2.4367
+[Iter 6  Ep 8]  pol=2.4488  val=0.3251  ent=-2.4307
+[Iter 6  Ep 9]  pol=2.4815  val=0.2076  ent=-2.4322
+[Iter 6  Ep 10]  pol=2.4026  val=0.2628  ent=-2.4263
+
+--- Iteration 7: Self-Play ---
+--- Iteration 7: Training (Avg Reward: 4.8724) ---
+[Iter 7  Ep 1]  pol=2.4117  val=0.2233  ent=-2.4337
+[Iter 7  Ep 2]  pol=2.4398  val=0.1934  ent=-2.4294
+[Iter 7  Ep 3]  pol=2.5295  val=0.2601  ent=-2.4316
+[Iter 7  Ep 4]  pol=2.4735  val=0.2396  ent=-2.4382
+[Iter 7  Ep 5]  pol=2.4305  val=0.2367  ent=-2.4357
+[Iter 7  Ep 6]  pol=2.4223  val=0.1986  ent=-2.4314
+[Iter 7  Ep 7]  pol=2.4320  val=0.2206  ent=-2.4358
+[Iter 7  Ep 8]  pol=2.4279  val=0.1859  ent=-2.4311
+[Iter 7  Ep 9]  pol=2.3931  val=0.2861  ent=-2.4352
+[Iter 7  Ep 10]  pol=2.4082  val=0.2473  ent=-2.4257
+
+--- Iteration 8: Self-Play ---
+--- Iteration 8: Training (Avg Reward: 5.2891) ---
+[Iter 8  Ep 1]  pol=2.4283  val=0.1894  ent=-2.4329
+[Iter 8  Ep 2]  pol=2.4235  val=0.2569  ent=-2.4337
+[Iter 8  Ep 3]  pol=2.4077  val=0.2688  ent=-2.4335
+[Iter 8  Ep 4]  pol=2.3681  val=0.2323  ent=-2.4280
+[Iter 8  Ep 5]  pol=2.3714  val=0.2861  ent=-2.4271
+[Iter 8  Ep 6]  pol=2.2845  val=0.2831  ent=-2.4124
+[Iter 8  Ep 7]  pol=2.3584  val=0.2148  ent=-2.4292
+[Iter 8  Ep 8]  pol=2.3840  val=0.2432  ent=-2.4201
+[Iter 8  Ep 9]  pol=2.3491  val=0.2579  ent=-2.4016
+[Iter 8  Ep 10]  pol=2.4463  val=0.1497  ent=-2.4266
+
+--- Iteration 9: Self-Play ---
+--- Iteration 9: Training (Avg Reward: 5.2614) ---
+[Iter 9  Ep 1]  pol=2.4068  val=0.1934  ent=-2.4273
+[Iter 9  Ep 2]  pol=2.3833  val=0.1908  ent=-2.4250
+[Iter 9  Ep 3]  pol=2.3853  val=0.1683  ent=-2.4235
+[Iter 9  Ep 4]  pol=2.3372  val=0.2110  ent=-2.4243
+[Iter 9  Ep 5]  pol=2.4456  val=0.1923  ent=-2.4257
+[Iter 9  Ep 6]  pol=2.4925  val=0.1744  ent=-2.4285
+[Iter 9  Ep 7]  pol=2.4001  val=0.1529  ent=-2.4241
+[Iter 9  Ep 8]  pol=2.4165  val=0.1848  ent=-2.4175
+[Iter 9  Ep 9]  pol=2.3398  val=0.1721  ent=-2.4240
+[Iter 9  Ep 10]  pol=2.4043  val=0.1683  ent=-2.4195
+
+--- Iteration 10: Self-Play ---
+--- Iteration 10: Training (Avg Reward: 5.2671) ---
+[Iter 10  Ep 1]  pol=2.4410  val=0.2142  ent=-2.4277
+[Iter 10  Ep 2]  pol=2.3433  val=0.1942  ent=-2.4202
+[Iter 10  Ep 3]  pol=2.3921  val=0.1826  ent=-2.4160
+[Iter 10  Ep 4]  pol=2.3514  val=0.2207  ent=-2.4102
+[Iter 10  Ep 5]  pol=2.4056  val=0.1631  ent=-2.4096
+[Iter 10  Ep 6]  pol=2.4130  val=0.2109  ent=-2.4056
+[Iter 10  Ep 7]  pol=2.3948  val=0.1956  ent=-2.4128
+[Iter 10  Ep 8]  pol=2.4439  val=0.1381  ent=-2.4136
+[Iter 10  Ep 9]  pol=2.2984  val=0.2098  ent=-2.3942
+[Iter 10  Ep 10]  pol=2.4028  val=0.1802  ent=-2.4037
+
+--- Iteration 11: Self-Play ---
+--- Iteration 11: Training (Avg Reward: 5.5554) ---
+[Iter 11  Ep 1]  pol=2.2736  val=0.2588  ent=-2.3995
+[Iter 11  Ep 2]  pol=2.4063  val=0.2298  ent=-2.4127
+[Iter 11  Ep 3]  pol=2.2782  val=0.2890  ent=-2.3972
+[Iter 11  Ep 4]  pol=2.3360  val=0.2619  ent=-2.4009
+[Iter 11  Ep 5]  pol=2.3863  val=0.2496  ent=-2.3918
+[Iter 11  Ep 6]  pol=2.4015  val=0.2202  ent=-2.4060
+[Iter 11  Ep 7]  pol=2.3538  val=0.2272  ent=-2.4099
+[Iter 11  Ep 8]  pol=2.3321  val=0.2536  ent=-2.4035
+[Iter 11  Ep 9]  pol=2.2970  val=0.2593  ent=-2.3819
+[Iter 11  Ep 10]  pol=2.2982  val=0.2431  ent=-2.3782
+
+--- Iteration 12: Self-Play ---
+--- Iteration 12: Training (Avg Reward: 5.4369) ---
+[Iter 12  Ep 1]  pol=2.3581  val=0.1311  ent=-2.4034
+[Iter 12  Ep 2]  pol=2.4059  val=0.1545  ent=-2.4065
+[Iter 12  Ep 3]  pol=2.4137  val=0.1382  ent=-2.3911
+[Iter 12  Ep 4]  pol=2.3611  val=0.1902  ent=-2.3799
+[Iter 12  Ep 5]  pol=2.3564  val=0.1804  ent=-2.4004
+[Iter 12  Ep 6]  pol=2.4114  val=0.1523  ent=-2.3997
+[Iter 12  Ep 7]  pol=2.4083  val=0.1592  ent=-2.3999
+[Iter 12  Ep 8]  pol=2.3351  val=0.1956  ent=-2.3863
+[Iter 12  Ep 9]  pol=2.4626  val=0.1218  ent=-2.4020
+[Iter 12  Ep 10]  pol=2.3455  val=0.1788  ent=-2.3864
+
+--- Iteration 13: Self-Play ---
+--- Iteration 13: Training (Avg Reward: 5.2944) ---
+[Iter 13  Ep 1]  pol=2.3189  val=0.2000  ent=-2.3747
+[Iter 13  Ep 2]  pol=2.3628  val=0.1495  ent=-2.3953
+[Iter 13  Ep 3]  pol=2.3007  val=0.1311  ent=-2.3786
+[Iter 13  Ep 4]  pol=2.3169  val=0.1740  ent=-2.3707
+[Iter 13  Ep 5]  pol=2.4010  val=0.1331  ent=-2.3917
+[Iter 13  Ep 6]  pol=2.3749  val=0.1598  ent=-2.3872
+[Iter 13  Ep 7]  pol=2.3627  val=0.1315  ent=-2.3800
+[Iter 13  Ep 8]  pol=2.3646  val=0.1608  ent=-2.3813
+[Iter 13  Ep 9]  pol=2.3300  val=0.1421  ent=-2.3818
+[Iter 13  Ep 10]  pol=2.3186  val=0.1346  ent=-2.3706
+
+--- Iteration 14: Self-Play ---
+--- Iteration 14: Training (Avg Reward: 5.6358) ---
+[Iter 14  Ep 1]  pol=2.3938  val=0.1670  ent=-2.3845
+[Iter 14  Ep 2]  pol=2.3855  val=0.1930  ent=-2.3739
+[Iter 14  Ep 3]  pol=2.3719  val=0.1672  ent=-2.3690
+[Iter 14  Ep 4]  pol=2.3934  val=0.1925  ent=-2.3631
+[Iter 14  Ep 5]  pol=2.3466  val=0.2498  ent=-2.3571
+[Iter 14  Ep 6]  pol=2.2703  val=0.1654  ent=-2.3597
+[Iter 14  Ep 7]  pol=2.2583  val=0.2118  ent=-2.3497
+[Iter 14  Ep 8]  pol=2.4192  val=0.1248  ent=-2.3617
+[Iter 14  Ep 9]  pol=2.2923  val=0.1270  ent=-2.3380
+[Iter 14  Ep 10]  pol=2.3105  val=0.2069  ent=-2.3654
+
+--- Iteration 15: Self-Play ---
+--- Iteration 15: Training (Avg Reward: 5.7979) ---
+[Iter 15  Ep 1]  pol=2.3337  val=0.1485  ent=-2.3666
+[Iter 15  Ep 2]  pol=2.3975  val=0.1113  ent=-2.3753
+[Iter 15  Ep 3]  pol=2.2640  val=0.1321  ent=-2.3652
+[Iter 15  Ep 4]  pol=2.2712  val=0.1770  ent=-2.3598
+[Iter 15  Ep 5]  pol=2.4027  val=0.1588  ent=-2.3650
+[Iter 15  Ep 6]  pol=2.2852  val=0.1780  ent=-2.3440
+[Iter 15  Ep 7]  pol=2.2994  val=0.1908  ent=-2.3511
+[Iter 15  Ep 8]  pol=2.3245  val=0.1886  ent=-2.3477
+[Iter 15  Ep 9]  pol=2.2956  val=0.1481  ent=-2.3470
+[Iter 15  Ep 10]  pol=2.2680  val=0.1548  ent=-2.3109
+
+--- Iteration 16: Self-Play ---
+--- Iteration 16: Training (Avg Reward: 5.3563) ---
+[Iter 16  Ep 1]  pol=2.1341  val=0.1450  ent=-2.3055
+[Iter 16  Ep 2]  pol=2.2246  val=0.1905  ent=-2.3012
+[Iter 16  Ep 3]  pol=2.3854  val=0.1770  ent=-2.2924
+[Iter 16  Ep 4]  pol=2.2914  val=0.2240  ent=-2.2984
+[Iter 16  Ep 5]  pol=2.3400  val=0.1694  ent=-2.3324
+[Iter 16  Ep 6]  pol=2.2617  val=0.1802  ent=-2.2976
+[Iter 16  Ep 7]  pol=2.2508  val=0.1863  ent=-2.2885
+[Iter 16  Ep 8]  pol=2.2865  val=0.1580  ent=-2.3165
+[Iter 16  Ep 9]  pol=2.3268  val=0.1652  ent=-2.3065
+[Iter 16  Ep 10]  pol=2.2209  val=0.1743  ent=-2.3004
+
+--- Iteration 17: Self-Play ---
+--- Iteration 17: Training (Avg Reward: 5.5513) ---
+[Iter 17  Ep 1]  pol=2.2656  val=0.1819  ent=-2.2523
+[Iter 17  Ep 2]  pol=2.2480  val=0.1771  ent=-2.2889
+[Iter 17  Ep 3]  pol=2.2344  val=0.2263  ent=-2.2734
+[Iter 17  Ep 4]  pol=2.3154  val=0.1717  ent=-2.2725
+[Iter 17  Ep 5]  pol=2.2151  val=0.1686  ent=-2.2652
+[Iter 17  Ep 6]  pol=2.3272  val=0.2220  ent=-2.3245
+[Iter 17  Ep 7]  pol=2.1923  val=0.2015  ent=-2.2765
+[Iter 17  Ep 8]  pol=2.2566  val=0.1930  ent=-2.2975
+[Iter 17  Ep 9]  pol=2.3373  val=0.1850  ent=-2.3201
+[Iter 17  Ep 10]  pol=2.4125  val=0.1602  ent=-2.3064
+
+--- Iteration 18: Self-Play ---
+--- Iteration 18: Training (Avg Reward: 5.7866) ---
+[Iter 18  Ep 1]  pol=2.2965  val=0.1365  ent=-2.2836
+[Iter 18  Ep 2]  pol=2.1732  val=0.1602  ent=-2.2244
+[Iter 18  Ep 3]  pol=2.2286  val=0.1747  ent=-2.2547
+[Iter 18  Ep 4]  pol=2.2464  val=0.1658  ent=-2.2574
+[Iter 18  Ep 5]  pol=2.1142  val=0.1809  ent=-2.2323
+[Iter 18  Ep 6]  pol=2.2472  val=0.1471  ent=-2.2491
+[Iter 18  Ep 7]  pol=2.3365  val=0.1570  ent=-2.2545
+[Iter 18  Ep 8]  pol=2.2348  val=0.1724  ent=-2.2274
+[Iter 18  Ep 9]  pol=2.2099  val=0.1676  ent=-2.2531
+[Iter 18  Ep 10]  pol=2.1098  val=0.1766  ent=-2.1790
+
+--- Iteration 19: Self-Play ---
+--- Iteration 19: Training (Avg Reward: 5.1340) ---
+[Iter 19  Ep 1]  pol=2.3181  val=0.1513  ent=-2.2533
+[Iter 19  Ep 2]  pol=2.2684  val=0.1205  ent=-2.2404
+[Iter 19  Ep 3]  pol=2.2480  val=0.1519  ent=-2.2432
+[Iter 19  Ep 4]  pol=2.2415  val=0.1769  ent=-2.2494
+[Iter 19  Ep 5]  pol=2.1281  val=0.1504  ent=-2.2098
+[Iter 19  Ep 6]  pol=2.4685  val=0.1757  ent=-2.2997
+[Iter 19  Ep 7]  pol=2.4110  val=0.1531  ent=-2.2825
+[Iter 19  Ep 8]  pol=2.2676  val=0.1759  ent=-2.2292
+[Iter 19  Ep 9]  pol=2.2385  val=0.1740  ent=-2.2153
+[Iter 19  Ep 10]  pol=2.1477  val=0.2134  ent=-2.1923
+
+--- Iteration 20: Self-Play ---
+--- Iteration 20: Training (Avg Reward: 5.5830) ---
+[Iter 20  Ep 1]  pol=2.2193  val=0.2006  ent=-2.2463
+[Iter 20  Ep 2]  pol=2.2119  val=0.1843  ent=-2.2315
+[Iter 20  Ep 3]  pol=2.2354  val=0.1568  ent=-2.2807
+[Iter 20  Ep 4]  pol=2.2219  val=0.1781  ent=-2.2229
+[Iter 20  Ep 5]  pol=2.1436  val=0.1501  ent=-2.2176
+[Iter 20  Ep 6]  pol=2.1223  val=0.1405  ent=-2.2223
+[Iter 20  Ep 7]  pol=2.2116  val=0.1897  ent=-2.2202
+[Iter 20  Ep 8]  pol=2.3619  val=0.1529  ent=-2.2979
+[Iter 20  Ep 9]  pol=2.1990  val=0.2102  ent=-2.1942
+[Iter 20  Ep 10]  pol=2.2121  val=0.1932  ent=-2.2335
+
+--- Iteration 21: Self-Play ---
+--- Iteration 21: Training (Avg Reward: 5.1101) ---
+[Iter 21  Ep 1]  pol=2.2642  val=0.0930  ent=-2.2813
+[Iter 21  Ep 2]  pol=2.3987  val=0.0858  ent=-2.3119
+[Iter 21  Ep 3]  pol=2.3370  val=0.1290  ent=-2.2975
+[Iter 21  Ep 4]  pol=2.2661  val=0.1076  ent=-2.2964
+[Iter 21  Ep 5]  pol=2.3095  val=0.1369  ent=-2.2700
+[Iter 21  Ep 6]  pol=2.2322  val=0.1130  ent=-2.2676
+[Iter 21  Ep 7]  pol=2.3555  val=0.0789  ent=-2.2934
+[Iter 21  Ep 8]  pol=2.1482  val=0.1012  ent=-2.2304
+[Iter 21  Ep 9]  pol=2.2888  val=0.1031  ent=-2.2827
+[Iter 21  Ep 10]  pol=2.3188  val=0.1160  ent=-2.2827
+
+--- Iteration 22: Self-Play ---
+--- Iteration 22: Training (Avg Reward: 5.2335) ---
+[Iter 22  Ep 1]  pol=2.1857  val=0.1028  ent=-2.2339
+[Iter 22  Ep 2]  pol=2.2350  val=0.1540  ent=-2.2274
+[Iter 22  Ep 3]  pol=2.2363  val=0.1042  ent=-2.2648
+[Iter 22  Ep 4]  pol=2.1770  val=0.1365  ent=-2.2235
+[Iter 22  Ep 5]  pol=2.2944  val=0.1390  ent=-2.2393
+[Iter 22  Ep 6]  pol=2.2214  val=0.0997  ent=-2.2724
+[Iter 22  Ep 7]  pol=2.1580  val=0.1987  ent=-2.1854
+[Iter 22  Ep 8]  pol=2.3061  val=0.1219  ent=-2.2824
+[Iter 22  Ep 9]  pol=2.2901  val=0.1468  ent=-2.2319
+[Iter 22  Ep 10]  pol=2.3244  val=0.1152  ent=-2.2597
+
+--- Iteration 23: Self-Play ---
+--- Iteration 23: Training (Avg Reward: 5.5802) ---
+[Iter 23  Ep 1]  pol=2.1767  val=0.1711  ent=-2.2186
+[Iter 23  Ep 2]  pol=2.2238  val=0.1539  ent=-2.1826
+[Iter 23  Ep 3]  pol=2.1882  val=0.1732  ent=-2.1606
+[Iter 23  Ep 4]  pol=2.2117  val=0.2244  ent=-2.1992
+[Iter 23  Ep 5]  pol=2.2419  val=0.1355  ent=-2.2378
+[Iter 23  Ep 6]  pol=2.2162  val=0.1360  ent=-2.2292
+[Iter 23  Ep 7]  pol=2.1755  val=0.1608  ent=-2.1918
+[Iter 23  Ep 8]  pol=2.2340  val=0.1965  ent=-2.2099
+[Iter 23  Ep 9]  pol=2.1727  val=0.1917  ent=-2.1713
+[Iter 23  Ep 10]  pol=2.2056  val=0.1308  ent=-2.2018
+
+--- Iteration 24: Self-Play ---
+--- Iteration 24: Training (Avg Reward: 5.2691) ---
+[Iter 24  Ep 1]  pol=2.1731  val=0.1301  ent=-2.1594
+[Iter 24  Ep 2]  pol=2.1118  val=0.1225  ent=-2.1681
+[Iter 24  Ep 3]  pol=2.2768  val=0.1282  ent=-2.2519
+[Iter 24  Ep 4]  pol=2.2419  val=0.1106  ent=-2.2109
+[Iter 24  Ep 5]  pol=2.2058  val=0.1202  ent=-2.2218
+[Iter 24  Ep 6]  pol=2.2617  val=0.1283  ent=-2.2643
+[Iter 24  Ep 7]  pol=2.3503  val=0.1097  ent=-2.2638
+[Iter 24  Ep 8]  pol=2.1759  val=0.1735  ent=-2.2066
+[Iter 24  Ep 9]  pol=2.2017  val=0.0798  ent=-2.2539
+[Iter 24  Ep 10]  pol=2.2063  val=0.0908  ent=-2.2416
+
+--- Iteration 25: Self-Play ---
+--- Iteration 25: Training (Avg Reward: 4.8215) ---
+[Iter 25  Ep 1]  pol=2.2100  val=0.1792  ent=-2.1867
+[Iter 25  Ep 2]  pol=2.0784  val=0.1640  ent=-2.1284
+[Iter 25  Ep 3]  pol=2.2480  val=0.1408  ent=-2.2277
+[Iter 25  Ep 4]  pol=2.2249  val=0.1790  ent=-2.1901
+[Iter 25  Ep 5]  pol=2.2107  val=0.1982  ent=-2.1972
+[Iter 25  Ep 6]  pol=2.2802  val=0.1561  ent=-2.1918
+[Iter 25  Ep 7]  pol=2.2785  val=0.1828  ent=-2.2373
+[Iter 25  Ep 8]  pol=2.1271  val=0.1586  ent=-2.2051
+[Iter 25  Ep 9]  pol=2.2339  val=0.1233  ent=-2.1809
+[Iter 25  Ep 10]  pol=2.2306  val=0.1502  ent=-2.2264
+
+--- Iteration 26: Self-Play ---
+--- Iteration 26: Training (Avg Reward: 5.0805) ---
+[Iter 26  Ep 1]  pol=2.1459  val=0.1281  ent=-2.1913
+[Iter 26  Ep 2]  pol=2.2676  val=0.1046  ent=-2.2510
+[Iter 26  Ep 3]  pol=2.2555  val=0.1174  ent=-2.2073
+[Iter 26  Ep 4]  pol=2.2317  val=0.1291  ent=-2.2057
+[Iter 26  Ep 5]  pol=2.1359  val=0.0962  ent=-2.1590
+[Iter 26  Ep 6]  pol=2.2199  val=0.1290  ent=-2.2284
+[Iter 26  Ep 7]  pol=2.2671  val=0.1109  ent=-2.2338
+[Iter 26  Ep 8]  pol=2.2421  val=0.0924  ent=-2.2360
+[Iter 26  Ep 9]  pol=2.2336  val=0.1426  ent=-2.2171
+[Iter 26  Ep 10]  pol=2.2347  val=0.0897  ent=-2.2286
+
+--- Iteration 27: Self-Play ---
+--- Iteration 27: Training (Avg Reward: 5.0240) ---
+[Iter 27  Ep 1]  pol=2.2687  val=0.1300  ent=-2.2228
+[Iter 27  Ep 2]  pol=2.2733  val=0.1456  ent=-2.2051
+[Iter 27  Ep 3]  pol=2.2572  val=0.1358  ent=-2.2133
+[Iter 27  Ep 4]  pol=2.0630  val=0.1726  ent=-2.1001
+[Iter 27  Ep 5]  pol=2.1950  val=0.1359  ent=-2.2330
+[Iter 27  Ep 6]  pol=2.2232  val=0.1389  ent=-2.1959
+[Iter 27  Ep 7]  pol=2.2393  val=0.1551  ent=-2.2058
+[Iter 27  Ep 8]  pol=2.2617  val=0.1391  ent=-2.2190
+[Iter 27  Ep 9]  pol=2.1507  val=0.1576  ent=-2.1708
+[Iter 27  Ep 10]  pol=2.3052  val=0.1064  ent=-2.2700
+
+--- Iteration 28: Self-Play ---
+--- Iteration 28: Training (Avg Reward: 5.1541) ---
+[Iter 28  Ep 1]  pol=2.2844  val=0.0842  ent=-2.2368
+[Iter 28  Ep 2]  pol=2.0439  val=0.1394  ent=-2.1782
+[Iter 28  Ep 3]  pol=2.1104  val=0.1776  ent=-2.1423
+[Iter 28  Ep 4]  pol=2.1541  val=0.1256  ent=-2.1606
+[Iter 28  Ep 5]  pol=2.1643  val=0.1122  ent=-2.2042
+[Iter 28  Ep 6]  pol=2.2716  val=0.1154  ent=-2.2520
+[Iter 28  Ep 7]  pol=2.1947  val=0.1061  ent=-2.2000
+[Iter 28  Ep 8]  pol=2.1082  val=0.1647  ent=-2.0484
+[Iter 28  Ep 9]  pol=2.2152  val=0.1001  ent=-2.2217
+[Iter 28  Ep 10]  pol=2.2307  val=0.1100  ent=-2.2260
+
+--- Iteration 29: Self-Play ---
+--- Iteration 29: Training (Avg Reward: 5.2769) ---
+[Iter 29  Ep 1]  pol=2.2359  val=0.1205  ent=-2.2333
+[Iter 29  Ep 2]  pol=2.2489  val=0.1422  ent=-2.1897
+[Iter 29  Ep 3]  pol=2.2810  val=0.1205  ent=-2.2041
+[Iter 29  Ep 4]  pol=2.1060  val=0.1301  ent=-2.1615
+[Iter 29  Ep 5]  pol=2.1400  val=0.0864  ent=-2.1809
+[Iter 29  Ep 6]  pol=2.1296  val=0.1131  ent=-2.1379
+[Iter 29  Ep 7]  pol=2.2149  val=0.0824  ent=-2.1748
+[Iter 29  Ep 8]  pol=2.2683  val=0.1039  ent=-2.2297
+[Iter 29  Ep 9]  pol=2.1231  val=0.1590  ent=-2.1812
+[Iter 29  Ep 10]  pol=2.1489  val=0.0862  ent=-2.2015
+
+--- Iteration 30: Self-Play ---
+--- Iteration 30: Training (Avg Reward: 4.8617) ---
+[Iter 30  Ep 1]  pol=2.0753  val=0.1093  ent=-2.1278
+[Iter 30  Ep 2]  pol=2.2019  val=0.1125  ent=-2.1867
+[Iter 30  Ep 3]  pol=2.1067  val=0.1055  ent=-2.1914
+[Iter 30  Ep 4]  pol=2.2242  val=0.1104  ent=-2.1876
+[Iter 30  Ep 5]  pol=2.2797  val=0.0981  ent=-2.2511
+[Iter 30  Ep 6]  pol=2.2508  val=0.0810  ent=-2.2508
+[Iter 30  Ep 7]  pol=2.2105  val=0.1125  ent=-2.1983
+[Iter 30  Ep 8]  pol=2.1075  val=0.1008  ent=-2.1399
+[Iter 30  Ep 9]  pol=2.1747  val=0.1318  ent=-2.1888
+[Iter 30  Ep 10]  pol=2.2950  val=0.0682  ent=-2.2585
+
+--- Iteration 31: Self-Play ---
+--- Iteration 31: Training (Avg Reward: 5.0959) ---
+[Iter 31  Ep 1]  pol=2.1977  val=0.0949  ent=-2.2126
+[Iter 31  Ep 2]  pol=2.1575  val=0.1373  ent=-2.1522
+[Iter 31  Ep 3]  pol=2.2632  val=0.0873  ent=-2.2470
+[Iter 31  Ep 4]  pol=2.0733  val=0.1395  ent=-2.1147
+[Iter 31  Ep 5]  pol=2.1062  val=0.0940  ent=-2.1394
+[Iter 31  Ep 6]  pol=2.1777  val=0.1289  ent=-2.1815
+[Iter 31  Ep 7]  pol=2.1397  val=0.1139  ent=-2.1556
+[Iter 31  Ep 8]  pol=2.1469  val=0.1380  ent=-2.1618
+[Iter 31  Ep 9]  pol=2.2337  val=0.1089  ent=-2.1342
+[Iter 31  Ep 10]  pol=2.1789  val=0.1120  ent=-2.1904
+
+--- Iteration 32: Self-Play ---
+--- Iteration 32: Training (Avg Reward: 4.8521) ---
+[Iter 32  Ep 1]  pol=2.1479  val=0.0798  ent=-2.2119
+[Iter 32  Ep 2]  pol=2.2422  val=0.1533  ent=-2.1835
+[Iter 32  Ep 3]  pol=2.2339  val=0.1133  ent=-2.2107
+[Iter 32  Ep 4]  pol=2.1975  val=0.0639  ent=-2.1996
+[Iter 32  Ep 5]  pol=2.2123  val=0.0935  ent=-2.2136
+[Iter 32  Ep 6]  pol=2.2185  val=0.0808  ent=-2.2357
+[Iter 32  Ep 7]  pol=2.1636  val=0.1121  ent=-2.1969
+[Iter 32  Ep 8]  pol=2.1931  val=0.0903  ent=-2.1558
+[Iter 32  Ep 9]  pol=2.2283  val=0.0944  ent=-2.2426
+[Iter 32  Ep 10]  pol=2.1458  val=0.1060  ent=-2.2195
+
+--- Iteration 33: Self-Play ---
+--- Iteration 33: Training (Avg Reward: 5.0191) ---
+[Iter 33  Ep 1]  pol=2.2474  val=0.0638  ent=-2.2333
+[Iter 33  Ep 2]  pol=2.0591  val=0.0692  ent=-2.1454
+[Iter 33  Ep 3]  pol=2.1527  val=0.0761  ent=-2.2396
+[Iter 33  Ep 4]  pol=2.2283  val=0.0739  ent=-2.2415
+[Iter 33  Ep 5]  pol=2.1834  val=0.0974  ent=-2.2379
+[Iter 33  Ep 6]  pol=2.1301  val=0.0667  ent=-2.1720
+[Iter 33  Ep 7]  pol=2.2614  val=0.0755  ent=-2.2299
+[Iter 33  Ep 8]  pol=2.1515  val=0.0568  ent=-2.1538
+[Iter 33  Ep 9]  pol=2.1923  val=0.0738  ent=-2.2163
+[Iter 33  Ep 10]  pol=2.1681  val=0.0521  ent=-2.2085
+
+--- Iteration 34: Self-Play ---
+--- Iteration 34: Training (Avg Reward: 5.1753) ---
+[Iter 34  Ep 1]  pol=2.2084  val=0.0634  ent=-2.1770
+[Iter 34  Ep 2]  pol=2.1899  val=0.0722  ent=-2.1588
+[Iter 34  Ep 3]  pol=2.1777  val=0.0691  ent=-2.1363
+[Iter 34  Ep 4]  pol=2.3016  val=0.1002  ent=-2.2061
+[Iter 34  Ep 5]  pol=2.2735  val=0.0390  ent=-2.2501
+[Iter 34  Ep 6]  pol=2.2173  val=0.1048  ent=-2.1678
+[Iter 34  Ep 7]  pol=2.2232  val=0.0649  ent=-2.2197
+[Iter 34  Ep 8]  pol=2.2603  val=0.0689  ent=-2.2090
+[Iter 34  Ep 9]  pol=2.2960  val=0.0466  ent=-2.2709
+[Iter 34  Ep 10]  pol=2.3459  val=0.0572  ent=-2.2452
+
+--- Iteration 35: Self-Play ---
+--- Iteration 35: Training (Avg Reward: 5.3311) ---
+[Iter 35  Ep 1]  pol=2.1850  val=0.1340  ent=-2.1571
+[Iter 35  Ep 2]  pol=2.2201  val=0.1003  ent=-2.1676
+[Iter 35  Ep 3]  pol=2.2969  val=0.0788  ent=-2.2210
+[Iter 35  Ep 4]  pol=2.2937  val=0.0673  ent=-2.2569
+[Iter 35  Ep 5]  pol=2.1403  val=0.0960  ent=-2.1100
+[Iter 35  Ep 6]  pol=2.2297  val=0.1259  ent=-2.1893
+[Iter 35  Ep 7]  pol=2.2127  val=0.0888  ent=-2.1616
+[Iter 35  Ep 8]  pol=2.1868  val=0.1295  ent=-2.1985
+[Iter 35  Ep 9]  pol=2.1522  val=0.0828  ent=-2.1992
+[Iter 35  Ep 10]  pol=2.1339  val=0.1464  ent=-2.1582
+
+--- Iteration 36: Self-Play ---
+--- Iteration 36: Training (Avg Reward: 4.9117) ---
+[Iter 36  Ep 1]  pol=2.2742  val=0.0839  ent=-2.2433
+[Iter 36  Ep 2]  pol=2.1726  val=0.0742  ent=-2.1860
+[Iter 36  Ep 3]  pol=2.2058  val=0.0925  ent=-2.2371
+[Iter 36  Ep 4]  pol=2.2242  val=0.0895  ent=-2.2172
+[Iter 36  Ep 5]  pol=2.2075  val=0.1174  ent=-2.2602
+[Iter 36  Ep 6]  pol=2.1607  val=0.1390  ent=-2.1948
+[Iter 36  Ep 7]  pol=2.1717  val=0.0917  ent=-2.1845
+[Iter 36  Ep 8]  pol=2.1742  val=0.0932  ent=-2.2455
+[Iter 36  Ep 9]  pol=2.2170  val=0.1040  ent=-2.2455
+[Iter 36  Ep 10]  pol=2.2019  val=0.0937  ent=-2.2474
+
+--- Iteration 37: Self-Play ---
+--- Iteration 37: Training (Avg Reward: 4.7639) ---
+[Iter 37  Ep 1]  pol=2.2076  val=0.1021  ent=-2.2640
+[Iter 37  Ep 2]  pol=2.2170  val=0.0595  ent=-2.2802
+[Iter 37  Ep 3]  pol=2.2049  val=0.1003  ent=-2.2206
+[Iter 37  Ep 4]  pol=2.2685  val=0.0777  ent=-2.2947
+[Iter 37  Ep 5]  pol=2.1986  val=0.1302  ent=-2.2048
+[Iter 37  Ep 6]  pol=2.1565  val=0.1471  ent=-2.2224
+[Iter 37  Ep 7]  pol=2.2345  val=0.1094  ent=-2.2588
+[Iter 37  Ep 8]  pol=2.2294  val=0.0768  ent=-2.2582
+[Iter 37  Ep 9]  pol=2.1638  val=0.1116  ent=-2.2233
+[Iter 37  Ep 10]  pol=2.1505  val=0.1572  ent=-2.1743
+
+--- Iteration 38: Self-Play ---
+--- Iteration 38: Training (Avg Reward: 5.1603) ---
+[Iter 38  Ep 1]  pol=2.0985  val=0.0556  ent=-2.2124
+[Iter 38  Ep 2]  pol=2.2172  val=0.0598  ent=-2.2511
+[Iter 38  Ep 3]  pol=2.1520  val=0.1163  ent=-2.1670
+[Iter 38  Ep 4]  pol=2.1220  val=0.1187  ent=-2.1560
+[Iter 38  Ep 5]  pol=2.1186  val=0.1092  ent=-2.1021
+[Iter 38  Ep 6]  pol=2.1234  val=0.0962  ent=-2.1332
+[Iter 38  Ep 7]  pol=2.1478  val=0.1340  ent=-2.1301
+[Iter 38  Ep 8]  pol=2.1986  val=0.0773  ent=-2.1654
+[Iter 38  Ep 9]  pol=2.0925  val=0.1388  ent=-2.1310
+[Iter 38  Ep 10]  pol=2.1385  val=0.1215  ent=-2.1208
+
+--- Iteration 39: Self-Play ---
+--- Iteration 39: Training (Avg Reward: 5.1590) ---
+[Iter 39  Ep 1]  pol=2.2724  val=0.0455  ent=-2.2592
+[Iter 39  Ep 2]  pol=2.1508  val=0.0669  ent=-2.1630
+[Iter 39  Ep 3]  pol=2.2224  val=0.0851  ent=-2.1515
+[Iter 39  Ep 4]  pol=2.1037  val=0.1010  ent=-2.1461
+[Iter 39  Ep 5]  pol=2.2119  val=0.0641  ent=-2.1637
+[Iter 39  Ep 6]  pol=2.1167  val=0.0804  ent=-2.1409
+[Iter 39  Ep 7]  pol=2.2036  val=0.0884  ent=-2.1879
+[Iter 39  Ep 8]  pol=2.2149  val=0.0655  ent=-2.2032
+[Iter 39  Ep 9]  pol=2.1964  val=0.0620  ent=-2.1976
+[Iter 39  Ep 10]  pol=2.2006  val=0.1044  ent=-2.1605
+
+--- Iteration 40: Self-Play ---
+--- Iteration 40: Training (Avg Reward: 5.3509) ---
+[Iter 40  Ep 1]  pol=2.2324  val=0.0560  ent=-2.2140
+[Iter 40  Ep 2]  pol=2.1575  val=0.0698  ent=-2.1937
+[Iter 40  Ep 3]  pol=2.2093  val=0.0487  ent=-2.1843
+[Iter 40  Ep 4]  pol=2.1490  val=0.0696  ent=-2.1693
+[Iter 40  Ep 5]  pol=2.1651  val=0.0611  ent=-2.2022
+[Iter 40  Ep 6]  pol=2.1735  val=0.0610  ent=-2.1764
+[Iter 40  Ep 7]  pol=2.2206  val=0.0608  ent=-2.2010
+[Iter 40  Ep 8]  pol=2.0280  val=0.0716  ent=-2.0769
+[Iter 40  Ep 9]  pol=2.1967  val=0.0634  ent=-2.1738
+[Iter 40  Ep 10]  pol=2.2109  val=0.0708  ent=-2.1781
+
+--- Iteration 41: Self-Play ---
+--- Iteration 41: Training (Avg Reward: 5.3813) ---
+[Iter 41  Ep 1]  pol=2.1819  val=0.0561  ent=-2.2008
+[Iter 41  Ep 2]  pol=2.0949  val=0.1252  ent=-2.1111
+[Iter 41  Ep 3]  pol=2.1686  val=0.0803  ent=-2.1643
+[Iter 41  Ep 4]  pol=2.1628  val=0.0383  ent=-2.1464
+[Iter 41  Ep 5]  pol=2.2222  val=0.0660  ent=-2.1875
+[Iter 41  Ep 6]  pol=2.2134  val=0.0790  ent=-2.1464
+[Iter 41  Ep 7]  pol=2.2082  val=0.0566  ent=-2.2327
+[Iter 41  Ep 8]  pol=2.2065  val=0.0895  ent=-2.1667
+[Iter 41  Ep 9]  pol=2.1599  val=0.0589  ent=-2.1994
+[Iter 41  Ep 10]  pol=2.1084  val=0.0612  ent=-2.1209
+
+--- Iteration 42: Self-Play ---
+--- Iteration 42: Training (Avg Reward: 5.2604) ---
+[Iter 42  Ep 1]  pol=2.2530  val=0.0599  ent=-2.2074
+[Iter 42  Ep 2]  pol=2.1861  val=0.0685  ent=-2.1658
+[Iter 42  Ep 3]  pol=2.1619  val=0.0540  ent=-2.2010
+[Iter 42  Ep 4]  pol=2.2327  val=0.0517  ent=-2.2367
+[Iter 42  Ep 5]  pol=2.2503  val=0.0489  ent=-2.2529
+[Iter 42  Ep 6]  pol=2.2537  val=0.0493  ent=-2.2370
+[Iter 42  Ep 7]  pol=2.1667  val=0.0539  ent=-2.1919
+[Iter 42  Ep 8]  pol=2.1822  val=0.0473  ent=-2.2027
+[Iter 42  Ep 9]  pol=2.1430  val=0.0441  ent=-2.1876
+[Iter 42  Ep 10]  pol=2.1583  val=0.0486  ent=-2.1857
+
+--- Iteration 43: Self-Play ---
+--- Iteration 43: Training (Avg Reward: 5.5323) ---
+[Iter 43  Ep 1]  pol=2.1586  val=0.0428  ent=-2.2035
+[Iter 43  Ep 2]  pol=2.2192  val=0.0462  ent=-2.2261
+[Iter 43  Ep 3]  pol=2.2480  val=0.0369  ent=-2.2403
+[Iter 43  Ep 4]  pol=2.2379  val=0.0460  ent=-2.2399
+[Iter 43  Ep 5]  pol=2.2215  val=0.0315  ent=-2.2338
+[Iter 43  Ep 6]  pol=2.2434  val=0.0436  ent=-2.2281
+[Iter 43  Ep 7]  pol=2.1908  val=0.0357  ent=-2.2370
+[Iter 43  Ep 8]  pol=2.2339  val=0.0403  ent=-2.2014
+[Iter 43  Ep 9]  pol=2.2244  val=0.0297  ent=-2.2062
+[Iter 43  Ep 10]  pol=2.2782  val=0.0390  ent=-2.2324
+
+--- Iteration 44: Self-Play ---
+--- Iteration 44: Training (Avg Reward: 5.8756) ---
+[Iter 44  Ep 1]  pol=2.2255  val=0.0399  ent=-2.2139
+[Iter 44  Ep 2]  pol=2.1890  val=0.0253  ent=-2.2082
+[Iter 44  Ep 3]  pol=2.2555  val=0.0324  ent=-2.2286
+[Iter 44  Ep 4]  pol=2.2829  val=0.0579  ent=-2.2559
+[Iter 44  Ep 5]  pol=2.2050  val=0.0550  ent=-2.2010
+[Iter 44  Ep 6]  pol=2.1879  val=0.0698  ent=-2.1678
+[Iter 44  Ep 7]  pol=2.1629  val=0.0340  ent=-2.1544
+[Iter 44  Ep 8]  pol=2.2279  val=0.0501  ent=-2.2111
+[Iter 44  Ep 9]  pol=2.1249  val=0.0641  ent=-2.1296
+[Iter 44  Ep 10]  pol=2.1109  val=0.0605  ent=-2.1085
+
+--- Iteration 45: Self-Play ---
+--- Iteration 45: Training (Avg Reward: 6.0842) ---
+[Iter 45  Ep 1]  pol=2.2290  val=0.0359  ent=-2.2292
+[Iter 45  Ep 2]  pol=2.2354  val=0.0298  ent=-2.2345
+[Iter 45  Ep 3]  pol=2.2627  val=0.0450  ent=-2.2272
+[Iter 45  Ep 4]  pol=2.1736  val=0.0243  ent=-2.2222
+[Iter 45  Ep 5]  pol=2.1838  val=0.0296  ent=-2.1800
+[Iter 45  Ep 6]  pol=2.1937  val=0.0271  ent=-2.1939
+[Iter 45  Ep 7]  pol=2.2781  val=0.0229  ent=-2.2429
+[Iter 45  Ep 8]  pol=2.2364  val=0.0363  ent=-2.2406
+[Iter 45  Ep 9]  pol=2.2254  val=0.0259  ent=-2.2196
+[Iter 45  Ep 10]  pol=2.2067  val=0.0286  ent=-2.2112
+
+--- Iteration 46: Self-Play ---
+--- Iteration 46: Training (Avg Reward: 6.1147) ---
+[Iter 46  Ep 1]  pol=2.1824  val=0.0481  ent=-2.1688
+[Iter 46  Ep 2]  pol=2.1898  val=0.0346  ent=-2.2134
+[Iter 46  Ep 3]  pol=2.2148  val=0.0232  ent=-2.2214
+[Iter 46  Ep 4]  pol=2.2478  val=0.0323  ent=-2.2200
+[Iter 46  Ep 5]  pol=2.2053  val=0.0222  ent=-2.2124
+[Iter 46  Ep 6]  pol=2.2177  val=0.0515  ent=-2.1671
+[Iter 46  Ep 7]  pol=2.2208  val=0.0285  ent=-2.2195
+[Iter 46  Ep 8]  pol=2.2503  val=0.0217  ent=-2.2055
+[Iter 46  Ep 9]  pol=2.1385  val=0.0392  ent=-2.1796
+[Iter 46  Ep 10]  pol=2.1720  val=0.0256  ent=-2.1870
+
+--- Iteration 47: Self-Play ---
+--- Iteration 47: Training (Avg Reward: 6.3486) ---
+[Iter 47  Ep 1]  pol=2.1317  val=0.0301  ent=-2.1517
+[Iter 47  Ep 2]  pol=2.2268  val=0.0241  ent=-2.2196
+[Iter 47  Ep 3]  pol=2.2925  val=0.0145  ent=-2.2662
+[Iter 47  Ep 4]  pol=2.1891  val=0.0337  ent=-2.1819
+[Iter 47  Ep 5]  pol=2.2251  val=0.0242  ent=-2.2296
+[Iter 47  Ep 6]  pol=2.2838  val=0.0451  ent=-2.2392
+[Iter 47  Ep 7]  pol=2.2657  val=0.0221  ent=-2.2312
+[Iter 47  Ep 8]  pol=2.2028  val=0.0444  ent=-2.2135
+[Iter 47  Ep 9]  pol=2.2221  val=0.0230  ent=-2.2034
+[Iter 47  Ep 10]  pol=2.1849  val=0.0246  ent=-2.2075
+
+--- Iteration 48: Self-Play ---
+--- Iteration 48: Training (Avg Reward: 6.2688) ---
+[Iter 48  Ep 1]  pol=2.2097  val=0.0265  ent=-2.2147
+[Iter 48  Ep 2]  pol=2.2684  val=0.0233  ent=-2.2433
+[Iter 48  Ep 3]  pol=2.2846  val=0.0309  ent=-2.2540
+[Iter 48  Ep 4]  pol=2.1847  val=0.0200  ent=-2.2075
+[Iter 48  Ep 5]  pol=2.2064  val=0.0323  ent=-2.2114
+[Iter 48  Ep 6]  pol=2.2251  val=0.0265  ent=-2.2422
+[Iter 48  Ep 7]  pol=2.2872  val=0.0251  ent=-2.2672
+[Iter 48  Ep 8]  pol=2.2401  val=0.0225  ent=-2.2231
+[Iter 48  Ep 9]  pol=2.1071  val=0.0328  ent=-2.1681
+[Iter 48  Ep 10]  pol=2.2226  val=0.0207  ent=-2.2262
+
+--- Iteration 49: Self-Play ---
+--- Iteration 49: Training (Avg Reward: 6.4919) ---
+[Iter 49  Ep 1]  pol=2.1618  val=0.0149  ent=-2.2239
+[Iter 49  Ep 2]  pol=2.2104  val=0.0206  ent=-2.2285
+[Iter 49  Ep 3]  pol=2.1795  val=0.0168  ent=-2.2027
+[Iter 49  Ep 4]  pol=2.1700  val=0.0269  ent=-2.1789
+[Iter 49  Ep 5]  pol=2.2397  val=0.0183  ent=-2.2357
+[Iter 49  Ep 6]  pol=2.1762  val=0.0246  ent=-2.2012
+[Iter 49  Ep 7]  pol=2.1674  val=0.0236  ent=-2.1911
+[Iter 49  Ep 8]  pol=2.1965  val=0.0199  ent=-2.2042
+[Iter 49  Ep 9]  pol=2.1835  val=0.0188  ent=-2.2051
+[Iter 49  Ep 10]  pol=2.1395  val=0.0181  ent=-2.1531
+
+--- Iteration 50: Self-Play ---
+--- Iteration 50: Training (Avg Reward: 6.7706) ---
+[Iter 50  Ep 1]  pol=2.2093  val=0.0123  ent=-2.2059
+[Iter 50  Ep 2]  pol=2.2473  val=0.0117  ent=-2.2194
+[Iter 50  Ep 3]  pol=2.1458  val=0.0166  ent=-2.1504
+[Iter 50  Ep 4]  pol=2.2825  val=0.0159  ent=-2.2082
+[Iter 50  Ep 5]  pol=2.2581  val=0.0070  ent=-2.2053
+[Iter 50  Ep 6]  pol=2.1117  val=0.0169  ent=-2.1499
+[Iter 50  Ep 7]  pol=2.1343  val=0.0207  ent=-2.1596
+[Iter 50  Ep 8]  pol=2.1940  val=0.0106  ent=-2.1726
+[Iter 50  Ep 9]  pol=2.2514  val=0.0067  ent=-2.2304
+[Iter 50  Ep 10]  pol=2.1045  val=0.0160  ent=-2.1632
+
+--- Iteration 51: Self-Play ---
+--- Iteration 51: Training (Avg Reward: 6.8566) ---
+[Iter 51  Ep 1]  pol=2.0765  val=0.0104  ent=-2.1250
+[Iter 51  Ep 2]  pol=2.0188  val=0.0042  ent=-2.0994
+[Iter 51  Ep 3]  pol=2.1888  val=0.0108  ent=-2.1578
+[Iter 51  Ep 4]  pol=2.2226  val=0.0114  ent=-2.2015
+[Iter 51  Ep 5]  pol=2.1616  val=0.0060  ent=-2.1823
+[Iter 51  Ep 6]  pol=2.1219  val=0.0082  ent=-2.1429
+[Iter 51  Ep 7]  pol=2.1547  val=0.0112  ent=-2.1573
+[Iter 51  Ep 8]  pol=2.0415  val=0.0147  ent=-2.1346
+[Iter 51  Ep 9]  pol=2.1558  val=0.0140  ent=-2.1657
+[Iter 51  Ep 10]  pol=2.1998  val=0.0132  ent=-2.1380
+
+--- Iteration 52: Self-Play ---
+--- Iteration 52: Training (Avg Reward: 6.9815) ---
+[Iter 52  Ep 1]  pol=2.0468  val=0.0026  ent=-2.0786
+[Iter 52  Ep 2]  pol=2.1039  val=0.0051  ent=-2.1264
+[Iter 52  Ep 3]  pol=1.9989  val=0.0019  ent=-2.0832
+[Iter 52  Ep 4]  pol=2.1079  val=0.0015  ent=-2.1095
+[Iter 52  Ep 5]  pol=2.2035  val=0.0015  ent=-2.1475
+[Iter 52  Ep 6]  pol=2.1408  val=0.0011  ent=-2.1326
+[Iter 52  Ep 7]  pol=2.2046  val=0.0010  ent=-2.1595
+[Iter 52  Ep 8]  pol=2.1814  val=0.0063  ent=-2.1250
+[Iter 52  Ep 9]  pol=1.9848  val=0.0011  ent=-2.0735
+[Iter 52  Ep 10]  pol=2.0241  val=0.0111  ent=-2.1104
+
+--- Iteration 53: Self-Play ---
+--- Iteration 53: Training (Avg Reward: 6.8743) ---
+[Iter 53  Ep 1]  pol=1.7845  val=0.0063  ent=-1.9940
+[Iter 53  Ep 2]  pol=2.0031  val=0.0070  ent=-2.0914
+[Iter 53  Ep 3]  pol=2.0453  val=0.0303  ent=-2.1083
+[Iter 53  Ep 4]  pol=2.0635  val=0.0252  ent=-2.0952
+[Iter 53  Ep 5]  pol=1.9034  val=0.0269  ent=-2.0105
+[Iter 53  Ep 6]  pol=1.8533  val=0.0123  ent=-2.0123
+[Iter 53  Ep 7]  pol=2.2551  val=0.0139  ent=-2.1176
+[Iter 53  Ep 8]  pol=2.0931  val=0.0123  ent=-2.0777
+[Iter 53  Ep 9]  pol=1.9756  val=0.0119  ent=-1.9111
+[Iter 53  Ep 10]  pol=1.9082  val=0.0134  ent=-1.9338
+
+--- Iteration 54: Self-Play ---
+--- Iteration 54: Training (Avg Reward: 7.1343) ---
+[Iter 54  Ep 1]  pol=1.9166  val=0.0029  ent=-2.0101
+[Iter 54  Ep 2]  pol=1.9431  val=0.0030  ent=-1.9971
+[Iter 54  Ep 3]  pol=1.9455  val=0.0028  ent=-2.0282
+[Iter 54  Ep 4]  pol=1.9566  val=0.0036  ent=-2.0682
+[Iter 54  Ep 5]  pol=2.0557  val=0.0030  ent=-2.1031
+[Iter 54  Ep 6]  pol=2.0170  val=0.0031  ent=-2.1038
+[Iter 54  Ep 7]  pol=2.0100  val=0.0027  ent=-2.0821
+[Iter 54  Ep 8]  pol=2.0374  val=0.0030  ent=-2.0830
+[Iter 54  Ep 9]  pol=2.0464  val=0.0028  ent=-2.0883
+[Iter 54  Ep 10]  pol=2.0471  val=0.0030  ent=-2.0928
+
+--- Iteration 55: Self-Play ---
+--- Iteration 55: Training (Avg Reward: 7.0216) ---
+[Iter 55  Ep 1]  pol=1.9437  val=0.0098  ent=-2.0896
+[Iter 55  Ep 2]  pol=1.9179  val=0.0121  ent=-2.0250
+[Iter 55  Ep 3]  pol=1.9789  val=0.0060  ent=-2.0248
+[Iter 55  Ep 4]  pol=1.8843  val=0.0038  ent=-2.0289
+[Iter 55  Ep 5]  pol=1.9175  val=0.0025  ent=-2.0079
+[Iter 55  Ep 6]  pol=1.9624  val=0.0084  ent=-2.0250
+[Iter 55  Ep 7]  pol=1.8608  val=0.0057  ent=-1.9161
+[Iter 55  Ep 8]  pol=2.0859  val=0.0149  ent=-1.9578
+[Iter 55  Ep 9]  pol=2.0083  val=0.0074  ent=-1.9252
+[Iter 55  Ep 10]  pol=2.2265  val=0.0018  ent=-2.0729
+
+--- Iteration 56: Self-Play ---
+--- Iteration 56: Training (Avg Reward: 7.1354) ---
+[Iter 56  Ep 1]  pol=1.8598  val=0.0015  ent=-1.9685
+[Iter 56  Ep 2]  pol=1.9044  val=0.0018  ent=-2.0187
+[Iter 56  Ep 3]  pol=1.7697  val=0.0014  ent=-2.0283
+[Iter 56  Ep 4]  pol=1.7609  val=0.0013  ent=-1.9840
+[Iter 56  Ep 5]  pol=1.8718  val=0.0016  ent=-2.0356
+[Iter 56  Ep 6]  pol=2.0068  val=0.0015  ent=-2.0545
+[Iter 56  Ep 7]  pol=1.8899  val=0.0013  ent=-1.9737
+[Iter 56  Ep 8]  pol=1.9161  val=0.0091  ent=-1.9627
+[Iter 56  Ep 9]  pol=1.9786  val=0.0128  ent=-1.9708
+[Iter 56  Ep 10]  pol=1.7488  val=0.0017  ent=-1.8734
+
+--- Iteration 57: Self-Play ---
+--- Iteration 57: Training (Avg Reward: 7.1315) ---
+[Iter 57  Ep 1]  pol=1.5393  val=0.0013  ent=-1.7713
+[Iter 57  Ep 2]  pol=1.7787  val=0.0049  ent=-1.8865
+[Iter 57  Ep 3]  pol=1.8611  val=0.0013  ent=-1.9266
+[Iter 57  Ep 4]  pol=1.8330  val=0.0013  ent=-1.8883
+[Iter 57  Ep 5]  pol=1.6651  val=0.0049  ent=-1.7439
+[Iter 57  Ep 6]  pol=1.7233  val=0.0013  ent=-1.7047
+[Iter 57  Ep 7]  pol=1.8103  val=0.0046  ent=-1.6793
+[Iter 57  Ep 8]  pol=1.6456  val=0.0010  ent=-1.5638
+[Iter 57  Ep 9]  pol=1.8204  val=0.0010  ent=-1.7109
+[Iter 57  Ep 10]  pol=1.7968  val=0.0048  ent=-1.7221
+
+--- Iteration 58: Self-Play ---
+--- Iteration 58: Training (Avg Reward: 7.1186) ---
+[Iter 58  Ep 1]  pol=1.7963  val=0.0009  ent=-1.9181
+[Iter 58  Ep 2]  pol=1.9571  val=0.0009  ent=-1.9776
+[Iter 58  Ep 3]  pol=1.8550  val=0.0009  ent=-1.9474
+[Iter 58  Ep 4]  pol=1.7552  val=0.0011  ent=-1.9017
+[Iter 58  Ep 5]  pol=1.6719  val=0.0009  ent=-1.8022
+[Iter 58  Ep 6]  pol=1.8743  val=0.0010  ent=-1.9019
+[Iter 58  Ep 7]  pol=1.7613  val=0.0010  ent=-1.7739
+[Iter 58  Ep 8]  pol=1.8533  val=0.0011  ent=-1.8004
+[Iter 58  Ep 9]  pol=1.6154  val=0.0010  ent=-1.7316
+[Iter 58  Ep 10]  pol=1.5952  val=0.0008  ent=-1.7297
+
+--- Iteration 59: Self-Play ---
+--- Iteration 59: Training (Avg Reward: 7.1498) ---
+[Iter 59  Ep 1]  pol=1.7423  val=0.0009  ent=-1.7614
+[Iter 59  Ep 2]  pol=1.7112  val=0.0008  ent=-1.8129
+[Iter 59  Ep 3]  pol=1.5195  val=0.0013  ent=-1.6902
+[Iter 59  Ep 4]  pol=1.7975  val=0.0011  ent=-1.8354
+[Iter 59  Ep 5]  pol=1.5821  val=0.0012  ent=-1.6771
+[Iter 59  Ep 6]  pol=1.6276  val=0.0010  ent=-1.6509
+[Iter 59  Ep 7]  pol=1.8253  val=0.0009  ent=-1.7541
+[Iter 59  Ep 8]  pol=1.5577  val=0.0008  ent=-1.5826
+[Iter 59  Ep 9]  pol=1.7547  val=0.0008  ent=-1.7476
+[Iter 59  Ep 10]  pol=1.5989  val=0.0007  ent=-1.6823
+
+--- Iteration 60: Self-Play ---
+--- Iteration 60: Training (Avg Reward: 7.1419) ---
+[Iter 60  Ep 1]  pol=1.6191  val=0.0007  ent=-1.7420
+[Iter 60  Ep 2]  pol=1.6334  val=0.0008  ent=-1.7963
+[Iter 60  Ep 3]  pol=1.7121  val=0.0006  ent=-1.7339
+[Iter 60  Ep 4]  pol=1.7241  val=0.0007  ent=-1.7693
+[Iter 60  Ep 5]  pol=1.6170  val=0.0005  ent=-1.7336
+[Iter 60  Ep 6]  pol=1.6882  val=0.0006  ent=-1.7169
+[Iter 60  Ep 7]  pol=1.6376  val=0.0008  ent=-1.7001
+[Iter 60  Ep 8]  pol=1.7984  val=0.0007  ent=-1.7874
+[Iter 60  Ep 9]  pol=1.6606  val=0.0007  ent=-1.6605
+[Iter 60  Ep 10]  pol=1.7613  val=0.0007  ent=-1.7919
+
+--- Iteration 61: Self-Play ---
+--- Iteration 61: Training (Avg Reward: 7.1660) ---
+[Iter 61  Ep 1]  pol=1.7040  val=0.0008  ent=-1.7746
+[Iter 61  Ep 2]  pol=1.7480  val=0.0007  ent=-1.7976
+[Iter 61  Ep 3]  pol=1.6798  val=0.0006  ent=-1.7002
+[Iter 61  Ep 4]  pol=1.5643  val=0.0008  ent=-1.6814
+[Iter 61  Ep 5]  pol=1.5629  val=0.0010  ent=-1.6027
+[Iter 61  Ep 6]  pol=1.6713  val=0.0006  ent=-1.6520
+[Iter 61  Ep 7]  pol=1.6423  val=0.0007  ent=-1.6312
+[Iter 61  Ep 8]  pol=1.4684  val=0.0007  ent=-1.4571
+[Iter 61  Ep 9]  pol=1.6126  val=0.0005  ent=-1.5037
+[Iter 61  Ep 10]  pol=1.7693  val=0.0007  ent=-1.7135
+
+--- Iteration 62: Self-Play ---
+--- Iteration 62: Training (Avg Reward: 7.1562) ---
+[Iter 62  Ep 1]  pol=1.5730  val=0.0007  ent=-1.6014
+[Iter 62  Ep 2]  pol=1.6641  val=0.0006  ent=-1.7005
+[Iter 62  Ep 3]  pol=1.7949  val=0.0007  ent=-1.7463
+[Iter 62  Ep 4]  pol=1.5226  val=0.0004  ent=-1.6314
+[Iter 62  Ep 5]  pol=1.5950  val=0.0005  ent=-1.6125
+[Iter 62  Ep 6]  pol=1.7514  val=0.0007  ent=-1.7635
+[Iter 62  Ep 7]  pol=1.8083  val=0.0007  ent=-1.7718
+[Iter 62  Ep 8]  pol=1.4544  val=0.0007  ent=-1.5157
+[Iter 62  Ep 9]  pol=1.5303  val=0.0007  ent=-1.5761
+[Iter 62  Ep 10]  pol=1.6247  val=0.0007  ent=-1.6620
+
+--- Iteration 63: Self-Play ---
+--- Iteration 63: Training (Avg Reward: 7.1735) ---
+[Iter 63  Ep 1]  pol=1.7537  val=0.0004  ent=-1.7625
+[Iter 63  Ep 2]  pol=1.3914  val=0.0006  ent=-1.4857
+[Iter 63  Ep 3]  pol=1.6573  val=0.0008  ent=-1.5998
+[Iter 63  Ep 4]  pol=1.4154  val=0.0006  ent=-1.5707
+[Iter 63  Ep 5]  pol=1.6419  val=0.0007  ent=-1.6074
+[Iter 63  Ep 6]  pol=1.6086  val=0.0009  ent=-1.6086
+[Iter 63  Ep 7]  pol=1.5638  val=0.0006  ent=-1.4904
+[Iter 63  Ep 8]  pol=1.7947  val=0.0007  ent=-1.6800
+[Iter 63  Ep 9]  pol=1.5849  val=0.0006  ent=-1.5614
+[Iter 63  Ep 10]  pol=1.4689  val=0.0005  ent=-1.4617
+
+--- Iteration 64: Self-Play ---
+--- Iteration 64: Training (Avg Reward: 7.1797) ---
+[Iter 64  Ep 1]  pol=1.4380  val=0.0006  ent=-1.4790
+[Iter 64  Ep 2]  pol=1.3161  val=0.0007  ent=-1.3541
+[Iter 64  Ep 3]  pol=1.5813  val=0.0007  ent=-1.4534
+[Iter 64  Ep 4]  pol=1.4398  val=0.0007  ent=-1.4022
+[Iter 64  Ep 5]  pol=1.4575  val=0.0007  ent=-1.4252
+[Iter 64  Ep 6]  pol=1.5413  val=0.0016  ent=-1.4952
+[Iter 64  Ep 7]  pol=1.4358  val=0.0008  ent=-1.4526
+[Iter 64  Ep 8]  pol=1.4626  val=0.0008  ent=-1.4652
+[Iter 64  Ep 9]  pol=1.4279  val=0.0015  ent=-1.4411
+[Iter 64  Ep 10]  pol=1.5629  val=0.0009  ent=-1.5564
+
+--- Iteration 65: Self-Play ---
+--- Iteration 65: Training (Avg Reward: 7.1430) ---
+[Iter 65  Ep 1]  pol=1.7491  val=0.0006  ent=-1.7291
+[Iter 65  Ep 2]  pol=1.5850  val=0.0007  ent=-1.5493
+[Iter 65  Ep 3]  pol=1.4180  val=0.0007  ent=-1.4408
+[Iter 65  Ep 4]  pol=1.6382  val=0.0006  ent=-1.6019
+[Iter 65  Ep 5]  pol=1.6992  val=0.0006  ent=-1.7043
+[Iter 65  Ep 6]  pol=1.6543  val=0.0010  ent=-1.6287
+[Iter 65  Ep 7]  pol=1.3225  val=0.0007  ent=-1.2927
+[Iter 65  Ep 8]  pol=1.5223  val=0.0005  ent=-1.4744
+[Iter 65  Ep 9]  pol=1.3866  val=0.0006  ent=-1.3537
+[Iter 65  Ep 10]  pol=1.7193  val=0.0006  ent=-1.6432
+
+--- Iteration 66: Self-Play ---
+--- Iteration 66: Training (Avg Reward: 7.1324) ---
+[Iter 66  Ep 1]  pol=1.4735  val=0.0006  ent=-1.4371
+[Iter 66  Ep 2]  pol=1.5168  val=0.0006  ent=-1.5520
+[Iter 66  Ep 3]  pol=1.4293  val=0.0006  ent=-1.4565
+[Iter 66  Ep 4]  pol=1.3218  val=0.0007  ent=-1.3550
+[Iter 66  Ep 5]  pol=1.6487  val=0.0009  ent=-1.5740
+[Iter 66  Ep 6]  pol=1.4344  val=0.0007  ent=-1.3823
+[Iter 66  Ep 7]  pol=1.6251  val=0.0008  ent=-1.5473
+[Iter 66  Ep 8]  pol=1.3934  val=0.0007  ent=-1.3764
+[Iter 66  Ep 9]  pol=1.8038  val=0.0007  ent=-1.7050
+[Iter 66  Ep 10]  pol=1.5383  val=0.0042  ent=-1.5111
+
+--- Iteration 67: Self-Play ---
+--- Iteration 67: Training (Avg Reward: 7.1630) ---
+[Iter 67  Ep 1]  pol=1.5635  val=0.0008  ent=-1.5592
+[Iter 67  Ep 2]  pol=1.6977  val=0.0008  ent=-1.6845
+[Iter 67  Ep 3]  pol=1.6900  val=0.0008  ent=-1.6515
+[Iter 67  Ep 4]  pol=1.5820  val=0.0005  ent=-1.5559
+[Iter 67  Ep 5]  pol=1.6595  val=0.0009  ent=-1.6614
+[Iter 67  Ep 6]  pol=1.6988  val=0.0007  ent=-1.6515
+[Iter 67  Ep 7]  pol=1.6848  val=0.0007  ent=-1.6697
+[Iter 67  Ep 8]  pol=1.5917  val=0.0008  ent=-1.5485
+[Iter 67  Ep 9]  pol=1.5205  val=0.0007  ent=-1.4686
+[Iter 67  Ep 10]  pol=1.4655  val=0.0010  ent=-1.4024
+
+--- Iteration 68: Self-Play ---
+--- Iteration 68: Training (Avg Reward: 7.1589) ---
+[Iter 68  Ep 1]  pol=1.3671  val=0.0009  ent=-1.3656
+[Iter 68  Ep 2]  pol=1.4471  val=0.0011  ent=-1.4106
+[Iter 68  Ep 3]  pol=1.3567  val=0.0008  ent=-1.3584
+[Iter 68  Ep 4]  pol=1.5162  val=0.0008  ent=-1.4720
+[Iter 68  Ep 5]  pol=1.5717  val=0.0010  ent=-1.5686
+[Iter 68  Ep 6]  pol=1.5652  val=0.0014  ent=-1.5360
+[Iter 68  Ep 7]  pol=1.4037  val=0.0013  ent=-1.3322
+[Iter 68  Ep 8]  pol=1.5866  val=0.0011  ent=-1.5272
+[Iter 68  Ep 9]  pol=1.3393  val=0.0008  ent=-1.3160
+[Iter 68  Ep 10]  pol=1.4733  val=0.0008  ent=-1.4682
+
+--- Iteration 69: Self-Play ---
+--- Iteration 69: Training (Avg Reward: 7.1470) ---
+[Iter 69  Ep 1]  pol=1.7491  val=0.0007  ent=-1.6700
+[Iter 69  Ep 2]  pol=1.4866  val=0.0006  ent=-1.4534
+[Iter 69  Ep 3]  pol=1.7498  val=0.0014  ent=-1.6525
+[Iter 69  Ep 4]  pol=1.5090  val=0.0007  ent=-1.4685
+[Iter 69  Ep 5]  pol=1.5196  val=0.0007  ent=-1.4765
+[Iter 69  Ep 6]  pol=1.5261  val=0.0006  ent=-1.5034
+[Iter 69  Ep 7]  pol=1.6698  val=0.0006  ent=-1.7042
+[Iter 69  Ep 8]  pol=1.4415  val=0.0014  ent=-1.5557
+[Iter 69  Ep 9]  pol=1.3645  val=0.0016  ent=-1.4243
+[Iter 69  Ep 10]  pol=1.4682  val=0.0007  ent=-1.4150
+
+--- Iteration 70: Self-Play ---
+--- Iteration 70: Training (Avg Reward: 7.1697) ---
+[Iter 70  Ep 1]  pol=1.3393  val=0.0006  ent=-1.3140
+[Iter 70  Ep 2]  pol=1.2613  val=0.0010  ent=-1.2389
+[Iter 70  Ep 3]  pol=1.5431  val=0.0005  ent=-1.4825
+[Iter 70  Ep 4]  pol=1.6333  val=0.0006  ent=-1.5992
+[Iter 70  Ep 5]  pol=1.5300  val=0.0009  ent=-1.5694
+[Iter 70  Ep 6]  pol=1.4875  val=0.0008  ent=-1.5372
+[Iter 70  Ep 7]  pol=1.3989  val=0.0008  ent=-1.4120
+[Iter 70  Ep 8]  pol=1.3678  val=0.0009  ent=-1.4042
+[Iter 70  Ep 9]  pol=1.5888  val=0.0008  ent=-1.5641
+[Iter 70  Ep 10]  pol=1.3968  val=0.0009  ent=-1.3934
+
+--- Iteration 71: Self-Play ---
+--- Iteration 71: Training (Avg Reward: 7.1443) ---
+[Iter 71  Ep 1]  pol=1.5040  val=0.0008  ent=-1.4618
+[Iter 71  Ep 2]  pol=1.4127  val=0.0005  ent=-1.3973
+[Iter 71  Ep 3]  pol=1.6150  val=0.0009  ent=-1.5581
+[Iter 71  Ep 4]  pol=1.4968  val=0.0009  ent=-1.4948
+[Iter 71  Ep 5]  pol=1.4023  val=0.0008  ent=-1.3715
+[Iter 71  Ep 6]  pol=1.4872  val=0.0007  ent=-1.4079
+[Iter 71  Ep 7]  pol=1.4313  val=0.0005  ent=-1.4053
+[Iter 71  Ep 8]  pol=1.6061  val=0.0007  ent=-1.5866
+[Iter 71  Ep 9]  pol=1.3801  val=0.0006  ent=-1.4660
+[Iter 71  Ep 10]  pol=1.3791  val=0.0005  ent=-1.4498
+
+--- Iteration 72: Self-Play ---
+--- Iteration 72: Training (Avg Reward: 7.1628) ---
+[Iter 72  Ep 1]  pol=1.5510  val=0.0008  ent=-1.4917
+[Iter 72  Ep 2]  pol=1.6935  val=0.0014  ent=-1.5748
+[Iter 72  Ep 3]  pol=1.5680  val=0.0008  ent=-1.4613
+[Iter 72  Ep 4]  pol=1.3756  val=0.0009  ent=-1.4073
+[Iter 72  Ep 5]  pol=1.4676  val=0.0010  ent=-1.4719
+[Iter 72  Ep 6]  pol=1.4929  val=0.0049  ent=-1.4875
+[Iter 72  Ep 7]  pol=1.4613  val=0.0007  ent=-1.4205
+[Iter 72  Ep 8]  pol=1.5294  val=0.0049  ent=-1.4456
+[Iter 72  Ep 9]  pol=1.5843  val=0.0008  ent=-1.4964
+[Iter 72  Ep 10]  pol=1.5452  val=0.0049  ent=-1.4901
+
+--- Iteration 73: Self-Play ---
+--- Iteration 73: Training (Avg Reward: 7.1693) ---
+[Iter 73  Ep 1]  pol=1.4915  val=0.0007  ent=-1.4836
+[Iter 73  Ep 2]  pol=1.5287  val=0.0008  ent=-1.4812
+[Iter 73  Ep 3]  pol=1.4975  val=0.0006  ent=-1.4606
+[Iter 73  Ep 4]  pol=1.7270  val=0.0007  ent=-1.7068
+[Iter 73  Ep 5]  pol=1.3710  val=0.0009  ent=-1.4170
+[Iter 73  Ep 6]  pol=1.6099  val=0.0007  ent=-1.6011
+[Iter 73  Ep 7]  pol=1.4039  val=0.0006  ent=-1.3780
+[Iter 73  Ep 8]  pol=1.8746  val=0.0007  ent=-1.7828
+[Iter 73  Ep 9]  pol=1.5264  val=0.0006  ent=-1.5097
+[Iter 73  Ep 10]  pol=1.6208  val=0.0006  ent=-1.6114
+
+--- Iteration 74: Self-Play ---
+--- Iteration 74: Training (Avg Reward: 7.1660) ---
+[Iter 74  Ep 1]  pol=1.3010  val=0.0010  ent=-1.2573
+[Iter 74  Ep 2]  pol=1.4507  val=0.0008  ent=-1.4146
+[Iter 74  Ep 3]  pol=1.4377  val=0.0007  ent=-1.3891
+[Iter 74  Ep 4]  pol=1.2502  val=0.0007  ent=-1.3259
+[Iter 74  Ep 5]  pol=1.4692  val=0.0008  ent=-1.4901
+[Iter 74  Ep 6]  pol=1.3948  val=0.0009  ent=-1.4078
+[Iter 74  Ep 7]  pol=1.5767  val=0.0006  ent=-1.4996
+[Iter 74  Ep 8]  pol=1.4132  val=0.0007  ent=-1.3325
+[Iter 74  Ep 9]  pol=1.4993  val=0.0010  ent=-1.4108
+[Iter 74  Ep 10]  pol=1.5571  val=0.0004  ent=-1.4919
+
+--- Iteration 75: Self-Play ---
+--- Iteration 75: Training (Avg Reward: 7.1669) ---
+[Iter 75  Ep 1]  pol=1.4998  val=0.0011  ent=-1.4466
+[Iter 75  Ep 2]  pol=1.3748  val=0.0010  ent=-1.3212
+[Iter 75  Ep 3]  pol=1.4936  val=0.0008  ent=-1.4453
+[Iter 75  Ep 4]  pol=1.5106  val=0.0006  ent=-1.4501
+[Iter 75  Ep 5]  pol=1.4182  val=0.0009  ent=-1.3994
+[Iter 75  Ep 6]  pol=1.7096  val=0.0009  ent=-1.7704
+[Iter 75  Ep 7]  pol=1.5645  val=0.0009  ent=-1.7040
+[Iter 75  Ep 8]  pol=1.5207  val=0.0006  ent=-1.7037
+[Iter 75  Ep 9]  pol=1.6930  val=0.0010  ent=-1.8033
+[Iter 75  Ep 10]  pol=1.5680  val=0.0005  ent=-1.5707
+
+--- Iteration 76: Self-Play ---
+--- Iteration 76: Training (Avg Reward: 7.1395) ---
+[Iter 76  Ep 1]  pol=1.4631  val=0.0007  ent=-1.3878
+[Iter 76  Ep 2]  pol=1.4772  val=0.0007  ent=-1.3592
+[Iter 76  Ep 3]  pol=1.5367  val=0.0006  ent=-1.4250
+[Iter 76  Ep 4]  pol=1.5812  val=0.0008  ent=-1.5221
+[Iter 76  Ep 5]  pol=1.5115  val=0.0008  ent=-1.5381
+[Iter 76  Ep 6]  pol=1.5370  val=0.0008  ent=-1.5590
+[Iter 76  Ep 7]  pol=1.2005  val=0.0006  ent=-1.2851
+[Iter 76  Ep 8]  pol=1.5586  val=0.0011  ent=-1.5702
+[Iter 76  Ep 9]  pol=1.2676  val=0.0008  ent=-1.3314
+[Iter 76  Ep 10]  pol=1.3723  val=0.0009  ent=-1.3959
+
+--- Iteration 77: Self-Play ---
+--- Iteration 77: Training (Avg Reward: 7.1223) ---
+[Iter 77  Ep 1]  pol=1.4717  val=0.0019  ent=-1.4817
+[Iter 77  Ep 2]  pol=1.5132  val=0.0019  ent=-1.4800
+[Iter 77  Ep 3]  pol=1.6406  val=0.0008  ent=-1.6132
+[Iter 77  Ep 4]  pol=1.5754  val=0.0010  ent=-1.5359
+[Iter 77  Ep 5]  pol=1.5040  val=0.0007  ent=-1.4671
+[Iter 77  Ep 6]  pol=1.3927  val=0.0010  ent=-1.3706
+[Iter 77  Ep 7]  pol=1.4034  val=0.0034  ent=-1.3984
+[Iter 77  Ep 8]  pol=1.2811  val=0.0072  ent=-1.3202
+[Iter 77  Ep 9]  pol=1.6375  val=0.0006  ent=-1.6165
+[Iter 77  Ep 10]  pol=1.7292  val=0.0084  ent=-1.6455
+
+--- Iteration 78: Self-Play ---
+--- Iteration 78: Training (Avg Reward: 7.0814) ---
+[Iter 78  Ep 1]  pol=1.4842  val=0.0073  ent=-1.4168
+[Iter 78  Ep 2]  pol=1.6519  val=0.0162  ent=-1.6596
+[Iter 78  Ep 3]  pol=1.5577  val=0.0024  ent=-1.5895
+[Iter 78  Ep 4]  pol=1.5414  val=0.0078  ent=-1.5151
+[Iter 78  Ep 5]  pol=1.6567  val=0.0008  ent=-1.6077
+[Iter 78  Ep 6]  pol=1.6873  val=0.0074  ent=-1.6092
+[Iter 78  Ep 7]  pol=1.4280  val=0.0012  ent=-1.4471
+[Iter 78  Ep 8]  pol=1.6593  val=0.0020  ent=-1.7015
+[Iter 78  Ep 9]  pol=1.4939  val=0.0039  ent=-1.5254
+[Iter 78  Ep 10]  pol=1.4202  val=0.0090  ent=-1.3939
+
+--- Iteration 79: Self-Play ---
+--- Iteration 79: Training (Avg Reward: 7.1148) ---
+[Iter 79  Ep 1]  pol=1.6981  val=0.0009  ent=-1.6588
+[Iter 79  Ep 2]  pol=1.6610  val=0.0009  ent=-1.6098
+[Iter 79  Ep 3]  pol=1.7140  val=0.0014  ent=-1.6578
+[Iter 79  Ep 4]  pol=1.5366  val=0.0014  ent=-1.5050
+[Iter 79  Ep 5]  pol=1.4574  val=0.0042  ent=-1.4341
+[Iter 79  Ep 6]  pol=1.6052  val=0.0010  ent=-1.5934
+[Iter 79  Ep 7]  pol=1.5492  val=0.0025  ent=-1.5002
+[Iter 79  Ep 8]  pol=1.3899  val=0.0027  ent=-1.2689
+[Iter 79  Ep 9]  pol=1.6166  val=0.0012  ent=-1.6144
+[Iter 79  Ep 10]  pol=1.6009  val=0.0007  ent=-1.6040
+
+--- Iteration 80: Self-Play ---
+--- Iteration 80: Training (Avg Reward: 7.1033) ---
+[Iter 80  Ep 1]  pol=1.6645  val=0.0139  ent=-1.6275
+[Iter 80  Ep 2]  pol=1.6707  val=0.0010  ent=-1.6394
+[Iter 80  Ep 3]  pol=1.6301  val=0.0188  ent=-1.6718
+[Iter 80  Ep 4]  pol=1.4060  val=0.0092  ent=-1.3402
+[Iter 80  Ep 5]  pol=1.6667  val=0.0071  ent=-1.6039
+[Iter 80  Ep 6]  pol=1.4103  val=0.0115  ent=-1.4160
+[Iter 80  Ep 7]  pol=1.6701  val=0.0031  ent=-1.6810
+[Iter 80  Ep 8]  pol=1.6516  val=0.0077  ent=-1.6344
+[Iter 80  Ep 9]  pol=1.6049  val=0.0021  ent=-1.5881
+[Iter 80  Ep 10]  pol=1.5477  val=0.0064  ent=-1.5413
+
+--- Iteration 81: Self-Play ---
+--- Iteration 81: Training (Avg Reward: 7.0462) ---
+[Iter 81  Ep 1]  pol=1.7636  val=0.0143  ent=-1.7042
+[Iter 81  Ep 2]  pol=1.6772  val=0.0145  ent=-1.6485
+[Iter 81  Ep 3]  pol=1.4386  val=0.0079  ent=-1.3548
+[Iter 81  Ep 4]  pol=1.5658  val=0.0207  ent=-1.5375
+[Iter 81  Ep 5]  pol=1.5504  val=0.0080  ent=-1.5164
+[Iter 81  Ep 6]  pol=1.5712  val=0.0202  ent=-1.6490
+[Iter 81  Ep 7]  pol=1.5278  val=0.0082  ent=-1.6081
+[Iter 81  Ep 8]  pol=1.6633  val=0.0205  ent=-1.7301
+[Iter 81  Ep 9]  pol=1.5966  val=0.0088  ent=-1.5301
+[Iter 81  Ep 10]  pol=1.6490  val=0.0082  ent=-1.5768
+
+--- Iteration 82: Self-Play ---
+--- Iteration 82: Training (Avg Reward: 7.0339) ---
+[Iter 82  Ep 1]  pol=1.7483  val=0.0188  ent=-1.7271
+[Iter 82  Ep 2]  pol=1.6070  val=0.0148  ent=-1.6233
+[Iter 82  Ep 3]  pol=1.6708  val=0.0106  ent=-1.6939
+[Iter 82  Ep 4]  pol=1.6989  val=0.0125  ent=-1.5997
+[Iter 82  Ep 5]  pol=1.8248  val=0.0170  ent=-1.7567
+[Iter 82  Ep 6]  pol=1.6289  val=0.0032  ent=-1.5919
+[Iter 82  Ep 7]  pol=1.6766  val=0.0089  ent=-1.6906
+[Iter 82  Ep 8]  pol=1.6636  val=0.0148  ent=-1.7183
+[Iter 82  Ep 9]  pol=1.6682  val=0.0088  ent=-1.6818
+[Iter 82  Ep 10]  pol=1.3948  val=0.0023  ent=-1.4447
+
+--- Iteration 83: Self-Play ---
+--- Iteration 83: Training (Avg Reward: 6.9692) ---
+[Iter 83  Ep 1]  pol=1.4309  val=0.0019  ent=-1.4496
+[Iter 83  Ep 2]  pol=1.4071  val=0.0073  ent=-1.3620
+[Iter 83  Ep 3]  pol=1.6738  val=0.0193  ent=-1.5932
+[Iter 83  Ep 4]  pol=1.7144  val=0.0060  ent=-1.6669
+[Iter 83  Ep 5]  pol=1.6998  val=0.0091  ent=-1.6457
+[Iter 83  Ep 6]  pol=1.6356  val=0.0127  ent=-1.5969
+[Iter 83  Ep 7]  pol=1.7614  val=0.0076  ent=-1.7468
+[Iter 83  Ep 8]  pol=1.6916  val=0.0059  ent=-1.7390
+[Iter 83  Ep 9]  pol=1.6738  val=0.0028  ent=-1.7215
+[Iter 83  Ep 10]  pol=1.7139  val=0.0137  ent=-1.6441
+
+--- Iteration 84: Self-Play ---
+--- Iteration 84: Training (Avg Reward: 6.9677) ---
+[Iter 84  Ep 1]  pol=1.4242  val=0.0091  ent=-1.3419
+[Iter 84  Ep 2]  pol=1.5971  val=0.0036  ent=-1.6020
+[Iter 84  Ep 3]  pol=1.3696  val=0.0163  ent=-1.3663
+[Iter 84  Ep 4]  pol=1.4534  val=0.0055  ent=-1.4222
+[Iter 84  Ep 5]  pol=1.4431  val=0.0023  ent=-1.4328
+[Iter 84  Ep 6]  pol=1.5446  val=0.0097  ent=-1.5461
+[Iter 84  Ep 7]  pol=1.5137  val=0.0042  ent=-1.5210
+[Iter 84  Ep 8]  pol=1.5740  val=0.0044  ent=-1.5744
+[Iter 84  Ep 9]  pol=1.4383  val=0.0095  ent=-1.4467
+[Iter 84  Ep 10]  pol=1.7674  val=0.0271  ent=-1.6914
+
+--- Iteration 85: Self-Play ---
+--- Iteration 85: Training (Avg Reward: 7.0280) ---
+[Iter 85  Ep 1]  pol=1.5866  val=0.0068  ent=-1.5908
+[Iter 85  Ep 2]  pol=1.3951  val=0.0338  ent=-1.3652
+[Iter 85  Ep 3]  pol=1.4548  val=0.0098  ent=-1.4296
+[Iter 85  Ep 4]  pol=1.5929  val=0.0144  ent=-1.5581
+[Iter 85  Ep 5]  pol=1.6182  val=0.0170  ent=-1.5826
+[Iter 85  Ep 6]  pol=1.5958  val=0.0210  ent=-1.6260
+[Iter 85  Ep 7]  pol=1.7498  val=0.0115  ent=-1.7968
+[Iter 85  Ep 8]  pol=1.7017  val=0.0210  ent=-1.7133
+[Iter 85  Ep 9]  pol=1.7925  val=0.0141  ent=-1.6907
+[Iter 85  Ep 10]  pol=1.5251  val=0.0223  ent=-1.4135
+
+--- Iteration 86: Self-Play ---
+--- Iteration 86: Training (Avg Reward: 6.9694) ---
+[Iter 86  Ep 1]  pol=1.8048  val=0.0027  ent=-1.7640
+[Iter 86  Ep 2]  pol=1.4554  val=0.0173  ent=-1.5290
+[Iter 86  Ep 3]  pol=1.5592  val=0.0025  ent=-1.6124
+[Iter 86  Ep 4]  pol=1.4237  val=0.0063  ent=-1.4516
+[Iter 86  Ep 5]  pol=1.4843  val=0.0018  ent=-1.4597
+[Iter 86  Ep 6]  pol=1.5634  val=0.0025  ent=-1.4457
+[Iter 86  Ep 7]  pol=1.4232  val=0.0077  ent=-1.3296
+[Iter 86  Ep 8]  pol=1.5942  val=0.0021  ent=-1.5203
+[Iter 86  Ep 9]  pol=1.6733  val=0.0045  ent=-1.6542
+[Iter 86  Ep 10]  pol=1.3692  val=0.0029  ent=-1.3830
+
+--- Iteration 87: Self-Play ---
+--- Iteration 87: Training (Avg Reward: 7.0332) ---
+[Iter 87  Ep 1]  pol=1.5943  val=0.0237  ent=-1.5358
+[Iter 87  Ep 2]  pol=1.6247  val=0.0098  ent=-1.5890
+[Iter 87  Ep 3]  pol=1.5614  val=0.0019  ent=-1.5659
+[Iter 87  Ep 4]  pol=1.6175  val=0.0020  ent=-1.6300
+[Iter 87  Ep 5]  pol=1.4736  val=0.0091  ent=-1.4919
+[Iter 87  Ep 6]  pol=1.7657  val=0.0158  ent=-1.7648
+[Iter 87  Ep 7]  pol=1.3927  val=0.0056  ent=-1.3817
+[Iter 87  Ep 8]  pol=1.6815  val=0.0104  ent=-1.6572
+[Iter 87  Ep 9]  pol=1.8293  val=0.0121  ent=-1.7664
+[Iter 87  Ep 10]  pol=1.5727  val=0.0081  ent=-1.5180
+
+--- Iteration 88: Self-Play ---
+--- Iteration 88: Training (Avg Reward: 6.8325) ---
+[Iter 88  Ep 1]  pol=1.4546  val=0.0531  ent=-1.4118
+[Iter 88  Ep 2]  pol=1.4775  val=0.0131  ent=-1.5776
+[Iter 88  Ep 3]  pol=1.6777  val=0.0304  ent=-1.7151
+[Iter 88  Ep 4]  pol=1.7746  val=0.0087  ent=-1.7225
+[Iter 88  Ep 5]  pol=1.6528  val=0.0314  ent=-1.6306
+[Iter 88  Ep 6]  pol=1.5078  val=0.0337  ent=-1.4846
+[Iter 88  Ep 7]  pol=1.7699  val=0.0289  ent=-1.7512
+[Iter 88  Ep 8]  pol=1.6738  val=0.0328  ent=-1.6754
+[Iter 88  Ep 9]  pol=1.5450  val=0.0280  ent=-1.5401
+[Iter 88  Ep 10]  pol=1.7640  val=0.0233  ent=-1.7303
+
+--- Iteration 89: Self-Play ---
+--- Iteration 89: Training (Avg Reward: 6.9659) ---
+[Iter 89  Ep 1]  pol=1.6674  val=0.0118  ent=-1.6359
+[Iter 89  Ep 2]  pol=1.7229  val=0.0026  ent=-1.7372
+[Iter 89  Ep 3]  pol=1.6882  val=0.0173  ent=-1.6788
+[Iter 89  Ep 4]  pol=1.5267  val=0.0228  ent=-1.5329
+[Iter 89  Ep 5]  pol=1.6674  val=0.0083  ent=-1.6106
+[Iter 89  Ep 6]  pol=1.5270  val=0.0216  ent=-1.4976
+[Iter 89  Ep 7]  pol=1.8275  val=0.0331  ent=-1.8032
+[Iter 89  Ep 8]  pol=1.4844  val=0.0162  ent=-1.5522
+[Iter 89  Ep 9]  pol=1.3718  val=0.0203  ent=-1.4055
+[Iter 89  Ep 10]  pol=1.6404  val=0.0127  ent=-1.6348
+
+--- Iteration 90: Self-Play ---
+--- Iteration 90: Training (Avg Reward: 7.0037) ---
+[Iter 90  Ep 1]  pol=1.5328  val=0.0199  ent=-1.4866
+[Iter 90  Ep 2]  pol=1.4608  val=0.0091  ent=-1.3903
+[Iter 90  Ep 3]  pol=1.7311  val=0.0103  ent=-1.7645
+[Iter 90  Ep 4]  pol=1.6664  val=0.0189  ent=-1.6392
+[Iter 90  Ep 5]  pol=1.6253  val=0.0174  ent=-1.6104
+[Iter 90  Ep 6]  pol=1.5884  val=0.0035  ent=-1.6122
+[Iter 90  Ep 7]  pol=1.7804  val=0.0090  ent=-1.8051
+[Iter 90  Ep 8]  pol=1.5527  val=0.0107  ent=-1.5473
+[Iter 90  Ep 9]  pol=1.7240  val=0.0154  ent=-1.6696
+[Iter 90  Ep 10]  pol=1.4161  val=0.0060  ent=-1.4139
+
+--- Iteration 91: Self-Play ---
+--- Iteration 91: Training (Avg Reward: 6.9770) ---
+[Iter 91  Ep 1]  pol=1.6779  val=0.0077  ent=-1.6486
+[Iter 91  Ep 2]  pol=1.5814  val=0.0088  ent=-1.5442
+[Iter 91  Ep 3]  pol=1.4703  val=0.0058  ent=-1.4952
+[Iter 91  Ep 4]  pol=1.5651  val=0.0166  ent=-1.5270
+[Iter 91  Ep 5]  pol=1.6001  val=0.0104  ent=-1.5942
+[Iter 91  Ep 6]  pol=1.6120  val=0.0037  ent=-1.6653
+[Iter 91  Ep 7]  pol=1.3592  val=0.0241  ent=-1.4121
+[Iter 91  Ep 8]  pol=1.4575  val=0.0030  ent=-1.5068
+[Iter 91  Ep 9]  pol=1.6508  val=0.0246  ent=-1.5977
+[Iter 91  Ep 10]  pol=1.6408  val=0.0053  ent=-1.5241
+
+--- Iteration 92: Self-Play ---
+--- Iteration 92: Training (Avg Reward: 6.9737) ---
+[Iter 92  Ep 1]  pol=1.7190  val=0.0341  ent=-1.6958
+[Iter 92  Ep 2]  pol=1.4572  val=0.0153  ent=-1.4630
+[Iter 92  Ep 3]  pol=1.5316  val=0.0112  ent=-1.5800
+[Iter 92  Ep 4]  pol=1.4909  val=0.0209  ent=-1.4884
+[Iter 92  Ep 5]  pol=1.6003  val=0.0181  ent=-1.5267
+[Iter 92  Ep 6]  pol=1.4110  val=0.0251  ent=-1.4173
+[Iter 92  Ep 7]  pol=1.5504  val=0.0280  ent=-1.5216
+[Iter 92  Ep 8]  pol=1.4669  val=0.0035  ent=-1.4956
+[Iter 92  Ep 9]  pol=1.6191  val=0.0420  ent=-1.6739
+[Iter 92  Ep 10]  pol=1.7058  val=0.0353  ent=-1.7090
+
+--- Iteration 93: Self-Play ---
+--- Iteration 93: Training (Avg Reward: 6.8967) ---
+[Iter 93  Ep 1]  pol=1.4584  val=0.0071  ent=-1.4519
+[Iter 93  Ep 2]  pol=1.5890  val=0.0141  ent=-1.5652
+[Iter 93  Ep 3]  pol=1.6319  val=0.0192  ent=-1.6254
+[Iter 93  Ep 4]  pol=1.4152  val=0.0352  ent=-1.4003
+[Iter 93  Ep 5]  pol=1.5853  val=0.0072  ent=-1.5607
+[Iter 93  Ep 6]  pol=1.7304  val=0.0296  ent=-1.6924
+[Iter 93  Ep 7]  pol=1.6359  val=0.0038  ent=-1.6509
+[Iter 93  Ep 8]  pol=1.4736  val=0.0122  ent=-1.4684
+[Iter 93  Ep 9]  pol=1.6913  val=0.0333  ent=-1.6712
+[Iter 93  Ep 10]  pol=1.8054  val=0.0053  ent=-1.7588
+
+--- Iteration 94: Self-Play ---
+--- Iteration 94: Training (Avg Reward: 6.8993) ---
+[Iter 94  Ep 1]  pol=1.7190  val=0.0138  ent=-1.7001
+[Iter 94  Ep 2]  pol=1.6791  val=0.0071  ent=-1.7449
+[Iter 94  Ep 3]  pol=1.5205  val=0.0027  ent=-1.5762
+[Iter 94  Ep 4]  pol=1.8392  val=0.0124  ent=-1.7816
+[Iter 94  Ep 5]  pol=1.6770  val=0.0104  ent=-1.6203
+[Iter 94  Ep 6]  pol=1.8230  val=0.0075  ent=-1.8226
+[Iter 94  Ep 7]  pol=1.8153  val=0.0092  ent=-1.8134
+[Iter 94  Ep 8]  pol=1.5774  val=0.0057  ent=-1.5983
+[Iter 94  Ep 9]  pol=1.6557  val=0.0158  ent=-1.6671
+[Iter 94  Ep 10]  pol=1.8339  val=0.0051  ent=-1.8041
+
+--- Iteration 95: Self-Play ---
+--- Iteration 95: Training (Avg Reward: 6.8240) ---
+[Iter 95  Ep 1]  pol=1.9807  val=0.0241  ent=-1.9301
+[Iter 95  Ep 2]  pol=1.6846  val=0.0392  ent=-1.6792
+[Iter 95  Ep 3]  pol=1.7056  val=0.0263  ent=-1.6733
+[Iter 95  Ep 4]  pol=1.5831  val=0.0164  ent=-1.5816
+[Iter 95  Ep 5]  pol=1.6585  val=0.0460  ent=-1.6536
+[Iter 95  Ep 6]  pol=1.6146  val=0.0616  ent=-1.5679
+[Iter 95  Ep 7]  pol=1.8145  val=0.0449  ent=-1.8086
+[Iter 95  Ep 8]  pol=1.7008  val=0.0219  ent=-1.7596
+[Iter 95  Ep 9]  pol=1.8059  val=0.0172  ent=-1.8486
+[Iter 95  Ep 10]  pol=1.7060  val=0.0343  ent=-1.6866
+
+--- Iteration 96: Self-Play ---
+--- Iteration 96: Training (Avg Reward: 7.0495) ---
+[Iter 96  Ep 1]  pol=1.4772  val=0.0083  ent=-1.4861
+[Iter 96  Ep 2]  pol=1.6409  val=0.0066  ent=-1.6143
+[Iter 96  Ep 3]  pol=1.7919  val=0.0059  ent=-1.8427
+[Iter 96  Ep 4]  pol=1.6128  val=0.0077  ent=-1.6223
+[Iter 96  Ep 5]  pol=1.8310  val=0.0099  ent=-1.7877
+[Iter 96  Ep 6]  pol=1.5652  val=0.0052  ent=-1.5330
+[Iter 96  Ep 7]  pol=1.8050  val=0.0065  ent=-1.7678
+[Iter 96  Ep 8]  pol=1.5738  val=0.0071  ent=-1.5925
+[Iter 96  Ep 9]  pol=1.8489  val=0.0087  ent=-1.8448
+[Iter 96  Ep 10]  pol=1.6860  val=0.0071  ent=-1.7017
+
+--- Iteration 97: Self-Play ---
+--- Iteration 97: Training (Avg Reward: 6.9890) ---
+[Iter 97  Ep 1]  pol=1.8046  val=0.0070  ent=-1.7772
+[Iter 97  Ep 2]  pol=1.4631  val=0.0129  ent=-1.4387
+[Iter 97  Ep 3]  pol=1.5533  val=0.0064  ent=-1.5192
+[Iter 97  Ep 4]  pol=1.7444  val=0.0114  ent=-1.7237
+[Iter 97  Ep 5]  pol=1.4830  val=0.0048  ent=-1.4516
+[Iter 97  Ep 6]  pol=1.6014  val=0.0105  ent=-1.6164
+[Iter 97  Ep 7]  pol=1.8397  val=0.0095  ent=-1.8297
+[Iter 97  Ep 8]  pol=1.6126  val=0.0187  ent=-1.6419
+[Iter 97  Ep 9]  pol=1.7290  val=0.0048  ent=-1.6650
+[Iter 97  Ep 10]  pol=1.7566  val=0.0110  ent=-1.6867
+
+--- Iteration 98: Self-Play ---
+--- Iteration 98: Training (Avg Reward: 6.9865) ---
+[Iter 98  Ep 1]  pol=1.5291  val=0.0183  ent=-1.5041
+[Iter 98  Ep 2]  pol=1.4479  val=0.0179  ent=-1.4949
+[Iter 98  Ep 3]  pol=1.9248  val=0.0443  ent=-1.9161
+[Iter 98  Ep 4]  pol=1.5477  val=0.0042  ent=-1.5697
+[Iter 98  Ep 5]  pol=1.5397  val=0.0072  ent=-1.4549
+[Iter 98  Ep 6]  pol=1.4131  val=0.0307  ent=-1.3375
+[Iter 98  Ep 7]  pol=1.6233  val=0.0113  ent=-1.5307
+[Iter 98  Ep 8]  pol=1.8438  val=0.0168  ent=-1.7860
+[Iter 98  Ep 9]  pol=1.5915  val=0.0403  ent=-1.5841
+[Iter 98  Ep 10]  pol=1.7158  val=0.0402  ent=-1.6992
+
+--- Iteration 99: Self-Play ---
+--- Iteration 99: Training (Avg Reward: 6.9224) ---
+[Iter 99  Ep 1]  pol=1.5474  val=0.0368  ent=-1.5714
+[Iter 99  Ep 2]  pol=1.7586  val=0.0186  ent=-1.7555
+[Iter 99  Ep 3]  pol=1.7365  val=0.0135  ent=-1.7451
+[Iter 99  Ep 4]  pol=1.6328  val=0.0454  ent=-1.6179
+[Iter 99  Ep 5]  pol=1.5888  val=0.0243  ent=-1.5823
+[Iter 99  Ep 6]  pol=1.5548  val=0.0101  ent=-1.5575
+[Iter 99  Ep 7]  pol=1.5777  val=0.0028  ent=-1.5626
+[Iter 99  Ep 8]  pol=1.5933  val=0.0071  ent=-1.5396
+[Iter 99  Ep 9]  pol=1.5324  val=0.0134  ent=-1.5420
+[Iter 99  Ep 10]  pol=1.6050  val=0.0174  ent=-1.5991
+
+--- Iteration 100: Self-Play ---
+--- Iteration 100: Training (Avg Reward: 6.8340) ---
+[Iter 100  Ep 1]  pol=1.7265  val=0.0325  ent=-1.7175
+[Iter 100  Ep 2]  pol=1.5661  val=0.0154  ent=-1.5217
+[Iter 100  Ep 3]  pol=1.5911  val=0.0184  ent=-1.6295
+[Iter 100  Ep 4]  pol=1.7303  val=0.0133  ent=-1.7209
+[Iter 100  Ep 5]  pol=1.7584  val=0.0326  ent=-1.7473
+[Iter 100  Ep 6]  pol=1.4872  val=0.0073  ent=-1.5121
+[Iter 100  Ep 7]  pol=1.5706  val=0.0190  ent=-1.5742
+[Iter 100  Ep 8]  pol=1.5382  val=0.0244  ent=-1.5128
+[Iter 100  Ep 9]  pol=1.7627  val=0.0313  ent=-1.7362
+[Iter 100  Ep 10]  pol=1.2962  val=0.0441  ent=-1.2602
+
+--- Iteration 101: Self-Play ---
+--- Iteration 101: Training (Avg Reward: 6.8222) ---
+[Iter 101  Ep 1]  pol=1.6958  val=0.0180  ent=-1.7263
+[Iter 101  Ep 2]  pol=1.5871  val=0.0283  ent=-1.5990
+[Iter 101  Ep 3]  pol=1.7067  val=0.0187  ent=-1.7186
+[Iter 101  Ep 4]  pol=1.6346  val=0.0266  ent=-1.5909
+[Iter 101  Ep 5]  pol=1.7662  val=0.0204  ent=-1.7186
+[Iter 101  Ep 6]  pol=1.7270  val=0.0274  ent=-1.7195
+[Iter 101  Ep 7]  pol=1.8003  val=0.0080  ent=-1.8013
+[Iter 101  Ep 8]  pol=1.8323  val=0.0275  ent=-1.8527
+[Iter 101  Ep 9]  pol=1.4565  val=0.0114  ent=-1.4245
+[Iter 101  Ep 10]  pol=1.8673  val=0.0396  ent=-1.8035
+
+--- Iteration 102: Self-Play ---
+--- Iteration 102: Training (Avg Reward: 6.8444) ---
+[Iter 102  Ep 1]  pol=1.5244  val=0.0239  ent=-1.5477
+[Iter 102  Ep 2]  pol=1.3760  val=0.0522  ent=-1.4390
+[Iter 102  Ep 3]  pol=1.7836  val=0.0140  ent=-1.8079
+[Iter 102  Ep 4]  pol=1.5792  val=0.0189  ent=-1.5627
+[Iter 102  Ep 5]  pol=1.9434  val=0.0389  ent=-1.9063
+[Iter 102  Ep 6]  pol=1.8344  val=0.0176  ent=-1.8519
+[Iter 102  Ep 7]  pol=1.7156  val=0.0190  ent=-1.7268
+[Iter 102  Ep 8]  pol=1.7366  val=0.0312  ent=-1.7236
+[Iter 102  Ep 9]  pol=1.7881  val=0.0196  ent=-1.7800
+[Iter 102  Ep 10]  pol=1.5466  val=0.0097  ent=-1.5702
+
+--- Iteration 103: Self-Play ---
+--- Iteration 103: Training (Avg Reward: 6.7895) ---
+[Iter 103  Ep 1]  pol=1.6658  val=0.0186  ent=-1.6677
+[Iter 103  Ep 2]  pol=2.0189  val=0.0192  ent=-1.9833
+[Iter 103  Ep 3]  pol=1.7520  val=0.0472  ent=-1.7207
+[Iter 103  Ep 4]  pol=1.8530  val=0.0459  ent=-1.8071
+[Iter 103  Ep 5]  pol=1.7674  val=0.0554  ent=-1.7470
+[Iter 103  Ep 6]  pol=1.5213  val=0.0403  ent=-1.5108
+[Iter 103  Ep 7]  pol=1.7186  val=0.0232  ent=-1.6667
+[Iter 103  Ep 8]  pol=1.5598  val=0.0460  ent=-1.5856
+[Iter 103  Ep 9]  pol=1.7678  val=0.0749  ent=-1.7485
+[Iter 103  Ep 10]  pol=1.6263  val=0.0316  ent=-1.6351
+
+--- Iteration 104: Self-Play ---
+--- Iteration 104: Training (Avg Reward: 6.7972) ---
+[Iter 104  Ep 1]  pol=1.5350  val=0.0203  ent=-1.5845
+[Iter 104  Ep 2]  pol=1.8170  val=0.0088  ent=-1.7880
+[Iter 104  Ep 3]  pol=1.7516  val=0.0125  ent=-1.7375
+[Iter 104  Ep 4]  pol=1.6068  val=0.0192  ent=-1.6573
+[Iter 104  Ep 5]  pol=1.9207  val=0.0081  ent=-1.8744
+[Iter 104  Ep 6]  pol=1.8354  val=0.0145  ent=-1.8264
+[Iter 104  Ep 7]  pol=1.7783  val=0.0223  ent=-1.8107
+[Iter 104  Ep 8]  pol=1.8029  val=0.0513  ent=-1.8116
+[Iter 104  Ep 9]  pol=1.2792  val=0.0149  ent=-1.3054
+[Iter 104  Ep 10]  pol=1.6518  val=0.0398  ent=-1.6963
+
+--- Iteration 105: Self-Play ---
+--- Iteration 105: Training (Avg Reward: 6.7160) ---
+[Iter 105  Ep 1]  pol=1.9512  val=0.0521  ent=-1.8887
+[Iter 105  Ep 2]  pol=1.7482  val=0.0830  ent=-1.7150
+[Iter 105  Ep 3]  pol=1.6108  val=0.0444  ent=-1.6158
+[Iter 105  Ep 4]  pol=1.5803  val=0.0523  ent=-1.5736
+[Iter 105  Ep 5]  pol=1.8090  val=0.0530  ent=-1.7924
+[Iter 105  Ep 6]  pol=1.7291  val=0.0335  ent=-1.6645
+[Iter 105  Ep 7]  pol=1.6306  val=0.0304  ent=-1.5949
+[Iter 105  Ep 8]  pol=1.4916  val=0.0406  ent=-1.5000
+[Iter 105  Ep 9]  pol=1.7418  val=0.0385  ent=-1.7276
+[Iter 105  Ep 10]  pol=1.6911  val=0.0463  ent=-1.7410
+
+--- Iteration 106: Self-Play ---
+--- Iteration 106: Training (Avg Reward: 6.7141) ---
+[Iter 106  Ep 1]  pol=1.7578  val=0.0377  ent=-1.7743
+[Iter 106  Ep 2]  pol=1.8737  val=0.0384  ent=-1.8143
+[Iter 106  Ep 3]  pol=1.5942  val=0.0677  ent=-1.5146
+[Iter 106  Ep 4]  pol=1.6216  val=0.0357  ent=-1.6282
+[Iter 106  Ep 5]  pol=1.7235  val=0.0736  ent=-1.7701
+[Iter 106  Ep 6]  pol=1.7781  val=0.0558  ent=-1.8174
+[Iter 106  Ep 7]  pol=1.7822  val=0.0311  ent=-1.7600
+[Iter 106  Ep 8]  pol=1.4493  val=0.0563  ent=-1.4344
+[Iter 106  Ep 9]  pol=1.4418  val=0.0598  ent=-1.3810
+[Iter 106  Ep 10]  pol=1.6970  val=0.0276  ent=-1.6845
+
+--- Iteration 107: Self-Play ---
+--- Iteration 107: Training (Avg Reward: 6.7480) ---
+[Iter 107  Ep 1]  pol=1.2131  val=0.0352  ent=-1.2463
+[Iter 107  Ep 2]  pol=1.6285  val=0.0357  ent=-1.6483
+[Iter 107  Ep 3]  pol=1.7571  val=0.0216  ent=-1.7678
+[Iter 107  Ep 4]  pol=1.6344  val=0.0434  ent=-1.6396
+[Iter 107  Ep 5]  pol=1.5259  val=0.0332  ent=-1.5457
+[Iter 107  Ep 6]  pol=1.6827  val=0.0425  ent=-1.6833
+[Iter 107  Ep 7]  pol=1.7089  val=0.0157  ent=-1.6899
+[Iter 107  Ep 8]  pol=1.6986  val=0.0281  ent=-1.6478
+[Iter 107  Ep 9]  pol=1.6061  val=0.0438  ent=-1.6000
+[Iter 107  Ep 10]  pol=1.8430  val=0.0673  ent=-1.7619
+
+--- Iteration 108: Self-Play ---
+--- Iteration 108: Training (Avg Reward: 6.7461) ---
+[Iter 108  Ep 1]  pol=1.5732  val=0.0182  ent=-1.6243
+[Iter 108  Ep 2]  pol=1.3644  val=0.0435  ent=-1.3801
+[Iter 108  Ep 3]  pol=1.4443  val=0.0259  ent=-1.4292
+[Iter 108  Ep 4]  pol=1.7308  val=0.0317  ent=-1.7858
+[Iter 108  Ep 5]  pol=1.6698  val=0.0261  ent=-1.6615
+[Iter 108  Ep 6]  pol=1.8058  val=0.0146  ent=-1.8210
+[Iter 108  Ep 7]  pol=1.7428  val=0.0240  ent=-1.7461
+[Iter 108  Ep 8]  pol=1.6021  val=0.0170  ent=-1.6498
+[Iter 108  Ep 9]  pol=1.7900  val=0.0328  ent=-1.7972
+[Iter 108  Ep 10]  pol=1.5784  val=0.0227  ent=-1.6269
+
+--- Iteration 109: Self-Play ---
+--- Iteration 109: Training (Avg Reward: 6.6562) ---
+[Iter 109  Ep 1]  pol=1.7011  val=0.0448  ent=-1.7128
+[Iter 109  Ep 2]  pol=1.8070  val=0.0518  ent=-1.7871
+[Iter 109  Ep 3]  pol=1.4910  val=0.0401  ent=-1.5016
+[Iter 109  Ep 4]  pol=1.7249  val=0.0597  ent=-1.7521
+[Iter 109  Ep 5]  pol=1.5641  val=0.0575  ent=-1.5932
+[Iter 109  Ep 6]  pol=1.7748  val=0.0460  ent=-1.7006
+[Iter 109  Ep 7]  pol=1.3677  val=0.0357  ent=-1.3817
+[Iter 109  Ep 8]  pol=1.5366  val=0.0420  ent=-1.5435
+[Iter 109  Ep 9]  pol=1.3723  val=0.0246  ent=-1.3411
+[Iter 109  Ep 10]  pol=1.6417  val=0.0468  ent=-1.5431
+
+--- Iteration 110: Self-Play ---
+--- Iteration 110: Training (Avg Reward: 6.8314) ---
+[Iter 110  Ep 1]  pol=1.7284  val=0.0208  ent=-1.7136
+[Iter 110  Ep 2]  pol=1.8261  val=0.0153  ent=-1.8653
+[Iter 110  Ep 3]  pol=1.1649  val=0.0188  ent=-1.2605
+[Iter 110  Ep 4]  pol=1.5629  val=0.0236  ent=-1.5696
+[Iter 110  Ep 5]  pol=1.5356  val=0.0165  ent=-1.5331
+[Iter 110  Ep 6]  pol=1.3286  val=0.0157  ent=-1.3353
+[Iter 110  Ep 7]  pol=1.8355  val=0.0154  ent=-1.8672
+[Iter 110  Ep 8]  pol=1.5252  val=0.0119  ent=-1.5620
+[Iter 110  Ep 9]  pol=1.4533  val=0.0238  ent=-1.4719
+[Iter 110  Ep 10]  pol=1.7170  val=0.0305  ent=-1.7208
+
+--- Iteration 111: Self-Play ---
+--- Iteration 111: Training (Avg Reward: 6.7022) ---
+[Iter 111  Ep 1]  pol=1.6875  val=0.0321  ent=-1.6261
+[Iter 111  Ep 2]  pol=1.7441  val=0.0359  ent=-1.7491
+[Iter 111  Ep 3]  pol=1.7362  val=0.0451  ent=-1.7126
+[Iter 111  Ep 4]  pol=1.7150  val=0.0382  ent=-1.6718
+[Iter 111  Ep 5]  pol=1.7893  val=0.0483  ent=-1.7919
+[Iter 111  Ep 6]  pol=1.4918  val=0.0232  ent=-1.5406
+[Iter 111  Ep 7]  pol=1.3780  val=0.0901  ent=-1.4112
+[Iter 111  Ep 8]  pol=1.4128  val=0.0323  ent=-1.4640
+[Iter 111  Ep 9]  pol=1.5594  val=0.0627  ent=-1.5526
+[Iter 111  Ep 10]  pol=1.5185  val=0.0734  ent=-1.4207
+
+--- Iteration 112: Self-Play ---
+--- Iteration 112: Training (Avg Reward: 6.7536) ---
+[Iter 112  Ep 1]  pol=1.7379  val=0.0228  ent=-1.7049
+[Iter 112  Ep 2]  pol=1.8717  val=0.0337  ent=-1.8911
+[Iter 112  Ep 3]  pol=1.6010  val=0.0437  ent=-1.6243
+[Iter 112  Ep 4]  pol=1.7589  val=0.0324  ent=-1.7546
+[Iter 112  Ep 5]  pol=1.5894  val=0.0240  ent=-1.5970
+[Iter 112  Ep 6]  pol=1.6139  val=0.0301  ent=-1.5948
+[Iter 112  Ep 7]  pol=1.5943  val=0.0515  ent=-1.6232
+[Iter 112  Ep 8]  pol=1.2935  val=0.0445  ent=-1.2730
+[Iter 112  Ep 9]  pol=1.5493  val=0.0256  ent=-1.5528
+[Iter 112  Ep 10]  pol=1.5210  val=0.0227  ent=-1.5227
+
+--- Iteration 113: Self-Play ---
+--- Iteration 113: Training (Avg Reward: 6.8209) ---
+[Iter 113  Ep 1]  pol=1.3857  val=0.0289  ent=-1.3924
+[Iter 113  Ep 2]  pol=1.7974  val=0.0328  ent=-1.7924
+[Iter 113  Ep 3]  pol=1.6070  val=0.0317  ent=-1.6300
+[Iter 113  Ep 4]  pol=1.3693  val=0.0198  ent=-1.3905
+[Iter 113  Ep 5]  pol=1.3723  val=0.0101  ent=-1.3599
+[Iter 113  Ep 6]  pol=1.8030  val=0.0277  ent=-1.7691
+[Iter 113  Ep 7]  pol=1.7187  val=0.0172  ent=-1.7022
+[Iter 113  Ep 8]  pol=1.4157  val=0.0217  ent=-1.3869
+[Iter 113  Ep 9]  pol=1.5629  val=0.0318  ent=-1.5628
+[Iter 113  Ep 10]  pol=1.6419  val=0.0304  ent=-1.7541
+
+--- Iteration 114: Self-Play ---
+--- Iteration 114: Training (Avg Reward: 6.5667) ---
+[Iter 114  Ep 1]  pol=1.7805  val=0.0356  ent=-1.8093
+[Iter 114  Ep 2]  pol=1.5686  val=0.0550  ent=-1.6062
+[Iter 114  Ep 3]  pol=1.4309  val=0.0442  ent=-1.3989
+[Iter 114  Ep 4]  pol=1.7120  val=0.0556  ent=-1.6125
+[Iter 114  Ep 5]  pol=1.7414  val=0.0224  ent=-1.7087
+[Iter 114  Ep 6]  pol=1.8522  val=0.0375  ent=-1.7957
+[Iter 114  Ep 7]  pol=1.7141  val=0.0442  ent=-1.8087
+[Iter 114  Ep 8]  pol=1.7638  val=0.0494  ent=-1.8699
+[Iter 114  Ep 9]  pol=1.5171  val=0.0678  ent=-1.6412
+[Iter 114  Ep 10]  pol=1.8026  val=0.0623  ent=-1.9043
+
+--- Iteration 115: Self-Play ---
+--- Iteration 115: Training (Avg Reward: 6.3308) ---
+[Iter 115  Ep 1]  pol=1.7672  val=0.0541  ent=-1.8706
+[Iter 115  Ep 2]  pol=1.6544  val=0.0680  ent=-1.7478
+[Iter 115  Ep 3]  pol=1.7340  val=0.0430  ent=-1.8222
+[Iter 115  Ep 4]  pol=1.7474  val=0.0511  ent=-1.8366
+[Iter 115  Ep 5]  pol=1.8592  val=0.0480  ent=-1.8147
+[Iter 115  Ep 6]  pol=1.5367  val=0.0462  ent=-1.4100
+[Iter 115  Ep 7]  pol=2.0177  val=0.0331  ent=-1.7355
+[Iter 115  Ep 8]  pol=1.6781  val=0.0558  ent=-1.3670
+[Iter 115  Ep 9]  pol=1.6856  val=0.0289  ent=-1.4335
+[Iter 115  Ep 10]  pol=1.5278  val=0.0361  ent=-1.4614
+
+--- Iteration 116: Self-Play ---
+--- Iteration 116: Training (Avg Reward: 5.2516) ---
+[Iter 116  Ep 1]  pol=1.9595  val=0.0624  ent=-1.9649
+[Iter 116  Ep 2]  pol=1.8134  val=0.0849  ent=-1.9345
+[Iter 116  Ep 3]  pol=2.0626  val=0.0787  ent=-2.1529
+[Iter 116  Ep 4]  pol=1.9029  val=0.1421  ent=-1.9780
+[Iter 116  Ep 5]  pol=1.7284  val=0.0961  ent=-1.6528
+[Iter 116  Ep 6]  pol=1.5344  val=0.1186  ent=-1.5045
+[Iter 116  Ep 7]  pol=1.6749  val=0.0979  ent=-1.6441
+[Iter 116  Ep 8]  pol=1.7160  val=0.0932  ent=-1.6309
+[Iter 116  Ep 9]  pol=1.8204  val=0.1270  ent=-1.7874
+[Iter 116  Ep 10]  pol=1.6012  val=0.1189  ent=-1.5791
+
+--- Iteration 117: Self-Play ---
+--- Iteration 117: Training (Avg Reward: 5.1977) ---
+[Iter 117  Ep 1]  pol=1.7587  val=0.1962  ent=-1.7288
+[Iter 117  Ep 2]  pol=1.7933  val=0.1815  ent=-1.7502
+[Iter 117  Ep 3]  pol=1.7770  val=0.1697  ent=-1.7755
+[Iter 117  Ep 4]  pol=1.6819  val=0.1594  ent=-1.6691
+[Iter 117  Ep 5]  pol=1.8475  val=0.1548  ent=-1.8354
+[Iter 117  Ep 6]  pol=1.7122  val=0.2370  ent=-1.6011
+[Iter 117  Ep 7]  pol=1.9123  val=0.1558  ent=-1.9179
+[Iter 117  Ep 8]  pol=1.8588  val=0.1536  ent=-1.8932
+[Iter 117  Ep 9]  pol=2.0248  val=0.0916  ent=-2.0009
+[Iter 117  Ep 10]  pol=1.7691  val=0.1473  ent=-1.7940
+
+--- Iteration 118: Self-Play ---
+--- Iteration 118: Training (Avg Reward: 5.3087) ---
+[Iter 118  Ep 1]  pol=1.5675  val=0.0798  ent=-1.6301
+[Iter 118  Ep 2]  pol=1.8789  val=0.1108  ent=-1.9050
+[Iter 118  Ep 3]  pol=1.6319  val=0.0866  ent=-1.6200
+[Iter 118  Ep 4]  pol=1.8393  val=0.1062  ent=-1.9089
+[Iter 118  Ep 5]  pol=1.6024  val=0.1499  ent=-1.6279
+[Iter 118  Ep 6]  pol=1.4402  val=0.1341  ent=-1.4892
+[Iter 118  Ep 7]  pol=1.7714  val=0.1483  ent=-1.8066
+[Iter 118  Ep 8]  pol=1.6887  val=0.0789  ent=-1.7027
+[Iter 118  Ep 9]  pol=1.8123  val=0.1014  ent=-1.7422
+[Iter 118  Ep 10]  pol=1.6493  val=0.0849  ent=-1.5915
+
+--- Iteration 119: Self-Play ---
+--- Iteration 119: Training (Avg Reward: 5.4950) ---
+[Iter 119  Ep 1]  pol=1.7313  val=0.0795  ent=-1.6970
+[Iter 119  Ep 2]  pol=1.4536  val=0.0689  ent=-1.4926
+[Iter 119  Ep 3]  pol=1.9790  val=0.0791  ent=-1.9711
+[Iter 119  Ep 4]  pol=1.3974  val=0.0728  ent=-1.4242
+[Iter 119  Ep 5]  pol=1.6975  val=0.0722  ent=-1.6811
+[Iter 119  Ep 6]  pol=1.6025  val=0.0726  ent=-1.5452
+[Iter 119  Ep 7]  pol=1.7083  val=0.0802  ent=-1.8005
+[Iter 119  Ep 8]  pol=1.8507  val=0.0683  ent=-1.9794
+[Iter 119  Ep 9]  pol=1.6587  val=0.0619  ent=-1.7572
+[Iter 119  Ep 10]  pol=1.6933  val=0.0851  ent=-1.7672
+
+--- Iteration 120: Self-Play ---
+--- Iteration 120: Training (Avg Reward: 6.4608) ---
+[Iter 120  Ep 1]  pol=1.7396  val=0.0285  ent=-1.7417
+[Iter 120  Ep 2]  pol=1.4636  val=0.0381  ent=-1.3813
+[Iter 120  Ep 3]  pol=1.5678  val=0.0362  ent=-1.5698
+[Iter 120  Ep 4]  pol=1.8225  val=0.0354  ent=-1.8385
+[Iter 120  Ep 5]  pol=1.6409  val=0.0267  ent=-1.6758
+[Iter 120  Ep 6]  pol=1.5902  val=0.0148  ent=-1.6220
+[Iter 120  Ep 7]  pol=1.5749  val=0.0211  ent=-1.5391
+[Iter 120  Ep 8]  pol=1.5399  val=0.0587  ent=-1.5286
+[Iter 120  Ep 9]  pol=1.5485  val=0.0258  ent=-1.5629
+[Iter 120  Ep 10]  pol=1.6033  val=0.0506  ent=-1.5864
+
+--- Iteration 121: Self-Play ---
+--- Iteration 121: Training (Avg Reward: 6.0018) ---
+[Iter 121  Ep 1]  pol=1.7723  val=0.0392  ent=-1.7484
+[Iter 121  Ep 2]  pol=1.6356  val=0.0368  ent=-1.6271
+[Iter 121  Ep 3]  pol=1.8487  val=0.0855  ent=-1.8421
+[Iter 121  Ep 4]  pol=1.6061  val=0.0632  ent=-1.6052
+[Iter 121  Ep 5]  pol=1.7871  val=0.0325  ent=-1.7938
+[Iter 121  Ep 6]  pol=1.8735  val=0.0349  ent=-1.9023
+[Iter 121  Ep 7]  pol=1.4871  val=0.0537  ent=-1.4967
+[Iter 121  Ep 8]  pol=1.5236  val=0.0349  ent=-1.5718
+[Iter 121  Ep 9]  pol=1.7907  val=0.0397  ent=-1.7696
+[Iter 121  Ep 10]  pol=1.7330  val=0.0465  ent=-1.6994
+
+--- Iteration 122: Self-Play ---
+--- Iteration 122: Training (Avg Reward: 6.5655) ---
+[Iter 122  Ep 1]  pol=1.8212  val=0.0297  ent=-1.8367
+[Iter 122  Ep 2]  pol=1.4515  val=0.0303  ent=-1.4294
+[Iter 122  Ep 3]  pol=1.6380  val=0.0357  ent=-1.6469
+[Iter 122  Ep 4]  pol=1.5474  val=0.0479  ent=-1.5495
+[Iter 122  Ep 5]  pol=1.5805  val=0.0353  ent=-1.5908
+[Iter 122  Ep 6]  pol=1.7410  val=0.0394  ent=-1.7555
+[Iter 122  Ep 7]  pol=1.7400  val=0.0420  ent=-1.7728
+[Iter 122  Ep 8]  pol=1.7106  val=0.0378  ent=-1.7043
+[Iter 122  Ep 9]  pol=1.6428  val=0.0499  ent=-1.6275
+[Iter 122  Ep 10]  pol=1.6681  val=0.0625  ent=-1.6422
+
+--- Iteration 123: Self-Play ---
+--- Iteration 123: Training (Avg Reward: 6.7355) ---
+[Iter 123  Ep 1]  pol=1.6389  val=0.0612  ent=-1.6177
+[Iter 123  Ep 2]  pol=1.7129  val=0.0498  ent=-1.6833
+[Iter 123  Ep 3]  pol=1.4977  val=0.0236  ent=-1.5017
+[Iter 123  Ep 4]  pol=1.7749  val=0.0375  ent=-1.7492
+[Iter 123  Ep 5]  pol=1.6457  val=0.0454  ent=-1.6492
+[Iter 123  Ep 6]  pol=1.4448  val=0.0437  ent=-1.4898
+[Iter 123  Ep 7]  pol=1.7335  val=0.0318  ent=-1.7925
+[Iter 123  Ep 8]  pol=1.5107  val=0.0251  ent=-1.5663
+[Iter 123  Ep 9]  pol=1.3171  val=0.0325  ent=-1.3028
+[Iter 123  Ep 10]  pol=1.4058  val=0.0146  ent=-1.2957
+
+--- Iteration 124: Self-Play ---
+--- Iteration 124: Training (Avg Reward: 6.8473) ---
+[Iter 124  Ep 1]  pol=1.6993  val=0.0226  ent=-1.6431
+[Iter 124  Ep 2]  pol=1.4461  val=0.0186  ent=-1.4790
+[Iter 124  Ep 3]  pol=1.3695  val=0.0050  ent=-1.3561
+[Iter 124  Ep 4]  pol=1.5762  val=0.0232  ent=-1.5798
+[Iter 124  Ep 5]  pol=1.5143  val=0.0070  ent=-1.5054
+[Iter 124  Ep 6]  pol=1.3058  val=0.0055  ent=-1.2918
+[Iter 124  Ep 7]  pol=1.4733  val=0.0060  ent=-1.4556
+[Iter 124  Ep 8]  pol=1.5030  val=0.0221  ent=-1.5067
+[Iter 124  Ep 9]  pol=1.2424  val=0.0289  ent=-1.2592
+[Iter 124  Ep 10]  pol=1.1254  val=0.0069  ent=-1.1832
+
+--- Iteration 125: Self-Play ---
+--- Iteration 125: Training (Avg Reward: 6.8791) ---
+[Iter 125  Ep 1]  pol=1.6929  val=0.0312  ent=-1.6547
+[Iter 125  Ep 2]  pol=1.8371  val=0.0897  ent=-1.7684
+[Iter 125  Ep 3]  pol=1.6128  val=0.0506  ent=-1.5599
+[Iter 125  Ep 4]  pol=1.4965  val=0.0323  ent=-1.4847
+[Iter 125  Ep 5]  pol=1.6407  val=0.0251  ent=-1.6535
+[Iter 125  Ep 6]  pol=1.6880  val=0.0887  ent=-1.5989
+[Iter 125  Ep 7]  pol=1.4699  val=0.0653  ent=-1.5100
+[Iter 125  Ep 8]  pol=1.5158  val=0.0467  ent=-1.5592
+[Iter 125  Ep 9]  pol=1.4198  val=0.0787  ent=-1.3857
+[Iter 125  Ep 10]  pol=1.6882  val=0.0617  ent=-1.6239
+
+--- Iteration 126: Self-Play ---
+--- Iteration 126: Training (Avg Reward: 6.7303) ---
+[Iter 126  Ep 1]  pol=1.7132  val=0.0397  ent=-1.6743
+[Iter 126  Ep 2]  pol=1.6504  val=0.0150  ent=-1.6687
+[Iter 126  Ep 3]  pol=1.3659  val=0.0293  ent=-1.3251
+[Iter 126  Ep 4]  pol=1.5650  val=0.0322  ent=-1.5284
+[Iter 126  Ep 5]  pol=1.6333  val=0.0141  ent=-1.6679
+[Iter 126  Ep 6]  pol=1.4224  val=0.0074  ent=-1.4864
+[Iter 126  Ep 7]  pol=1.4538  val=0.0458  ent=-1.4756
+[Iter 126  Ep 8]  pol=1.4554  val=0.0079  ent=-1.4993
+[Iter 126  Ep 9]  pol=1.4522  val=0.0313  ent=-1.4234
+[Iter 126  Ep 10]  pol=1.4801  val=0.0316  ent=-1.4887
+
+--- Iteration 127: Self-Play ---
+--- Iteration 127: Training (Avg Reward: 6.4857) ---
+[Iter 127  Ep 1]  pol=1.4697  val=0.0803  ent=-1.5058
+[Iter 127  Ep 2]  pol=1.4829  val=0.0727  ent=-1.4838
+[Iter 127  Ep 3]  pol=1.4544  val=0.0541  ent=-1.4551
+[Iter 127  Ep 4]  pol=1.5235  val=0.0540  ent=-1.5636
+[Iter 127  Ep 5]  pol=1.5537  val=0.0805  ent=-1.4990
+[Iter 127  Ep 6]  pol=1.4870  val=0.0772  ent=-1.4440
+[Iter 127  Ep 7]  pol=1.3511  val=0.0724  ent=-1.3363
+[Iter 127  Ep 8]  pol=1.4738  val=0.0566  ent=-1.4623
+[Iter 127  Ep 9]  pol=1.5284  val=0.0641  ent=-1.5667
+[Iter 127  Ep 10]  pol=1.7504  val=0.0292  ent=-1.8293
+
+--- Iteration 128: Self-Play ---
+--- Iteration 128: Training (Avg Reward: 6.7236) ---
+[Iter 128  Ep 1]  pol=1.3369  val=0.0250  ent=-1.3814
+[Iter 128  Ep 2]  pol=1.4343  val=0.0312  ent=-1.2961
+[Iter 128  Ep 3]  pol=1.3750  val=0.0257  ent=-1.2544
+[Iter 128  Ep 4]  pol=1.3803  val=0.0297  ent=-1.3008
+[Iter 128  Ep 5]  pol=1.3458  val=0.0245  ent=-1.3241
+[Iter 128  Ep 6]  pol=1.3058  val=0.0276  ent=-1.4409
+[Iter 128  Ep 7]  pol=1.3073  val=0.0432  ent=-1.4487
+[Iter 128  Ep 8]  pol=1.5271  val=0.0538  ent=-1.5801
+[Iter 128  Ep 9]  pol=1.4827  val=0.0432  ent=-1.6161
+[Iter 128  Ep 10]  pol=1.2488  val=0.0348  ent=-1.3420
+
+--- Iteration 129: Self-Play ---
+--- Iteration 129: Training (Avg Reward: 6.5118) ---
+[Iter 129  Ep 1]  pol=1.6172  val=0.0606  ent=-1.6352
+[Iter 129  Ep 2]  pol=1.3203  val=0.0449  ent=-1.3210
+[Iter 129  Ep 3]  pol=1.5267  val=0.0450  ent=-1.5460
+[Iter 129  Ep 4]  pol=1.3811  val=0.0496  ent=-1.3645
+[Iter 129  Ep 5]  pol=1.6485  val=0.0426  ent=-1.6140
+[Iter 129  Ep 6]  pol=1.5723  val=0.0479  ent=-1.3885
+[Iter 129  Ep 7]  pol=1.6846  val=0.0358  ent=-1.4853
+[Iter 129  Ep 8]  pol=1.4368  val=0.0550  ent=-1.4003
+[Iter 129  Ep 9]  pol=1.4620  val=0.0493  ent=-1.5075
+[Iter 129  Ep 10]  pol=1.6053  val=0.0513  ent=-1.6196
+
+--- Iteration 130: Self-Play ---
+--- Iteration 130: Training (Avg Reward: 6.1359) ---
+[Iter 130  Ep 1]  pol=1.7143  val=0.0754  ent=-1.7065
+[Iter 130  Ep 2]  pol=1.8202  val=0.0514  ent=-1.8003
+[Iter 130  Ep 3]  pol=1.4836  val=0.0719  ent=-1.4429
+[Iter 130  Ep 4]  pol=1.7402  val=0.0565  ent=-1.8037
+[Iter 130  Ep 5]  pol=1.5103  val=0.0554  ent=-1.5575
+[Iter 130  Ep 6]  pol=1.7590  val=0.0573  ent=-1.7333
+[Iter 130  Ep 7]  pol=1.5758  val=0.0493  ent=-1.5953
+[Iter 130  Ep 8]  pol=1.6203  val=0.0553  ent=-1.6120
+[Iter 130  Ep 9]  pol=1.7817  val=0.0681  ent=-1.7041
+[Iter 130  Ep 10]  pol=1.5746  val=0.0611  ent=-1.5360
+
+--- Iteration 131: Self-Play ---
+--- Iteration 131: Training (Avg Reward: 6.1849) ---
+[Iter 131  Ep 1]  pol=1.5488  val=0.0682  ent=-1.5027
+[Iter 131  Ep 2]  pol=1.5569  val=0.0499  ent=-1.5718
+[Iter 131  Ep 3]  pol=1.5970  val=0.0663  ent=-1.5631
+[Iter 131  Ep 4]  pol=1.7313  val=0.0701  ent=-1.6736
+[Iter 131  Ep 5]  pol=1.4083  val=0.0546  ent=-1.4270
+[Iter 131  Ep 6]  pol=1.6549  val=0.0798  ent=-1.6453
+[Iter 131  Ep 7]  pol=1.7839  val=0.0511  ent=-1.8424
+[Iter 131  Ep 8]  pol=1.5883  val=0.0583  ent=-1.6159
+[Iter 131  Ep 9]  pol=1.7864  val=0.0856  ent=-1.7315
+[Iter 131  Ep 10]  pol=1.6861  val=0.1132  ent=-1.6764
+
+--- Iteration 132: Self-Play ---
+--- Iteration 132: Training (Avg Reward: 6.4378) ---
+[Iter 132  Ep 1]  pol=1.5705  val=0.0606  ent=-1.5410
+[Iter 132  Ep 2]  pol=1.5195  val=0.0719  ent=-1.4778
+[Iter 132  Ep 3]  pol=1.6148  val=0.0568  ent=-1.6534
+[Iter 132  Ep 4]  pol=1.5579  val=0.0649  ent=-1.5972
+[Iter 132  Ep 5]  pol=1.6921  val=0.0948  ent=-1.6857
+[Iter 132  Ep 6]  pol=1.4122  val=0.1165  ent=-1.4095
+[Iter 132  Ep 7]  pol=1.6451  val=0.0505  ent=-1.6343
+[Iter 132  Ep 8]  pol=1.3940  val=0.0683  ent=-1.3924
+[Iter 132  Ep 9]  pol=1.7828  val=0.0765  ent=-1.7890
+[Iter 132  Ep 10]  pol=1.6527  val=0.0722  ent=-1.6136
+
+--- Iteration 133: Self-Play ---
+--- Iteration 133: Training (Avg Reward: 5.9371) ---
+[Iter 133  Ep 1]  pol=1.5858  val=0.0772  ent=-1.5390
+[Iter 133  Ep 2]  pol=1.7196  val=0.0641  ent=-1.7411
+[Iter 133  Ep 3]  pol=1.5684  val=0.0841  ent=-1.5244
+[Iter 133  Ep 4]  pol=1.6242  val=0.0896  ent=-1.6123
+[Iter 133  Ep 5]  pol=1.3304  val=0.0585  ent=-1.3306
+[Iter 133  Ep 6]  pol=1.5305  val=0.0858  ent=-1.5594
+[Iter 133  Ep 7]  pol=1.9421  val=0.0565  ent=-1.9826
+[Iter 133  Ep 8]  pol=1.7432  val=0.0712  ent=-1.9162
+[Iter 133  Ep 9]  pol=1.5928  val=0.0796  ent=-1.6469
+[Iter 133  Ep 10]  pol=1.4841  val=0.0745  ent=-1.4797
+
+--- Iteration 134: Self-Play ---
+--- Iteration 134: Training (Avg Reward: 5.3655) ---
+[Iter 134  Ep 1]  pol=1.5606  val=0.0812  ent=-1.4977
+[Iter 134  Ep 2]  pol=1.6770  val=0.1286  ent=-1.5569
+[Iter 134  Ep 3]  pol=1.6823  val=0.1092  ent=-1.5870
+[Iter 134  Ep 4]  pol=1.6729  val=0.1624  ent=-1.6401
+[Iter 134  Ep 5]  pol=1.4896  val=0.0885  ent=-1.5735
+[Iter 134  Ep 6]  pol=1.6460  val=0.1253  ent=-1.7075
+[Iter 134  Ep 7]  pol=1.6114  val=0.1524  ent=-1.7010
+[Iter 134  Ep 8]  pol=1.3455  val=0.1323  ent=-1.4062
+[Iter 134  Ep 9]  pol=1.8589  val=0.1155  ent=-1.8479
+[Iter 134  Ep 10]  pol=1.6621  val=0.1117  ent=-1.6294
+
+--- Iteration 135: Self-Play ---
+--- Iteration 135: Training (Avg Reward: 5.6595) ---
+[Iter 135  Ep 1]  pol=1.4770  val=0.0598  ent=-1.4995
+[Iter 135  Ep 2]  pol=1.7163  val=0.1256  ent=-1.7039
+[Iter 135  Ep 3]  pol=1.4191  val=0.0659  ent=-1.4038
+[Iter 135  Ep 4]  pol=1.6074  val=0.1234  ent=-1.5767
+[Iter 135  Ep 5]  pol=1.8853  val=0.0921  ent=-1.8605
+[Iter 135  Ep 6]  pol=1.6954  val=0.1074  ent=-1.7383
+[Iter 135  Ep 7]  pol=1.6003  val=0.1528  ent=-1.6280
+[Iter 135  Ep 8]  pol=1.4098  val=0.1880  ent=-1.4156
+[Iter 135  Ep 9]  pol=1.5958  val=0.1285  ent=-1.6177
+[Iter 135  Ep 10]  pol=1.7522  val=0.0938  ent=-1.7089
+
+--- Iteration 136: Self-Play ---
+--- Iteration 136: Training (Avg Reward: 5.9779) ---
+[Iter 136  Ep 1]  pol=1.4292  val=0.0655  ent=-1.4521
+[Iter 136  Ep 2]  pol=1.4797  val=0.0677  ent=-1.5156
+[Iter 136  Ep 3]  pol=1.8580  val=0.0860  ent=-1.8585
+[Iter 136  Ep 4]  pol=1.4746  val=0.0648  ent=-1.5010
+[Iter 136  Ep 5]  pol=1.5742  val=0.0826  ent=-1.5335
+[Iter 136  Ep 6]  pol=1.4276  val=0.0683  ent=-1.4566
+[Iter 136  Ep 7]  pol=1.7198  val=0.0767  ent=-1.7438
+[Iter 136  Ep 8]  pol=1.8147  val=0.0869  ent=-1.8019
+[Iter 136  Ep 9]  pol=1.6514  val=0.0580  ent=-1.5820
+[Iter 136  Ep 10]  pol=1.3153  val=0.0571  ent=-1.3243
+
+--- Iteration 137: Self-Play ---
+--- Iteration 137: Training (Avg Reward: 5.3362) ---
+[Iter 137  Ep 1]  pol=1.7197  val=0.1450  ent=-1.6840
+[Iter 137  Ep 2]  pol=1.7244  val=0.0953  ent=-1.6676
+[Iter 137  Ep 3]  pol=1.8153  val=0.1685  ent=-1.7730
+[Iter 137  Ep 4]  pol=1.5143  val=0.1600  ent=-1.4515
+[Iter 137  Ep 5]  pol=1.8160  val=0.1732  ent=-1.7560
+[Iter 137  Ep 6]  pol=1.6668  val=0.1956  ent=-1.6584
+[Iter 137  Ep 7]  pol=1.5858  val=0.1582  ent=-1.7395
+[Iter 137  Ep 8]  pol=1.8571  val=0.1241  ent=-2.1287
+[Iter 137  Ep 9]  pol=1.7600  val=0.1418  ent=-2.0578
+[Iter 137  Ep 10]  pol=1.8216  val=0.0688  ent=-2.0267
+
+--- Iteration 138: Self-Play ---
+--- Iteration 138: Training (Avg Reward: 5.9601) ---
+[Iter 138  Ep 1]  pol=1.9089  val=0.1317  ent=-1.9288
+[Iter 138  Ep 2]  pol=1.6972  val=0.1325  ent=-1.6124
+[Iter 138  Ep 3]  pol=1.6087  val=0.0977  ent=-1.4482
+[Iter 138  Ep 4]  pol=1.8228  val=0.0611  ent=-1.7232
+[Iter 138  Ep 5]  pol=1.6823  val=0.1073  ent=-1.5845
+[Iter 138  Ep 6]  pol=1.5143  val=0.1085  ent=-1.5381
+[Iter 138  Ep 7]  pol=1.7340  val=0.1289  ent=-1.7747
+[Iter 138  Ep 8]  pol=1.9445  val=0.0664  ent=-1.9937
+[Iter 138  Ep 9]  pol=1.7124  val=0.1213  ent=-1.7837
+[Iter 138  Ep 10]  pol=1.4026  val=0.1491  ent=-1.4490
+
+--- Iteration 139: Self-Play ---
+--- Iteration 139: Training (Avg Reward: 5.1602) ---
+[Iter 139  Ep 1]  pol=1.7780  val=0.1498  ent=-1.8014
+[Iter 139  Ep 2]  pol=1.5857  val=0.1990  ent=-1.5967
+[Iter 139  Ep 3]  pol=1.7445  val=0.1143  ent=-1.7756
+[Iter 139  Ep 4]  pol=1.6555  val=0.1615  ent=-1.6551
+[Iter 139  Ep 5]  pol=1.8651  val=0.1398  ent=-1.7993
+[Iter 139  Ep 6]  pol=1.5532  val=0.1318  ent=-1.5509
+[Iter 139  Ep 7]  pol=1.5160  val=0.1306  ent=-1.5238
+[Iter 139  Ep 8]  pol=1.6031  val=0.1835  ent=-1.5710
+[Iter 139  Ep 9]  pol=1.9034  val=0.1350  ent=-1.8452
+[Iter 139  Ep 10]  pol=1.8094  val=0.1622  ent=-1.8385
+
+--- Iteration 140: Self-Play ---
+--- Iteration 140: Training (Avg Reward: 4.8161) ---
+[Iter 140  Ep 1]  pol=1.6251  val=0.2734  ent=-1.5628
+[Iter 140  Ep 2]  pol=1.6521  val=0.2485  ent=-1.7427
+[Iter 140  Ep 3]  pol=1.7182  val=0.1777  ent=-1.7237
+[Iter 140  Ep 4]  pol=1.6098  val=0.2614  ent=-1.5829
+[Iter 140  Ep 5]  pol=1.5517  val=0.3460  ent=-1.5852
+[Iter 140  Ep 6]  pol=1.8059  val=0.2354  ent=-1.8049
+[Iter 140  Ep 7]  pol=1.6458  val=0.2806  ent=-1.7096
+[Iter 140  Ep 8]  pol=1.6964  val=0.2652  ent=-1.7284
+[Iter 140  Ep 9]  pol=1.6946  val=0.2963  ent=-1.7311
+[Iter 140  Ep 10]  pol=1.6356  val=0.2314  ent=-1.6737
+
+--- Iteration 141: Self-Play ---

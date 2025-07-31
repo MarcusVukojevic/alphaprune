@@ -7,7 +7,7 @@ args = {
     # import relativi a modelli e dati
     "model_name" : "distilgpt2",
     "name_dataset" : "wikitext",
-    "device": "mps",
+    "device": "cuda",
 
     # target di sparsity
     "target_sparsity" : 0.3,
