@@ -1,0 +1,45 @@
+--> ppl iniziale:  78.51433738825796
+--> inizio ad imparare
+Ci mette: 406.72735953330994
+Ci mette: 138.20455360412598
+Ci mette: 140.27106022834778
+Ci mette: 121.39584302902222
+Ci mette: 118.2916796207428
+Ci mette: 118.61825132369995
+Ci mette: 118.26766610145569
+Ci mette: 119.20381927490234
+Ci mette: 119.1347303390503
+Ci mette: 117.94488883018494
+Ci mette: 119.03396606445312
+Ci mette: 118.45051717758179
+Ci mette: 116.93487405776978
+Ci mette: 119.58952713012695
+Ci mette: 118.92966628074646
+Ci mette: 117.8843240737915
+Ci mette: 118.0569794178009
+Ci mette: 118.58737373352051
+Ci mette: 118.4516351222992
+Ci mette: 117.6565306186676
+Ci mette: 116.91969323158264
+Ci mette: 115.41056656837463
+Ci mette: 120.12815618515015
+Ci mette: 117.90008044242859
+Ci mette: 117.44150137901306
+Ci mette: 116.84145712852478
+Ci mette: 117.79643869400024
+Ci mette: 119.03519320487976
+Ci mette: 117.81805038452148
+Ci mette: 118.22886943817139
+--> ppl iniziale:  78.51433738825796
+🔖  plot salvato in → eval_gate_state.png
+📈  curva reward salvata in → reward_metric_curve.png
+
+======  E V A L U A T I O N  ======
+
+PPL baseline : 78.51
+PPL finale   : 2024.91
+Sparsity ini : 0.00%
+Sparsity fin : 50.00%
+Mosse fatte  : 6/20
+Reward finale: 0.1068
+🔖  plot stato porte in → eval_gate_state.png
