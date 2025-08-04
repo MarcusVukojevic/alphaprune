@@ -33,10 +33,8 @@ class AlphaZero:
         state = self.game.reset_game()
 
         while True:
-            # 1) MCTS
             action = self.mcts.search(state)
 
-            # 2) Costruisci π dalle visite dei figli della root
             root = self.mcts.last_root
             N = state.numel()
             pi = torch.zeros(N, dtype=torch.float32)
@@ -47,14 +45,15 @@ class AlphaZero:
             if total_visits > 0:
                 pi /= total_visits
 
-            # 3) Encoded state & scalar
+            # prendiamo l'ecoded state e tutto
             enc  = self.game.get_encoded_state(state).cpu()
             scal = self.game.get_scalar().cpu().unsqueeze(0)  # (1,)
 
-            # 4) Esegui l'azione vera
+            # eseguiamo l'azione vera
             self.game.do_action(action)
-            # 5) Check fine
-            reward, done = self.game.get_value_and_terminated(self.game.state, depth=self.game.numero_mossa)
+            
+            # check se abbiamo vinto o meno
+            reward, done = self.game.get_value_and_terminated(self.game.state, depth=self.game.numero_mossa, register=True)
             traj.append((enc, scal, pi.cpu(), None))
 
             if done:
@@ -85,18 +84,13 @@ class AlphaZero:
     
     def learn(self):
         os.makedirs("models", exist_ok=True)
-        import time
-
 
         # Iterazioni globali
         for it in trange(self.num_episodes, desc="Iterations"):
             self.model.eval()
-            start = time.time()
             for _ in trange(self.num_self_iteration, desc=f"Self-play {it}", leave=False):
                 episode = self.self_play()
                 self.replay.extend(episode)
-            finish = time.time()
-            print(f"Ci mette: {finish-start}")
             if not self.replay:
                 print("[warn] replay vuota, skip training")
                 continue
@@ -106,5 +100,4 @@ class AlphaZero:
                 batch = random.sample(self.replay, k=min(self.batch_size, len(self.replay)))
                 self.train_on_memory(batch)
 
-            # -------- SAVE ---------
             torch.save(self.model.state_dict(), f"models/model_iter{it}.pt")

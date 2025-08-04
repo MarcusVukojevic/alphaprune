@@ -33,7 +33,7 @@ class MCTS:
             while not node.is_leaf():
                 node = node.select(self.c_puct)
 
-            value, done = self.game.get_value_and_terminated(node.state, depth=node.depth)
+            value, done = self.game.get_value_and_terminated(node.state, depth=node.depth, register=False)
             if done:
                 node.backpropagate(value)
                 continue

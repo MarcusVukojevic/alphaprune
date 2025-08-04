@@ -117,9 +117,9 @@ class PruneGame():
         self.history = []
         self.history = deque(maxlen=self.limite_mosse - 1)
         self.history.appendleft(self.initial_state)
-        self.reward_history = []
-        self.ppl_history = []
-        self.mse_history = []
+        #self.reward_history = []
+        #self.ppl_history = []
+        #self.mse_history = []
 
         return self.state
     
@@ -139,7 +139,7 @@ class PruneGame():
         return ok_s and ok_m
 
     
-    def get_value_and_terminated(self, state, depth=None):
+    def get_value_and_terminated(self, state, depth=None, register=False):
         """
         Ritorna (reward_finale, done) SOLO se episodio terminato.
         Altrimenti (0.0, False). Calcola PPL realmente ogni step come vuoi tu.
@@ -212,7 +212,8 @@ class PruneGame():
         # Clippa
         reward = float(max(-1.0, min(1.0, reward)))
 
-        self.reward_history.append(reward)
+        if register:
+            self.reward_history.append(reward)
         return reward, True
 
 
