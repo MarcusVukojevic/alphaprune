@@ -7,25 +7,25 @@ args = {
     # import relativi a modelli e dati
     "model_name" : "distilgpt2",
     "name_dataset" : "wikitext",
-    "device": "mps",
+    "device": "cuda",
 
     # target di sparsity
     "target_sparsity" : 0.2,
 
     # iper params per Alphazero
-    "num_episodes": 5,
-    "num_self_iteration" : 10,
+    "num_episodes": 100,
+    "num_self_iteration" : 20,
     "num_epochs" : 5, # --> numero epoche per il modello
     "n_mosse_massimo" : 20,
-    "batch_size": 64,
+    "batch_size": 32,
     "grad_clip": 1.0,
     "entropy_bonus": 0.02,
     "lr": 2e-4,
 
     # iper params per MCTS
     "C": 2,
-    "num_searches" : 10,
-    "top_k": 1,
+    "num_searches" : 25,
+    "top_k": 3,
 
     # che modalità di evaluation vogliamo? mse | ppl
     "eval_mode" : "mse"
