@@ -28,7 +28,7 @@ args = {
     "top_k": 3,
 
     # che modalità di evaluation vogliamo? mse | ppl
-    "eval_mode" : "mse"
+    "eval_mode" : "ppl"
 }
 
 gioco = PruneGame(args)

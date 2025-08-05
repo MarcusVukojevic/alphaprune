@@ -8,6 +8,14 @@ import math
 from collections import deque
 
 
+#TODO
+
+# 1) facciamop plot mcts per vedere se funziona senza reward
+# 1.1) mettiamo ppl su 5 sample che dovrebbe essere veloce
+# 1.9) mcts parallelo
+# 2) poi aggiungiamo reward
+
+
 class PruneGame():
     # funzione per applicare la patch al modello
     @staticmethod
@@ -159,6 +167,8 @@ class PruneGame():
             target   = self.scale_mse * self.tol_frac     # ← soglia dinamica
             mse_penalty = max(0.0, min(1.0, mse_now / target))  # 0‑1
             hit_p    = mse_now <= target
+
+        
         steps = self.numero_mossa if depth is None else depth
         limit = steps >= self.limite_mosse
         win   = hit_s and hit_p
