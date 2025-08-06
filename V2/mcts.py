@@ -21,7 +21,7 @@ class MCTS:
         self.root_noise_eps       = args.get("root_noise_eps", 0.25)
         self.root_dirichlet_alpha = args.get("root_dirichlet_alpha", 0.3)
         self.gamma                = args.get("gamma", 1.0)           # discount on model value
-        self.depth_penalty        = args.get("depth_penalty", 0.0)   # small per-step cost
+        self.depth_penalty        = args.get("depth_penalty", 1)   # small per-step cost
 
         # per debugging
         self.last_root: Node | None = None
@@ -131,9 +131,7 @@ class MCTS:
             lmask[last_real] = False
 
         # inferenza del modello (se non supporta la mask internamente, filtriamo dopo)
-        action_idx, probs, value, top_idx, top_p = self.model.fwd_infer(
-            enc, scal, legal_mask=lmask.unsqueeze(0), top_k=self.top_k
-        )
+        action_idx, probs, value, top_idx, top_p = self.model.fwd_infer(enc, scal, legal_mask=lmask.unsqueeze(0), top_k=self.top_k)
 
         # azioni + priors dalla policy del modello
         if self.top_k is not None:
@@ -161,8 +159,8 @@ class MCTS:
         # ---- Scoring custom (policy × ppl × sparsity) ----
         init_ppl  = self.game.initial_ppl
         target_s  = self.game.target_sparsity
-        tol_frac  = float(getattr(self, "ppl_tol_frac", 0.02))  # plateau ±2%
-        alpha_ppl = float(getattr(self, "ppl_alpha", 0.02))     # ripidità oltre plateau
+        tol_frac  = float(getattr(self, "ppl_tol_frac", 0.02))
+        alpha_ppl = float(getattr(self, "ppl_alpha", 0.02))   
         w_s       = float(getattr(self, "w_sparsity", 0.3))
         s_beta    = float(getattr(self, "s_beta", 0.05))
         beta_pol  = float(getattr(self, "beta_policy", 1.0))

@@ -13,7 +13,7 @@ args = {
     "target_sparsity" : 0.2,
 
     # iper params per Alphazero
-    "num_episodes": 10,
+    "num_episodes": 5,
     "num_self_iteration" : 5,
     "num_epochs" : 5, # --> numero epoche per il modello
     "n_mosse_massimo" : 20,
