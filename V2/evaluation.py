@@ -13,6 +13,7 @@ def evaluate_current_model(model, args, save_plot: bool = True):
     sparsity_start = 1.0 - state.float().mean().item()
 
     while True:
+        state = game_eval.state.clone()
         action = mcts_eval.search(state)          
         print(action)
         state  = game_eval.do_action(action)      
