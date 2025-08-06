@@ -14,6 +14,7 @@ def evaluate_current_model(model, args, save_plot: bool = True):
 
     while True:
         action = mcts_eval.search(state)          
+        print(action)
         state  = game_eval.do_action(action)      
         state = game_eval.state
         reward, done = game_eval.get_value_and_terminated(state, depth=game_eval.numero_mossa, register=True)

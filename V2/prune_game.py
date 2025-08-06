@@ -6,7 +6,7 @@ from patches import _patch_gpt2_block, _patch_llama_block
 from utils import load_model, build_calib_dataset
 import math
 from collections import deque
-
+from collections import OrderedDict
 
 #TODO
 
@@ -65,7 +65,7 @@ class PruneGame():
         self.initial_state = self.state.clone() # stato iniziale fisso
 
         # TODO: da stare attenti ad un possibile POF sulla lunghezza delle sequenze
-        self.dataset = build_calib_dataset(self.nome_dataset, self.tokenizer, split="validation", nsamples=10, seq_len=128)
+        self.dataset = build_calib_dataset(self.nome_dataset, self.tokenizer, split="validation", nsamples=5, seq_len=128)
 
         self.ppl = self.compute_ppl()
         self.initial_ppl = self.ppl
@@ -82,6 +82,7 @@ class PruneGame():
         self.reward_history = []
         self.ppl_history = []
         self.mse_history = []
+        self.last_real_action = None
 
     def _cache_teacher_full(self, batch_size=64, dtype=torch.float16):
         self.model_victim.eval()
@@ -146,8 +147,58 @@ class PruneGame():
             ok_m = self.mse <= mse_target
         return ok_s and ok_m
 
-    
+    def ppl_from_state_or_cache(self, state):
+        if state.data_ptr() == self.state.data_ptr():  # stesso tensore
+            return float(self.ppl)
+        return self.compute_ppl_for_state(state)
+
+    @torch.no_grad()
     def get_value_and_terminated(self, state, depth=None, register=False):
+        # passi effettuati a questo nodo (viene passato da MCTS)
+        steps = self.numero_mossa if depth is None else depth
+
+        # metriche sullo stato ipotetico
+        s = 1.0 - state.float().mean().item()
+        target = self.target_sparsity
+        ppl_now = self.ppl_from_state_or_cache(state) 
+
+        # PPL: distanza relativa e termini
+        rel   = max(0.0, (ppl_now - self.initial_ppl) / (self.initial_ppl + 1e-8))
+        alpha = getattr(self, "ppl_alpha", 0.01)
+        tol   = getattr(self, "ppl_tol_frac", 0.02)
+        ppl_term = math.exp(- rel / (alpha + 1e-12))  # (0,1]
+
+        # success/fail conditions
+        hit_s = (s >= target)
+        hit_p = (rel <= tol)
+        limit = (steps >= self.limite_mosse)
+
+        
+        if hit_s and hit_p:
+            # successo pieno: chiudi subito
+            reward = 1.0
+            if register: self.reward_history.append(reward)
+            return reward, True
+
+        if not limit:
+            # continua la simulazione
+            return 0.0, False
+
+        # limite mosse: episodio termina senza successo pieno
+        # tie-break: preferisci PPL bassa (dominante) e vicinanza al target di sparsità
+        s_beta = getattr(self, "s_beta", 0.05)
+        s_peak = math.exp(-abs(s - target) / (s_beta + 1e-12))  # (0,1], max al target
+        eps_s  = getattr(self, "eps_sparsity_bonus", 0.1)       # piccolo peso
+
+        reward = min(1.0, ppl_term + eps_s * s_peak)
+
+        if register: self.reward_history.append(float(reward))
+        return float(reward), True
+
+
+
+
+    def get_value_and_terminated_v1(self, state, depth=None, register=False):
         """
         Ritorna (reward_finale, done) SOLO se episodio terminato.
         Altrimenti (0.0, False). Calcola PPL realmente ogni step come vuoi tu.
@@ -263,6 +314,7 @@ class PruneGame():
     def do_action(self, gid:int):
         self.toggle_gate(gid)
         self.numero_mossa += 1
+        self.last_real_action = gid       
         self.history.appendleft(self.state.clone())
         if self.eval_mode == "ppl":
             self.ppl = self.compute_ppl()  
@@ -270,6 +322,17 @@ class PruneGame():
         elif self.eval_mode == "mse":
             self.mse = self.compute_mse()
             self.mse_history.append(self.mse)
+
+    def legal_mask(self, state, is_root: bool, parent_action: int | None):
+        mask = torch.ones_like(state, dtype=torch.bool)
+        # vieta il revert immediato tra mosse reali
+        if is_root and self.last_real_action is not None:
+            mask[self.last_real_action] = False
+        # vieta anche il revert rispetto al padre nel tree
+        if parent_action is not None:
+            mask[parent_action] = False
+        return mask
+
 
     # sarebbe un toggle, senza veramente toccare la board -> utile per mcts
     def pensa_azione(self, state: torch.Tensor, action: int):
@@ -330,6 +393,47 @@ class PruneGame():
     @torch.no_grad()
     def compute_kl(self):
         pass
+
+    
+
+    def _state_key(self, state: torch.Tensor) -> bytes:
+        return state.detach().to('cpu', copy=False).contiguous().numpy().tobytes()
+
+    def _ensure_cache(self, cap=20000):
+        if not hasattr(self, "_ppl_cache"):
+            self._ppl_cache = OrderedDict()
+            self._ppl_cache_cap = cap
+
+    def clear_ppl_cache(self):
+        if hasattr(self, "_ppl_cache"):
+            self._ppl_cache.clear()
+
+    @torch.no_grad()
+    def compute_ppl_for_state(self, state: torch.Tensor, batch_size: int = 64) -> float:
+        self._ensure_cache()
+        k = self._state_key(state)
+        if k in self._ppl_cache:
+            v = self._ppl_cache.pop(k)     # move-to-end
+            self._ppl_cache[k] = v
+            return v
+
+        # snapshot
+        saved = [g.alpha.data.clone() for g in self.gates]
+        try:
+            for gid, gate in enumerate(self.gates):
+                gate.alpha.data.fill_(float(state[gid].item()))
+            ppl = self.compute_ppl(batch_size=batch_size)
+        finally:
+            for gate, val in zip(self.gates, saved):
+                gate.alpha.data.copy_(val)
+
+        # insert LRU
+        self._ppl_cache[k] = float(ppl)
+        if len(self._ppl_cache) > self._ppl_cache_cap:
+            self._ppl_cache.popitem(last=False)  # drop oldest
+        return float(ppl)
+
+
 
     @torch.no_grad()
     def plot_scacchiera(self, fname="gate_state.png"):

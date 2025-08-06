@@ -28,32 +28,41 @@ class AlphaZero:
     
     @torch.no_grad()
     def self_play(self):
-
         traj = []
-        state = self.game.reset_game()
+        _ = self.game.reset_game()
+        if hasattr(self.game, "clear_ppl_cache"):
+            self.game.clear_ppl_cache()
+        self.mcts.last_root = None
 
         while True:
+            # stato corrente PRIMA dell'azione
+            state = self.game.state.clone()
+
+            # pianifica da questo stato
             action = self.mcts.search(state)
+            root   = self.mcts.last_root
 
-            root = self.mcts.last_root
-            N = state.numel()
+            # π dai visit count alla radice (prima di agire)
+            N  = state.numel()
             pi = torch.zeros(N, dtype=torch.float32)
-            total_visits = 0
-            for child in root.children:
-                pi[child.action_taken] = child.visit_count
-                total_visits += child.visit_count
-            if total_visits > 0:
-                pi /= total_visits
+            tot = sum(c.visit_count for c in root.children)
+            if tot > 0:
+                for c in root.children:
+                    pi[c.action_taken] = c.visit_count / tot
 
-            # prendiamo l'ecoded state e tutto
+            # features pre-azione
             enc  = self.game.get_encoded_state(state).cpu()
-            scal = self.game.get_scalar().cpu().unsqueeze(0)  # (1,)
+            scal = self.game.get_scalar().cpu().unsqueeze(0)
 
-            # eseguiamo l'azione vera
+            # esegui l’azione e riusa il sottoalbero
             self.game.do_action(action)
-            
-            # check se abbiamo vinto o meno
-            reward, done = self.game.get_value_and_terminated(self.game.state, depth=self.game.numero_mossa, register=True)
+            if hasattr(self.mcts, "reuse_subtree"):
+                self.mcts.reuse_subtree(action)
+
+            # check fine episodio
+            reward, done = self.game.get_value_and_terminated(
+                self.game.state, depth=self.game.numero_mossa, register=True
+            )
             traj.append((enc, scal, pi.cpu(), None))
 
             if done:
@@ -62,6 +71,7 @@ class AlphaZero:
                 break
 
         return traj
+
 
     
     def train_on_memory(self, batch):
