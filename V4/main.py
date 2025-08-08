@@ -14,21 +14,21 @@ def pick_device():
 
 if __name__ == "__main__":
     device = pick_device()
-
+    print(device)
     args = {
         # --- Modello vittima & dataset HF ---
-        "model_name"   : "distilgpt2",   # es: "gpt2", "Qwen/Qwen2-0.5B"
+        "model_name"   : "meta-llama/Llama-2-7b-hf",#"distilgpt2",   # es: "gpt2", "Qwen/Qwen2-0.5B"
         "name_dataset" : "wikitext",     # "wikitext" => wikitext-2-raw-v1 (val)
         "device"       : device,
 
         # --- Target pruning ---
-        "target_sparsity"  : 0.50,       # frazione di gate OFF desiderata
+        "target_sparsity"  : 0.20,       # frazione di gate OFF desiderata
         "n_mosse_massimo"  : 20,         # orizzonte T
-        "eval_mode"        : "ppl",      # "ppl" | "mse"
+        "eval_mode"        : "kl",      # "ppl" | "mse"
 
         # --- AlphaZero loop ---
-        "num_episodes"      : 50,         # quante iterazioni globali
-        "num_self_iteration": 10,         # quanti episodi di self-play per iter
+        "num_episodes"      : 30,         # quante iterazioni globali
+        "num_self_iteration": 20,         # quanti episodi di self-play per iter
         "num_epochs"        : 5,         # passi di training per iter
         "batch_size"        : 32,
         "grad_clip"         : 1.0,
@@ -38,8 +38,8 @@ if __name__ == "__main__":
 
         # --- MCTS ---
         "C"             : 2.0,
-        "num_searches"  : 32,            # >7 per spazio azioni ampio
-        "top_k"         : None,          # abilita dopo warmup se vuoi
+        "num_searches"  : 12,            # >7 per spazio azioni ampio
+        "top_k"         : 8,          # abilita dopo warmup se vuoi
         "gamma"         : 0.97,          # preferisce piani corti
         "depth_penalty" : 0.01,          # piccolo costo per step
         "root_noise_eps": 0.25,          # Dirichlet alla root
