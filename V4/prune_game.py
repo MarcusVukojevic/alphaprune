@@ -77,7 +77,7 @@ class PruneGame:
 
         # dataset di calibrazione
         self.dataset = build_calib_dataset(self.nome_dataset, self.tokenizer,
-                                           split="validation", nsamples=args.get("calib_nsamples", 5), seq_len=28)
+                                           split="validation", nsamples=args.get("calib_nsamples", 5), seq_len=50) # 128 prima
 
         # metriche iniziali
         if self.eval_mode == "ppl":

@@ -4,7 +4,7 @@ import math, random
 import torch
 from node import Node
 from graphviz import Digraph
-from IPython.display import display
+#from IPython.display import display
 
 class MCTS:
     def __init__(self, game, model, args):
@@ -229,5 +229,5 @@ class MCTS:
                 recurse(child)
 
         recurse(root)
-        display(dot)
+        #display(dot)
         return best_action

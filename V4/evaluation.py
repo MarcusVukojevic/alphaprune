@@ -29,8 +29,8 @@ def evaluate_current_model(model, args, save_plot: bool = True):
     n_steps = game_eval.numero_mossa
 
     if save_plot:
-        game_eval.plot_scacchiera("eval_gate_state.png")
-        game_eval.plot_reward_history("reward_metric_curve.png")
+        game_eval.plot_scacchiera("4_eval_gate_state.png")
+        game_eval.plot_reward_history("4_reward_metric_curve.png")
 
     print("\n======  E V A L U A T I O N  ======\n")
     print(f"PPL baseline : {ppl_baseline:.2f}")
