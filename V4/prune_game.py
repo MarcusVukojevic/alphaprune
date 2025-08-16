@@ -1,5 +1,6 @@
 # prune_game.py
 import math
+import threading
 from collections import deque, OrderedDict
 
 import torch
@@ -77,7 +78,7 @@ class PruneGame:
 
         # dataset di calibrazione
         self.dataset = build_calib_dataset(self.nome_dataset, self.tokenizer,
-                                           split="validation", nsamples=args.get("calib_nsamples", 5), seq_len=50) # 128 prima
+                                           split="validation", nsamples=args.get("calib_nsamples", 5), seq_len=128)
 
         # metriche iniziali
         if self.eval_mode == "ppl":
@@ -105,9 +106,10 @@ class PruneGame:
         self.mse_history = []
         self.last_real_action = None
 
-        # cache LRU per metrica (ppl/kl/mse)
+        # cache LRU per metrica (ppl/kl/mse) + lock per parallelo
         self._metric_cache = OrderedDict()
         self._metric_cache_cap = args.get("metric_cache_cap", 20000)
+        self._metric_lock = threading.RLock()
 
     # ---------- Teacher cache ----------
     def _cache_teacher_full(self, batch_size=64, dtype=torch.float16):
@@ -115,16 +117,16 @@ class PruneGame:
         ref_lp, ref_logits, inputs = [], [], []
         with torch.no_grad():
             for i in range(0, len(self.dataset), batch_size):
-                j   = min(i + batch_size, len(self.dataset))
+                j = min(i + batch_size, len(self.dataset))
                 inp = torch.stack(self.dataset[i:j], dim=0).long().to(self.device)
                 out = self.model_victim(inp)
                 logits = out.logits                        # (B,L,V)
-                lp  = torch.log_softmax(logits, dim=-1)    # (B,L,V)
+                lp = torch.log_softmax(logits, dim=-1)     # (B,L,V)
                 ref_lp.append(lp.to(dtype).cpu())
                 ref_logits.append(logits.to(dtype).cpu())
                 inputs.append(inp.cpu())
         self.teacher_logprobs = torch.cat(ref_lp, dim=0)     # (N,L,V) on CPU fp16
-        self.teacher_logits   = torch.cat(ref_logits, dim=0) # (N,L,V) on CPU fp16
+        self.teacher_logits = torch.cat(ref_logits, dim=0)   # (N,L,V) on CPU fp16
         self.calib_inputs_cpu = torch.cat(inputs, dim=0)
 
     # ---------- Metriche ----------
@@ -151,7 +153,7 @@ class PruneGame:
         N = self.teacher_logprobs.size(0)
         tot, count = 0.0, 0
         for i in range(0, N, batch_size):
-            j   = min(i + batch_size, N)
+            j = min(i + batch_size, N)
             inp = self.calib_inputs_cpu[i:j].to(self.device)
             ref_logp = self.teacher_logprobs[i:j].to(self.device, dtype=torch.float32)  # (B,L,V)
             stu_logp = torch.log_softmax(self.model_victim(inp).logits, dim=-1).float()
@@ -169,7 +171,7 @@ class PruneGame:
         N = self.teacher_logits.size(0)
         tot, count = 0.0, 0
         for i in range(0, N, batch_size):
-            j   = min(i + batch_size, N)
+            j = min(i + batch_size, N)
             inp = self.calib_inputs_cpu[i:j].to(self.device)
             ref = self.teacher_logits[i:j].to(self.device, dtype=torch.float32)
             stu = self.model_victim(inp).logits.float()
@@ -198,6 +200,10 @@ class PruneGame:
     def clear_metric_cache(self):
         self._metric_cache.clear()
 
+    # alias per retro-compat (chiamato nel codice sequenziale esistente)
+    def clear_ppl_cache(self):
+        self.clear_metric_cache()
+
     @torch.no_grad()
     def _compute_metric_for_state(self, state: torch.Tensor, batch_size: int = 64) -> float:
         """Calcola la metrica corrente (ppl/kl/mse) per uno stato ipotetico."""
@@ -220,8 +226,7 @@ class PruneGame:
 
     @torch.no_grad()
     def metric_from_state_or_cache(self, state: torch.Tensor) -> float:
-        """Restituisce la metrica per 'state', sfruttando cache e stato attuale."""
-        # se è proprio lo stesso tensore di self.state, usa il valore attuale
+        """Sequenziale: restituisce la metrica per 'state', usando cache e stato attuale."""
         if state.data_ptr() == self.state.data_ptr():
             if self.eval_mode == "ppl":
                 return float(getattr(self, "ppl"))
@@ -237,6 +242,39 @@ class PruneGame:
         val = self._compute_metric_for_state(state)
         self._cache_put(k, val)
         return val
+
+    @torch.no_grad()
+    def evaluate_metric_shared(self, state: torch.Tensor) -> float:
+        """
+        Parallelo: valutazione thread-safe
+        1) controlla LRU condivisa,
+        2) se miss, applica temporaneamente la maschera al modello, calcola metrica,
+           ripristina e aggiorna la cache.
+        """
+        k = self._state_key(state)
+        with self._metric_lock:
+            hit = self._cache_get(k)
+            if hit is not None:
+                return hit
+
+            saved = [g.alpha.data.clone() for g in self.gates]
+            try:
+                for gid, gate in enumerate(self.gates):
+                    gate.alpha.data.fill_(float(state[gid].item()))
+                if self.eval_mode == "ppl":
+                    val = self.compute_ppl()
+                elif self.eval_mode == "kl":
+                    val = self.compute_kl()
+                elif self.eval_mode == "mse":
+                    val = self.compute_mse()
+                else:
+                    raise ValueError(f"Unknown eval_mode: {self.eval_mode}")
+            finally:
+                for gate, val_alpha in zip(self.gates, saved):
+                    gate.alpha.data.copy_(val_alpha)
+
+            self._cache_put(k, float(val))
+            return float(val)
 
     # ---------- Interfaccia AlphaZero ----------
     def reset_game(self):
@@ -274,15 +312,15 @@ class PruneGame:
 
         # map metrica -> (term weight, tol)
         if self.eval_mode == "ppl":
-            rel   = max(0.0, (m_now - self.initial_ppl) / (self.initial_ppl + 1e-8))
+            rel = max(0.0, (m_now - self.initial_ppl) / (self.initial_ppl + 1e-8))
             m_term = math.exp(- rel / (self.ppl_alpha + 1e-12))  # (0,1]
-            m_ok   = (rel <= self.ppl_tol_frac)
+            m_ok = (rel <= self.ppl_tol_frac)
         elif self.eval_mode == "kl":
             m_term = math.exp(- m_now / (self.kl_alpha + 1e-12))
-            m_ok   = (m_now <= self.kl_tol)
+            m_ok = (m_now <= self.kl_tol)
         elif self.eval_mode == "mse":
             m_term = math.exp(- m_now / (self.mse_alpha + 1e-12))
-            m_ok   = (m_now <= self.mse_tol)
+            m_ok = (m_now <= self.mse_tol)
         else:
             raise ValueError
 
@@ -310,7 +348,7 @@ class PruneGame:
     # features per la rete
     def get_encoded_state(self, state: torch.Tensor):
         T, N = self.limite_mosse, state.numel()
-        enc  = torch.zeros((T, N), dtype=torch.float32, device=self.device)
+        enc = torch.zeros((T, N), dtype=torch.float32, device=self.device)
         enc[0] = state.float()  # stato corrente
         for t, past_state in enumerate(self.history, start=1):
             if t >= T:
@@ -332,7 +370,7 @@ class PruneGame:
         return True
 
     def do_action(self, gid: int):
-        ok = self.disable_gate(gid)
+        _ = self.disable_gate(gid)
         self.numero_mossa += 1
         self.last_real_action = gid
         self.history.appendleft(self.state.clone())
@@ -365,7 +403,7 @@ class PruneGame:
         nuovo_stato[action] = 0
         return nuovo_stato
 
-    # --- plot utils (uguali a prima) ---
+    # --- plot utils ---
     @torch.no_grad()
     def plot_scacchiera(self, fname="gate_state.png"):
         import matplotlib.pyplot as plt
@@ -378,7 +416,9 @@ class PruneGame:
         ax.set_yticks(range(n_layers))
         ax.set_yticklabels([f"L{i}" for i in range(n_layers)])
         ax.set_title("Gate state (1=ON, 0=OFF)")
-        import matplotlib
+        import matplotlib  # noqa: F401
+        import matplotlib.pyplot as plt  # noqa: F401
+        import numpy as np  # noqa: F401
         plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
         plt.tight_layout()
         plt.savefig(fname, dpi=150)
