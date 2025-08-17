@@ -1,4 +1,3 @@
-# alphazero.py
 import os
 import math
 import random
@@ -91,7 +90,7 @@ class AlphaZero:
     class _EpisodeEnv:
         """
         Env leggero per episodio, non tocca lo stato interno del PruneGame.
-        Delegando la metrica a game.evaluate_metric_shared_stage() (lock + LRU),
+        Delegando la metrica a core.evaluate_metric_shared(..., stage_idx),
         più episodi possono coesistere in parallelo condividendo il modello.
         """
         def __init__(self, core_game, args):
@@ -127,9 +126,6 @@ class AlphaZero:
             self.ppl = getattr(core_game, "initial_ppl", None)
             self.kl = 0.0 if self.eval_mode == "kl" else None
             self.mse = 0.0 if self.eval_mode == "mse" else None
-
-            # stage finale per le ricompense
-            self.final_stage = getattr(core_game, "final_stage_idx", 0)
 
         def reset_game(self):
             self.state.copy_(self.initial_state)
@@ -169,21 +165,26 @@ class AlphaZero:
             s2[action] = 0
             return s2
 
+        # ---------- Surrogato progressivo ----------
         @torch.no_grad()
-        def metric_from_state_or_cache(self, state: torch.Tensor) -> float:
-            # per compatibilità, ma ora usiamo la progressiva finale
-            return self.core.evaluate_metric_shared_stage(state, self.final_stage)
+        def metric_progressive(self, state: torch.Tensor, stage_idx: int | None):
+            return self.core.evaluate_metric_shared(state, stage_idx=stage_idx)
+
+        def get_stage_baseline_for_ppl(self, stage_idx: int):
+            return self.core.get_stage_baseline_for_ppl(stage_idx)
 
         @torch.no_grad()
         def get_value_and_terminated(self, state, depth=None, register=False):
+            # NB: qui lasciamo il check su metrica "full" per stabilità del terminal check
             steps = self.numero_mossa if depth is None else depth
             s = 1.0 - state.float().mean().item()
             target = self.target_sparsity
-            m_now = self.core.evaluate_metric_shared_stage(state, self.final_stage)
+
+            # valutazione completa (non surrogata) per la condizione di stop
+            m_now = self.core.metric_from_state_or_cache(state)
 
             if self.eval_mode == "ppl":
-                # baseline coerente con lo stage
-                init_ppl = self.core.initial_ppl_stages[self.final_stage]
+                init_ppl = self.core.initial_ppl
                 rel = max(0.0, (m_now - init_ppl) / (init_ppl + 1e-8))
                 m_term = math.exp(- rel / (self.ppl_alpha + 1e-12))
                 m_ok = (rel <= self.ppl_tol_frac)
@@ -223,8 +224,8 @@ class AlphaZero:
             self.numero_mossa += 1
             self.last_real_action = gid
             self.history.appendleft(self.state.clone())
-            # aggiorna metrica corrente (solo logging)
-            m = self.core.evaluate_metric_shared_stage(self.state, self.final_stage)
+            # logging only: non necessario ai fini della policy
+            m = self.core.metric_from_state_or_cache(self.state)
             if self.eval_mode == "ppl":
                 self.ppl = m
             elif self.eval_mode == "kl":
