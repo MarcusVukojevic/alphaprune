@@ -71,7 +71,7 @@ class AlphaZero:
             if hasattr(self.mcts, "reuse_subtree"):
                 self.mcts.reuse_subtree(action)
 
-            # check fine episodio
+            # check fine episodio (usa value/metrica SURROGATO nel game)
             reward, done = self.game.get_value_and_terminated(
                 self.game.state, depth=self.game.numero_mossa, register=True
             )
@@ -90,7 +90,7 @@ class AlphaZero:
     class _EpisodeEnv:
         """
         Env leggero per episodio, non tocca lo stato interno del PruneGame.
-        Delegando la metrica a core.evaluate_metric_shared(..., stage_idx),
+        Delegando la metrica a core.evaluate_metric_shared() (lock + LRU),
         più episodi possono coesistere in parallelo condividendo il modello.
         """
         def __init__(self, core_game, args):
@@ -130,11 +130,20 @@ class AlphaZero:
         def reset_game(self):
             self.state.copy_(self.initial_state)
             self.numero_mossa = 0
-            self.history.clear()
+            from collections import deque as _deque
+            self.history = _deque(maxlen=self.limite_mosse - 1)
             self.history.appendleft(self.initial_state)
-            self.reward_history.clear()
+            self.reward_history = []
             self.last_real_action = None
             return self.state
+
+        # ---------- Surrogato progressivo ----------
+        @torch.no_grad()
+        def metric_progressive(self, state: torch.Tensor, stage_idx: int | None):
+            return self.core.evaluate_metric_shared(state, stage_idx=stage_idx)
+
+        def get_stage_baseline_for_ppl(self, stage_idx: int):
+            return self.core.get_stage_baseline_for_ppl(stage_idx)
 
         def get_encoded_state(self, state: torch.Tensor):
             T, N = self.limite_mosse, state.numel()
@@ -165,36 +174,35 @@ class AlphaZero:
             s2[action] = 0
             return s2
 
-        # ---------- Surrogato progressivo ----------
-        @torch.no_grad()
-        def metric_progressive(self, state: torch.Tensor, stage_idx: int | None):
-            return self.core.evaluate_metric_shared(state, stage_idx=stage_idx)
-
-        def get_stage_baseline_for_ppl(self, stage_idx: int):
-            return self.core.get_stage_baseline_for_ppl(stage_idx)
-
         @torch.no_grad()
         def get_value_and_terminated(self, state, depth=None, register=False):
-            # NB: qui lasciamo il check su metrica "full" per stabilità del terminal check
+            """
+            Valore/terminazione durante self-play:
+            usa il SURROGATO per qualità, niente PPL full qui.
+            """
             steps = self.numero_mossa if depth is None else depth
             s = 1.0 - state.float().mean().item()
             target = self.target_sparsity
 
-            # valutazione completa (non surrogata) per la condizione di stop
-            m_now = self.core.metric_from_state_or_cache(state)
+            # usa lo stage più economico per il value shaping
+            stage_idx = 0
+            m_now = self.metric_progressive(state, stage_idx=stage_idx)
 
             if self.eval_mode == "ppl":
-                init_ppl = self.core.initial_ppl
+                init_ppl = self.get_stage_baseline_for_ppl(stage_idx)
                 rel = max(0.0, (m_now - init_ppl) / (init_ppl + 1e-8))
-                m_term = math.exp(- rel / (self.ppl_alpha + 1e-12))
-                m_ok = (rel <= self.ppl_tol_frac)
+                ppl_alpha = self.ppl_alpha
+                ppl_tol   = self.ppl_tol_frac
+                m_term = math.exp(- rel / (ppl_alpha + 1e-12))
+                m_ok   = (rel <= ppl_tol)
             elif self.eval_mode == "kl":
                 m_term = math.exp(- m_now / (self.kl_alpha + 1e-12))
-                m_ok = (m_now <= self.kl_tol)
+                m_ok   = (m_now <= self.kl_tol)
             else:
                 m_term = math.exp(- m_now / (self.mse_alpha + 1e-12))
-                m_ok = (m_now <= self.mse_tol)
+                m_ok   = (m_now <= self.mse_tol)
 
+            # di default, NON richiediamo qualità per early-stop (come prima)
             hit_s = (s >= target)
             hit_q = m_ok if self.require_metric_ok_for_stop else True
             limit = (steps >= self.limite_mosse)
@@ -215,23 +223,22 @@ class AlphaZero:
             return float(reward), True
 
         def do_action(self, gid: int):
+            """Spegne 1 gate; NIENTE PPL full qui."""
             if int(self.state[gid].item()) == 0:
                 self.numero_mossa += 1
                 self.last_real_action = gid
                 self.history.appendleft(self.state.clone())
                 return self.state
+
             self.state[gid] = 0
             self.numero_mossa += 1
             self.last_real_action = gid
             self.history.appendleft(self.state.clone())
-            # logging only: non necessario ai fini della policy
-            m = self.core.metric_from_state_or_cache(self.state)
-            if self.eval_mode == "ppl":
-                self.ppl = m
-            elif self.eval_mode == "kl":
-                self.kl = m
-            else:
-                self.mse = m
+
+            # opzionale: logging surrogato molto leggero (disattivato di default)
+            if bool(self.args.get("log_progressive_metric", False)):
+                _ = self.metric_progressive(self.state, stage_idx=0)
+
             return self.state
 
     @torch.no_grad()
