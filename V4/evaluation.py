@@ -1,14 +1,19 @@
+# evaluation.py
 from prune_game import PruneGame
 from mcts import MCTS
 
 
 def evaluate_current_model(model, args, save_plot: bool = True):
-    # crea un nuovo env
-    game_eval = PruneGame(args)
+    # Forza eval in PPL, lasciando inalterato tutto il resto
+    args_eval = dict(args)
+    args_eval["eval_mode"] = "ppl"
+
+    # crea un nuovo env (ricarica modello vittima patchato, dataset calib, ecc.)
+    game_eval = PruneGame(args_eval)
     _ = game_eval.reset_game()
 
-    # MCTS eval con stessi parametri
-    mcts_eval = MCTS(game_eval, model, args)
+    # MCTS eval con stessi parametri (num_searches, ecc.)
+    mcts_eval = MCTS(game_eval, model, args_eval)
 
     ppl_baseline = game_eval.initial_ppl
     state = game_eval.state
@@ -19,18 +24,22 @@ def evaluate_current_model(model, args, save_plot: bool = True):
         action = mcts_eval.search(state)
         state = game_eval.do_action(action)
         state = game_eval.state
-        reward, done = game_eval.get_value_and_terminated(state, depth=game_eval.numero_mossa, register=True)
+        reward, done = game_eval.get_value_and_terminated(
+            state, depth=game_eval.numero_mossa, register=True
+        )
         if done:
             break
 
     state = game_eval.state
-    ppl_final = game_eval.compute_ppl()
+    ppl_final = game_eval.compute_ppl()  # usa lo shim, coerente con calib corrente
     sparsity_f = 1.0 - state.float().mean().item()
     n_steps = game_eval.numero_mossa
 
+    # suffix esperimento se presente
+    suffix = args.get("plot_suffix", "")
     if save_plot:
-        game_eval.plot_scacchiera("4_eval_gate_state.png")
-        game_eval.plot_reward_history("4_reward_metric_curve.png")
+        game_eval.plot_scacchiera(f"4_eval_gate_state{suffix}.png")
+        game_eval.plot_reward_history(f"4_reward_metric_curve{suffix}.png")
 
     print("\n======  E V A L U A T I O N  ======\n")
     print(f"PPL baseline : {ppl_baseline:.2f}")
@@ -40,7 +49,7 @@ def evaluate_current_model(model, args, save_plot: bool = True):
     print(f"Mosse fatte  : {n_steps}/{args['n_mosse_massimo']}")
     print(f"Reward finale: {reward:.4f}")
     if save_plot:
-        print("🔖  plot stato porte in → eval_gate_state.png")
+        print(f"🔖  plot stato porte in → 4_eval_gate_state{suffix}.png")
 
     return {
         "ppl_baseline": ppl_baseline,
@@ -48,5 +57,5 @@ def evaluate_current_model(model, args, save_plot: bool = True):
         "sparsity_start": sparsity_start,
         "sparsity_final": sparsity_f,
         "steps": n_steps,
-        "reward" : reward,
+        "reward": reward,
     }

@@ -21,11 +21,13 @@ if __name__ == "__main__":
         "model_name": "meta-llama/Llama-2-7b-hf",  # es: "distilgpt2", "gpt2", "Qwen/Qwen2-0.5B"
         "name_dataset": "wikitext",                # "wikitext" => wikitext-2-raw-v1 (val)
         "device": device,
+        "calib_nsamples": 5,
+        "calib_seq_len": 128,
 
         # --- Target pruning ---
         "target_sparsity": 0.50,       # frazione di gate OFF desiderata
         "n_mosse_massimo": 20,         # orizzonte T
-        "eval_mode": "ppl",            # "ppl" | "kl" | "mse"
+        "eval_mode": "kl",             # "ppl" | "kl" | "mse"  (consigliato: "kl" per velocità/robustezza)
 
         # --- AlphaZero loop ---
         "num_episodes": 50,            # quante iterazioni globali
@@ -51,6 +53,13 @@ if __name__ == "__main__":
         "ppl_alpha": 0.05,             # morbidezza penalità PPL
         "s_beta": 0.05,                # picco su target sparsity
         "eps_sparsity_bonus": 0.2,     # bonus su vicinanza al target
+
+        # --- Progressive eval (stato) ---
+        "progressive_eval": True,          # abilita multi-stadio a livello di STATO (consigliato)
+        # se None, auto: [(2,32), (4,64), (full,full)]
+        "prog_stages": None,               # es. [(2,32), (4,64), (5,128)]
+        "prog_refine_topk": 8,             # n figli rifiniti a stage successivo in MCTS.expand
+        "prog_refine_to_stage": 1,         # 0-based index dello stage di raffinamento
 
         # --- Parallel / Esperimenti ---
         "parallel": True,              # << flag: True = self-play parallelo, False = sequenziale

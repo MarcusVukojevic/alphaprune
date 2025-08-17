@@ -4,7 +4,7 @@ import math, random
 import torch
 from node import Node
 from graphviz import Digraph
-#from IPython.display import display
+# from IPython.display import display
 
 class MCTS:
     def __init__(self, game, model, args):
@@ -24,6 +24,11 @@ class MCTS:
         self.w_sparsity           = args.get("w_sparsity", 0.3)
         self.beta_policy          = args.get("beta_policy", 1.0)
         self.beta_ppl             = args.get("beta_ppl", 1.0)  # usato anche per KL/MSE come "qualità"
+
+        # progressive eval
+        self.prog_enabled         = bool(args.get("progressive_eval", True))
+        self.prog_refine_topk     = int(args.get("prog_refine_topk", 8))
+        self.prog_refine_to_stage = int(args.get("prog_refine_to_stage", 1))
 
         self.last_root: Node | None = None
 
@@ -141,21 +146,61 @@ class MCTS:
         beta_pol  = float(getattr(self, "beta_policy", 1.0))
         beta_q    = float(getattr(self, "beta_ppl", 1.0))  # riuso come peso qualità
 
-        scored = []
+        stage0 = 0
+        refine_to = min(self.prog_refine_to_stage, getattr(self.game, "final_stage_idx", 0))
+
+        tmp_list = []
         for gid, p in zip(actions, priors):
             child_state = self.game.pensa_azione(node.state, gid)
             if int(node.state[gid].item()) == 0:
                 continue
 
-            # qualità: ppl/kl/mse più bassa è meglio → peso exp(-x/alpha) o plateau ppl
-            m_child = self.game.metric_from_state_or_cache(child_state)
+            # --- qualità sullo STATO (stage 0) ---
+            if self.prog_enabled:
+                m_child = self.game.metric_progressive(child_state, stage_idx=stage0)
+                init_ppl_stage0 = getattr(self.game, "initial_ppl_stages", None)
+            else:
+                m_child = self.game.metric_from_state_or_cache(child_state)
+                init_ppl_stage0 = None
+
+            # mappa metrica -> peso qualità
             if self.game.eval_mode == "ppl":
-                init_ppl = getattr(self.game, "initial_ppl")
-                rel = max(0.0, (m_child - init_ppl) / (init_ppl + 1e-8))
+                if init_ppl_stage0 is None:
+                    init_ref = getattr(self.game, "initial_ppl")
+                else:
+                    init_ref = init_ppl_stage0[stage0]
+                rel = max(0.0, (m_child - init_ref) / (init_ref + 1e-8))
                 q_w = 1.0 if rel <= tol_frac else math.exp(-(rel - tol_frac) / (alpha_val + 1e-12))
             else:
                 q_w = math.exp(- m_child / (alpha_val + 1e-12))
 
+            # salviamo per possibile raffinamento
+            tmp_list.append([gid, child_state, p, q_w, m_child])
+
+        # --- raffinamento su top-k (qualità) ---
+        if self.prog_enabled and self.prog_refine_topk > 0 and len(tmp_list) > 0 and refine_to > stage0:
+            # ordina per qualità decrescente (q_w alto = meglio)
+            tmp_list.sort(key=lambda x: x[3], reverse=True)
+            k = min(self.prog_refine_topk, len(tmp_list))
+            for i in range(k):
+                gid, child_state, p, q_w_old, _m_old = tmp_list[i]
+                m_ref = self.game.metric_progressive(child_state, stage_idx=refine_to)
+                # ricalcola qualità sullo stage raffinato
+                if self.game.eval_mode == "ppl":
+                    init_ref = self.game.initial_ppl_stages[refine_to]
+                    rel = max(0.0, (m_ref - init_ref) / (init_ref + 1e-8))
+                    q_ref = 1.0 if rel <= tol_frac else math.exp(-(rel - tol_frac) / (alpha_val + 1e-12))
+                else:
+                    q_ref = math.exp(- m_ref / (alpha_val + 1e-12))
+                tmp_list[i] = [gid, child_state, p, q_ref, m_ref]
+
+        # --- costruisci i figli con prior normalizzate ---
+        if not tmp_list:
+            node.backpropagate(value.item())
+            return
+
+        scored = []
+        for gid, child_state, p, q_w, _m in tmp_list:
             if w_s > 0.0:
                 s_child  = 1.0 - child_state.float().mean().item()
                 s_peak   = math.exp(-abs(s_child - target_s) / (s_beta + 1e-12))
@@ -164,16 +209,10 @@ class MCTS:
                 combo    = (p ** beta_pol) * (q_w ** beta_q) * (1.0 + w_s * s_term)
             else:
                 combo    = (p ** beta_pol) * (q_w ** beta_q)
-
             scored.append((gid, child_state, max(combo, 1e-12)))
-
-        if not scored:
-            node.backpropagate(value.item())
-            return
 
         Z = sum(sc for _, _, sc in scored)
         invZ = 1.0 / (Z + 1e-12)
-
         for gid, child_state, sc in scored:
             node.add_child(child_state, action=gid, prior=float(sc * invZ))
 
@@ -229,5 +268,5 @@ class MCTS:
                 recurse(child)
 
         recurse(root)
-        #display(dot)
+        # display(dot)
         return best_action

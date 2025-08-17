@@ -63,6 +63,26 @@ class PruneGame:
         self.s_beta = args.get("s_beta", 0.05)
         self.eps_sparsity_bonus = args.get("eps_sparsity_bonus", 0.2)
 
+        # Progressive eval config
+        self.prog_enabled = bool(args.get("progressive_eval", True))
+        self.calib_nsamples = int(args.get("calib_nsamples", 5))
+        self.calib_seq_len  = int(args.get("calib_seq_len", 128))
+        # lista di (nsamples, seq_len); None/<=0 -> full
+        user_stages = args.get("prog_stages", None)
+        if user_stages is None:
+            # default: (2,32) -> (4,64) -> (full, full)
+            s1 = (min(2, self.calib_nsamples), min(32, self.calib_seq_len))
+            s2 = (min(4, self.calib_nsamples), min(64, self.calib_seq_len))
+            s3 = (self.calib_nsamples, self.calib_seq_len)
+            self.prog_stages = [s1, s2, s3]
+        else:
+            self.prog_stages = []
+            for ns, sl in user_stages:
+                ns_eff = self.calib_nsamples if (ns is None or ns <= 0) else min(int(ns), self.calib_nsamples)
+                sl_eff = self.calib_seq_len  if (sl is None or sl <= 0) else min(int(sl), self.calib_seq_len)
+                self.prog_stages.append((ns_eff, sl_eff))
+        self.final_stage_idx = len(self.prog_stages) - 1
+
         # modello e tokenizer
         self.model_victim = PruneGame._ensure_patched(
             load_model(self.model_name, device=self.device, eightbit=self.eight_bit)
@@ -77,23 +97,31 @@ class PruneGame:
         self.initial_state = self.state.clone()
 
         # dataset di calibrazione
-        self.dataset = build_calib_dataset(self.nome_dataset, self.tokenizer,
-                                           split="validation", nsamples=args.get("calib_nsamples", 5), seq_len=128)
+        self.dataset = build_calib_dataset(
+            self.nome_dataset, self.tokenizer,
+            split="validation",
+            nsamples=self.calib_nsamples,
+            seq_len=self.calib_seq_len
+        )
 
-        # metriche iniziali
+        # metriche iniziali & teacher cache
         if self.eval_mode == "ppl":
-            self.ppl = self.compute_ppl()
+            self.ppl = self.compute_ppl_subset(self.calib_nsamples, self.calib_seq_len)
             self.initial_ppl = self.ppl
+            # baseline per-stage per coerenza con progressive
+            self.initial_ppl_stages = []
+            for (ns, sl) in self.prog_stages:
+                self.initial_ppl_stages.append(self.compute_ppl_subset(ns, sl))
             print("--> ppl iniziale:", self.ppl)
         else:
-            # Precalcola teacher logits/logprobs per KL/MSE
+            # Precalcola teacher logits/logprobs per KL/MSE (full calib)
             self._cache_teacher_full()
             if self.eval_mode == "kl":
-                self.kl = self.compute_kl()
-                self.initial_kl = 0.0  # teacher vs teacher = 0
+                self.kl = self.compute_kl_subset(self.calib_nsamples, self.calib_seq_len)
+                self.initial_kl = 0.0  # teacher vs teacher = 0 ovunque
                 print("--> kl iniziale (teacher vs teacher): 0.0")
             elif self.eval_mode == "mse":
-                self.mse = self.compute_mse()  # MSE logits tra student e teacher (inizio: 0)
+                self.mse = self.compute_mse_subset(self.calib_nsamples, self.calib_seq_len)
                 self.initial_mse = 0.0
                 print("--> mse iniziale (teacher vs teacher): 0.0")
 
@@ -106,7 +134,7 @@ class PruneGame:
         self.mse_history = []
         self.last_real_action = None
 
-        # cache LRU per metrica (ppl/kl/mse) + lock per parallelo
+        # cache LRU per metrica (ppl/kl/mse) + lock per parallelo (stage-aware)
         self._metric_cache = OrderedDict()
         self._metric_cache_cap = args.get("metric_cache_cap", 20000)
         self._metric_lock = threading.RLock()
@@ -126,38 +154,40 @@ class PruneGame:
                 ref_logits.append(logits.to(dtype).cpu())
                 inputs.append(inp.cpu())
         self.teacher_logprobs = torch.cat(ref_lp, dim=0)     # (N,L,V) on CPU fp16
-        self.teacher_logits = torch.cat(ref_logits, dim=0)   # (N,L,V) on CPU fp16
+        self.teacher_logits   = torch.cat(ref_logits, dim=0) # (N,L,V) on CPU fp16
         self.calib_inputs_cpu = torch.cat(inputs, dim=0)
 
-    # ---------- Metriche ----------
+    # ---------- Metriche (subset-friendly) ----------
     @torch.no_grad()
-    def compute_ppl(self, batch_size: int = 64) -> float:
+    def compute_ppl_subset(self, nsamples: int, seq_len: int, batch_size: int = 64) -> float:
+        """PPL su sottoinsieme (nsamples, seq_len)."""
         self.model_victim.eval()
+        ns = min(nsamples, len(self.dataset))
         total_nll, total_tok = 0.0, 0
-        loader = self.dataset
         dev = self.device
-        for i in range(0, len(loader), batch_size):
-            j = min(i + batch_size, len(loader))
-            inp = torch.stack(loader[i:j], dim=0).long().to(dev)
+        # loop per batch ma troncando seq_len
+        for i in range(0, ns, batch_size):
+            j = min(i + batch_size, ns)
+            inp = torch.stack(self.dataset[i:j], dim=0).long()[:, :seq_len].to(dev)
             outputs = self.model_victim(inp, labels=inp, use_cache=False)
             loss = outputs.loss.float()
             total_nll += loss.item() * (inp.size(1) - 1)
             total_tok += (inp.size(1) - 1)
-        ppl = math.exp(total_nll / total_tok)
+        ppl = math.exp(total_nll / max(total_tok, 1))
         return ppl
 
     @torch.no_grad()
-    def compute_kl(self, batch_size: int = 64) -> float:
-        """KL(teacher || student) medio su calib set."""
+    def compute_kl_subset(self, nsamples: int, seq_len: int, batch_size: int = 64) -> float:
+        """KL(teacher || student) su subset (nsamples, seq_len)."""
         self.model_victim.eval()
-        N = self.teacher_logprobs.size(0)
+        N = min(nsamples, self.teacher_logprobs.size(0))
+        L = min(seq_len, self.teacher_logprobs.size(1))
         tot, count = 0.0, 0
         for i in range(0, N, batch_size):
-            j = min(i + batch_size, N)
-            inp = self.calib_inputs_cpu[i:j].to(self.device)
-            ref_logp = self.teacher_logprobs[i:j].to(self.device, dtype=torch.float32)  # (B,L,V)
+            j   = min(i + batch_size, N)
+            inp = self.calib_inputs_cpu[i:j, :L].to(self.device)
+            ref_logp = self.teacher_logprobs[i:j, :L].to(self.device, dtype=torch.float32)  # (B,L,V)
             stu_logp = torch.log_softmax(self.model_victim(inp).logits, dim=-1).float()
-            # KL = sum pT * (log pT - log pS)
             kl = (ref_logp.exp() * (ref_logp - stu_logp)).sum(dim=-1).mean().item()
             bsz = (j - i)
             tot += kl * bsz
@@ -165,15 +195,16 @@ class PruneGame:
         return tot / max(count, 1)
 
     @torch.no_grad()
-    def compute_mse(self, batch_size=64) -> float:
-        """MSE tra logits teacher e student."""
+    def compute_mse_subset(self, nsamples: int, seq_len: int, batch_size=64) -> float:
+        """MSE logits teacher vs student su subset."""
         self.model_victim.eval()
-        N = self.teacher_logits.size(0)
+        N = min(nsamples, self.teacher_logits.size(0))
+        L = min(seq_len, self.teacher_logits.size(1))
         tot, count = 0.0, 0
         for i in range(0, N, batch_size):
-            j = min(i + batch_size, N)
-            inp = self.calib_inputs_cpu[i:j].to(self.device)
-            ref = self.teacher_logits[i:j].to(self.device, dtype=torch.float32)
+            j   = min(i + batch_size, N)
+            inp = self.calib_inputs_cpu[i:j, :L].to(self.device)
+            ref = self.teacher_logits[i:j, :L].to(self.device, dtype=torch.float32)
             stu = self.model_victim(inp).logits.float()
             mse = torch.mean((stu - ref) ** 2).item()
             bsz = (j - i)
@@ -181,9 +212,20 @@ class PruneGame:
             count += bsz
         return tot / max(count, 1)
 
-    # ---------- Cache metrica per stati ipotetici ----------
+    # ---------- Cache metrica per stati/stage ----------
     def _state_key(self, state: torch.Tensor) -> bytes:
         return state.detach().to('cpu', copy=False).contiguous().numpy().tobytes()
+
+    def _stage_key(self, stage_idx: int) -> bytes:
+        return f"|stage={int(stage_idx)}|".encode("utf-8")
+
+    def _state_stage_key(self, state: torch.Tensor, stage_idx: int) -> bytes:
+        return self._state_key(state) + self._stage_key(stage_idx)
+
+    @torch.no_grad()
+    def compute_ppl(self, batch_size: int = 64) -> float:
+        """Compat: PPL usando il subset 'full' di calibrazione corrente (nsamples, seq_len)."""
+        return self.compute_ppl_subset(self.calib_nsamples, self.calib_seq_len, batch_size)
 
     def _cache_get(self, k):
         if k in self._metric_cache:
@@ -205,19 +247,20 @@ class PruneGame:
         self.clear_metric_cache()
 
     @torch.no_grad()
-    def _compute_metric_for_state(self, state: torch.Tensor, batch_size: int = 64) -> float:
-        """Calcola la metrica corrente (ppl/kl/mse) per uno stato ipotetico."""
+    def _compute_metric_for_state_stage(self, state: torch.Tensor, stage_idx: int) -> float:
+        """Calcola la metrica corrente (ppl/kl/mse) per uno stato ipotetico allo STAGE indicato."""
+        ns, sl = self.prog_stages[stage_idx]
         # snapshot
         saved = [g.alpha.data.clone() for g in self.gates]
         try:
             for gid, gate in enumerate(self.gates):
                 gate.alpha.data.fill_(float(state[gid].item()))
             if self.eval_mode == "ppl":
-                return self.compute_ppl(batch_size=batch_size)
+                return self.compute_ppl_subset(ns, sl)
             elif self.eval_mode == "kl":
-                return self.compute_kl(batch_size=batch_size)
+                return self.compute_kl_subset(ns, sl)
             elif self.eval_mode == "mse":
-                return self.compute_mse(batch_size=batch_size)
+                return self.compute_mse_subset(ns, sl)
             else:
                 raise ValueError(f"Unknown eval_mode: {self.eval_mode}")
         finally:
@@ -225,54 +268,32 @@ class PruneGame:
                 gate.alpha.data.copy_(val)
 
     @torch.no_grad()
-    def metric_from_state_or_cache(self, state: torch.Tensor) -> float:
-        """Sequenziale: restituisce la metrica per 'state', usando cache e stato attuale."""
-        if state.data_ptr() == self.state.data_ptr():
-            if self.eval_mode == "ppl":
-                return float(getattr(self, "ppl"))
-            elif self.eval_mode == "kl":
-                return float(getattr(self, "kl", 0.0))
-            elif self.eval_mode == "mse":
-                return float(getattr(self, "mse", 0.0))
-
-        k = self._state_key(state)
-        hit = self._cache_get(k)
-        if hit is not None:
-            return hit
-        val = self._compute_metric_for_state(state)
-        self._cache_put(k, val)
-        return val
+    def metric_progressive(self, state: torch.Tensor, stage_idx: int | None = None) -> float:
+        """API comoda: metrica di stato con stage (default = finale). Thread-safe."""
+        if stage_idx is None:
+            stage_idx = self.final_stage_idx
+        return self.evaluate_metric_shared_stage(state, stage_idx)
 
     @torch.no_grad()
-    def evaluate_metric_shared(self, state: torch.Tensor) -> float:
+    def metric_from_state_or_cache(self, state: torch.Tensor) -> float:
+        """Compat: restituisce la metrica per 'state' allo STAGE FINALE (usa cache+lock)."""
+        return self.evaluate_metric_shared_stage(state, self.final_stage_idx)
+
+    @torch.no_grad()
+    def evaluate_metric_shared_stage(self, state: torch.Tensor, stage_idx: int) -> float:
         """
-        Parallelo: valutazione thread-safe
-        1) controlla LRU condivisa,
-        2) se miss, applica temporaneamente la maschera al modello, calcola metrica,
+        Thread-safe:
+        1) controlla LRU condivisa (key=(state,stage)),
+        2) se miss, applica temporaneamente la maschera al modello, calcola metrica (subset di stage),
            ripristina e aggiorna la cache.
         """
-        k = self._state_key(state)
+        k = self._state_stage_key(state, stage_idx)
         with self._metric_lock:
             hit = self._cache_get(k)
             if hit is not None:
                 return hit
 
-            saved = [g.alpha.data.clone() for g in self.gates]
-            try:
-                for gid, gate in enumerate(self.gates):
-                    gate.alpha.data.fill_(float(state[gid].item()))
-                if self.eval_mode == "ppl":
-                    val = self.compute_ppl()
-                elif self.eval_mode == "kl":
-                    val = self.compute_kl()
-                elif self.eval_mode == "mse":
-                    val = self.compute_mse()
-                else:
-                    raise ValueError(f"Unknown eval_mode: {self.eval_mode}")
-            finally:
-                for gate, val_alpha in zip(self.gates, saved):
-                    gate.alpha.data.copy_(val_alpha)
-
+            val = self._compute_metric_for_state_stage(state, stage_idx)
             self._cache_put(k, float(val))
             return float(val)
 
@@ -305,22 +326,23 @@ class PruneGame:
         """
         steps = self.numero_mossa if depth is None else depth
 
-        # metriche sullo stato ipotetico
+        # metriche sullo stato ipotetico (stage finale)
         s = 1.0 - state.float().mean().item()
         target = self.target_sparsity
-        m_now = self.metric_from_state_or_cache(state)
+        m_now = self.metric_progressive(state, stage_idx=self.final_stage_idx)
 
         # map metrica -> (term weight, tol)
         if self.eval_mode == "ppl":
-            rel = max(0.0, (m_now - self.initial_ppl) / (self.initial_ppl + 1e-8))
+            init_ref = self.initial_ppl_stages[self.final_stage_idx]
+            rel   = max(0.0, (m_now - init_ref) / (init_ref + 1e-8))
             m_term = math.exp(- rel / (self.ppl_alpha + 1e-12))  # (0,1]
-            m_ok = (rel <= self.ppl_tol_frac)
+            m_ok   = (rel <= self.ppl_tol_frac)
         elif self.eval_mode == "kl":
             m_term = math.exp(- m_now / (self.kl_alpha + 1e-12))
-            m_ok = (m_now <= self.kl_tol)
+            m_ok   = (m_now <= self.kl_tol)
         elif self.eval_mode == "mse":
             m_term = math.exp(- m_now / (self.mse_alpha + 1e-12))
-            m_ok = (m_now <= self.mse_tol)
+            m_ok   = (m_now <= self.mse_tol)
         else:
             raise ValueError
 
@@ -348,7 +370,7 @@ class PruneGame:
     # features per la rete
     def get_encoded_state(self, state: torch.Tensor):
         T, N = self.limite_mosse, state.numel()
-        enc = torch.zeros((T, N), dtype=torch.float32, device=self.device)
+        enc  = torch.zeros((T, N), dtype=torch.float32, device=self.device)
         enc[0] = state.float()  # stato corrente
         for t, past_state in enumerate(self.history, start=1):
             if t >= T:
@@ -375,15 +397,16 @@ class PruneGame:
         self.last_real_action = gid
         self.history.appendleft(self.state.clone())
 
-        # aggiorna metrica corrente
+        # aggiorna metrica corrente (logging full-stage)
+        m = self.metric_progressive(self.state, stage_idx=self.final_stage_idx)
         if self.eval_mode == "ppl":
-            self.ppl = self.compute_ppl()
+            self.ppl = m
             self.ppl_history.append(self.ppl)
         elif self.eval_mode == "kl":
-            self.kl = self.compute_kl()
+            self.kl = m
             self.kl_history.append(self.kl)
         elif self.eval_mode == "mse":
-            self.mse = self.compute_mse()
+            self.mse = m
             self.mse_history.append(self.mse)
 
         return self.state
