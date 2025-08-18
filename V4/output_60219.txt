@@ -1,0 +1,107 @@
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:02<00:02,  2.17s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:02<00:00,  1.34s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:02<00:00,  1.47s/it]
+/home/marcus.vukojevic/.conda/envs/ambiente/lib/python3.11/site-packages/torch/nn/modules/transformer.py:306: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(f"enable_nested_tensor is True, but self.use_nested_tensor is False because {why_not_sparsity_fast_path}")
+Iterations:   0%|          | 0/50 [00:00<?, ?it/s]
+Train 0:   0%|          | 0/5 [00:00<?, ?it/s][A
+Train 0:  20%|██        | 1/5 [00:00<00:00,  8.92it/s][A
+                                                      [AIterations:   2%|▏         | 1/50 [24:38<20:07:11, 1478.20s/it]
+Train 1:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                              [AIterations:   4%|▍         | 2/50 [47:29<18:52:02, 1415.05s/it]
+Train 2:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                              [AIterations:   6%|▌         | 3/50 [1:06:13<16:44:41, 1282.59s/it]
+Train 3:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                              [AIterations:   8%|▊         | 4/50 [1:17:26<13:18:46, 1041.87s/it]
+Train 4:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                              [AIterations:  10%|█         | 5/50 [1:29:54<11:41:55, 935.91s/it] 
+Train 5:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                              [AIterations:  12%|█▏        | 6/50 [1:39:05<9:50:10, 804.79s/it] 
+Train 6:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                              [AIterations:  14%|█▍        | 7/50 [1:45:26<7:57:39, 666.50s/it]
+Train 7:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                              [AIterations:  16%|█▌        | 8/50 [1:52:19<6:50:03, 585.80s/it]
+Train 8:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                              [AIterations:  18%|█▊        | 9/50 [1:59:23<6:05:39, 535.12s/it]
+Train 9:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                              [AIterations:  20%|██        | 10/50 [2:05:24<5:20:58, 481.46s/it]
+Train 10:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  22%|██▏       | 11/50 [2:11:15<4:46:49, 441.26s/it]
+Train 11:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  24%|██▍       | 12/50 [2:17:02<4:21:18, 412.58s/it]
+Train 12:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  26%|██▌       | 13/50 [2:22:38<4:00:11, 389.50s/it]
+Train 13:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  28%|██▊       | 14/50 [2:28:09<3:43:02, 371.75s/it]
+Train 14:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  30%|███       | 15/50 [2:33:08<3:24:08, 349.96s/it]
+Train 15:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  32%|███▏      | 16/50 [2:38:22<3:12:06, 339.01s/it]
+Train 16:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  34%|███▍      | 17/50 [2:44:09<3:07:49, 341.50s/it]
+Train 17:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  36%|███▌      | 18/50 [2:49:14<2:56:13, 330.42s/it]
+Train 18:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  38%|███▊      | 19/50 [2:53:25<2:38:27, 306.69s/it]
+Train 19:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  40%|████      | 20/50 [2:58:14<2:30:39, 301.30s/it]
+Train 20:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  42%|████▏     | 21/50 [3:02:43<2:20:54, 291.53s/it]
+Train 21:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  44%|████▍     | 22/50 [3:07:24<2:14:36, 288.46s/it]
+Train 22:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  46%|████▌     | 23/50 [3:12:41<2:13:43, 297.18s/it]
+Train 23:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  48%|████▊     | 24/50 [3:16:17<1:58:11, 272.76s/it]
+Train 24:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  50%|█████     | 25/50 [3:19:07<1:40:47, 241.89s/it]
+Train 25:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  52%|█████▏    | 26/50 [3:22:40<1:33:19, 233.29s/it]
+Train 26:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  54%|█████▍    | 27/50 [3:25:48<1:24:13, 219.73s/it]
+Train 27:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  56%|█████▌    | 28/50 [3:29:18<1:19:29, 216.79s/it]
+Train 28:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  58%|█████▊    | 29/50 [3:31:49<1:08:58, 197.08s/it]
+Train 29:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  60%|██████    | 30/50 [3:33:56<58:37, 175.87s/it]  
+Train 30:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  62%|██████▏   | 31/50 [3:36:27<53:23, 168.61s/it]
+Train 31:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  64%|██████▍   | 32/50 [3:37:59<43:39, 145.54s/it]
+Train 32:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  66%|██████▌   | 33/50 [3:39:25<36:10, 127.70s/it]
+Train 33:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  68%|██████▊   | 34/50 [3:40:51<30:43, 115.20s/it]
+Train 34:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  70%|███████   | 35/50 [3:42:13<26:17, 105.19s/it]
+Train 35:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  72%|███████▏  | 36/50 [3:43:29<22:31, 96.50s/it] 
+Train 36:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  74%|███████▍  | 37/50 [3:44:35<18:53, 87.19s/it]
+Train 37:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  76%|███████▌  | 38/50 [3:45:31<15:33, 77.83s/it]
+Train 38:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  78%|███████▊  | 39/50 [3:46:29<13:11, 71.96s/it]
+Train 39:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  80%|████████  | 40/50 [3:47:26<11:15, 67.56s/it]
+Train 40:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  82%|████████▏ | 41/50 [3:48:20<09:29, 63.31s/it]
+Train 41:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  84%|████████▍ | 42/50 [3:49:06<07:45, 58.16s/it]
+Train 42:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  86%|████████▌ | 43/50 [3:49:52<06:22, 54.59s/it]
+Train 43:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  88%|████████▊ | 44/50 [3:50:55<05:42, 57.06s/it]
+Train 44:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  90%|█████████ | 45/50 [3:51:27<04:08, 49.66s/it]
+Train 45:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  92%|█████████▏| 46/50 [3:52:13<03:14, 48.60s/it]
+Train 46:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  94%|█████████▍| 47/50 [3:52:56<02:20, 46.72s/it]
+Train 47:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  96%|█████████▌| 48/50 [3:53:50<01:38, 49.09s/it]
+Train 48:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations:  98%|█████████▊| 49/50 [3:54:27<00:45, 45.29s/it]
+Train 49:   0%|          | 0/5 [00:00<?, ?it/s][A
+                                               [AIterations: 100%|██████████| 50/50 [3:55:22<00:00, 48.28s/it]Iterations: 100%|██████████| 50/50 [3:55:22<00:00, 282.45s/it]
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:01<00:01,  1.83s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:01<00:00,  1.17it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:01<00:00,  1.00it/s]
+Some parameters are on the meta device because they were offloaded to the cpu.

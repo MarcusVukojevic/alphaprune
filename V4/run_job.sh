@@ -18,5 +18,5 @@ source /home/marcus.vukojevic/.bashrc
 conda activate ambiente
 
 # Eseguire lo script Python
-python ~/alphaprune/V4/main.py > 4_debug_loss.txt
+python ~/alphaprune/V4/main.py > debug_loss.txt
 

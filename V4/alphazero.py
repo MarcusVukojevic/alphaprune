@@ -1,22 +1,44 @@
 import os
-import math
 import random
+import threading
 import torch
-from collections import deque
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from torch.nn.utils import clip_grad_norm_
+from mcts import MCTS
+from collections import deque, OrderedDict
 from tqdm import trange
 
-from mcts import MCTS
+
+class ThreadSafeLRU:
+    def __init__(self, capacity: int = 20000):
+        self._cap = int(capacity)
+        self._od = OrderedDict()
+        self._lock = threading.RLock()
+
+    def get(self, k):
+        with self._lock:
+            if k in self._od:
+                v = self._od.pop(k)
+                self._od[k] = v
+                return v
+            return None
+
+    def put(self, k, v: float):
+        with self._lock:
+            self._od[k] = float(v)
+            if len(self._od) > self._cap:
+                self._od.popitem(last=False)
+
+    def clear(self):
+        with self._lock:
+            self._od.clear()
 
 
 class AlphaZero:
     def __init__(self, model, game, args):
         self.model = model
-        self.game = game          # PruneGame condiviso (modello + cache)
+        self.game = game
         self.args = args
-
-        self.mcts = MCTS(game, model, args)   # usato nel percorso sequenziale
+        self.mcts = MCTS(game, model, args)
         self.optimizer = torch.optim.AdamW(model.parameters(), lr=args["lr"])
 
         # Hyper
@@ -31,12 +53,8 @@ class AlphaZero:
         cap = args.get("replay_maxlen", 10000)
         self.replay = deque(maxlen=cap)
 
-        # Parallel
-        self.parallel = bool(args.get("parallel", False))
-        self.parallel_workers = int(args.get("parallel_workers", 0))
-
     # --------------------
-    # Percorso SEQUENZIALE
+    # Percorso SEQUENZIALE (basic)
     # --------------------
     @torch.no_grad()
     def self_play(self):
@@ -71,7 +89,7 @@ class AlphaZero:
             if hasattr(self.mcts, "reuse_subtree"):
                 self.mcts.reuse_subtree(action)
 
-            # check fine episodio (usa value/metrica SURROGATO nel game)
+            # check fine episodio
             reward, done = self.game.get_value_and_terminated(
                 self.game.state, depth=self.game.numero_mossa, register=True
             )
@@ -84,223 +102,17 @@ class AlphaZero:
 
         return traj
 
-    # --------------------
-    # Percorso PARALLELO
-    # --------------------
-    class _EpisodeEnv:
-        """
-        Env leggero per episodio, non tocca lo stato interno del PruneGame.
-        Delegando la metrica a core.evaluate_metric_shared() (lock + LRU),
-        più episodi possono coesistere in parallelo condividendo il modello.
-        """
-        def __init__(self, core_game, args):
-            from collections import deque as _deque
-            self.core = core_game
-            self.args = args
-            self.device = core_game.device
-
-            self.target_sparsity = core_game.target_sparsity
-            self.limite_mosse = core_game.limite_mosse
-            self.eval_mode = core_game.eval_mode
-
-            self.ppl_tol_frac = args.get("ppl_tol_frac", 0.10)
-            self.ppl_alpha    = args.get("ppl_alpha", 0.05)
-            self.kl_alpha     = args.get("kl_alpha", 0.02)
-            self.kl_tol       = args.get("kl_tol", 0.05)
-            self.mse_alpha    = args.get("mse_alpha", 0.02)
-            self.mse_tol      = args.get("mse_tol", 0.02)
-            self.require_metric_ok_for_stop = args.get("require_metric_ok_for_stop", False)
-            self.s_beta = args.get("s_beta", 0.05)
-            self.eps_sparsity_bonus = args.get("eps_sparsity_bonus", 0.2)
-
-            # stato locale
-            self.state = core_game.initial_state.clone().to(self.device)
-            self.initial_state = self.state.clone()
-            self.history = _deque(maxlen=self.limite_mosse - 1)
-            self.history.appendleft(self.initial_state)
-            self.reward_history = []
-            self.last_real_action = None
-            self.numero_mossa = 0
-
-            # logging metrica corrente (solo per info)
-            self.ppl = getattr(core_game, "initial_ppl", None)
-            self.kl = 0.0 if self.eval_mode == "kl" else None
-            self.mse = 0.0 if self.eval_mode == "mse" else None
-
-        def reset_game(self):
-            self.state.copy_(self.initial_state)
-            self.numero_mossa = 0
-            from collections import deque as _deque
-            self.history = _deque(maxlen=self.limite_mosse - 1)
-            self.history.appendleft(self.initial_state)
-            self.reward_history = []
-            self.last_real_action = None
-            return self.state
-
-        # ---------- Surrogato progressivo ----------
-        @torch.no_grad()
-        def metric_progressive(self, state: torch.Tensor, stage_idx: int | None):
-            return self.core.evaluate_metric_shared(state, stage_idx=stage_idx)
-
-        def get_stage_baseline_for_ppl(self, stage_idx: int):
-            return self.core.get_stage_baseline_for_ppl(stage_idx)
-
-        def get_encoded_state(self, state: torch.Tensor):
-            T, N = self.limite_mosse, state.numel()
-            enc = torch.zeros((T, N), dtype=torch.float32, device=self.device)
-            enc[0] = state.float()
-            for t, past_state in enumerate(self.history, start=1):
-                if t >= T:
-                    break
-                enc[t] = past_state.float()
-            return enc
-
-        def get_scalar(self):
-            return torch.tensor([self.limite_mosse - self.numero_mossa],
-                                dtype=torch.float32, device=self.device)
-
-        def legal_mask(self, state, is_root: bool, parent_action: int | None):
-            mask = state.bool().clone()
-            if is_root and self.last_real_action is not None:
-                mask[self.last_real_action] = False
-            if parent_action is not None:
-                mask[parent_action] = False
-            return mask
-
-        def pensa_azione(self, state: torch.Tensor, action: int):
-            if int(state[action].item()) == 0:
-                return state
-            s2 = state.clone()
-            s2[action] = 0
-            return s2
-
-        @torch.no_grad()
-        def get_value_and_terminated(self, state, depth=None, register=False):
-            """
-            Valore/terminazione durante self-play:
-            usa il SURROGATO per qualità, niente PPL full qui.
-            """
-            steps = self.numero_mossa if depth is None else depth
-            s = 1.0 - state.float().mean().item()
-            target = self.target_sparsity
-
-            # usa lo stage più economico per il value shaping
-            stage_idx = 0
-            m_now = self.metric_progressive(state, stage_idx=stage_idx)
-
-            if self.eval_mode == "ppl":
-                init_ppl = self.get_stage_baseline_for_ppl(stage_idx)
-                rel = max(0.0, (m_now - init_ppl) / (init_ppl + 1e-8))
-                ppl_alpha = self.ppl_alpha
-                ppl_tol   = self.ppl_tol_frac
-                m_term = math.exp(- rel / (ppl_alpha + 1e-12))
-                m_ok   = (rel <= ppl_tol)
-            elif self.eval_mode == "kl":
-                m_term = math.exp(- m_now / (self.kl_alpha + 1e-12))
-                m_ok   = (m_now <= self.kl_tol)
-            else:
-                m_term = math.exp(- m_now / (self.mse_alpha + 1e-12))
-                m_ok   = (m_now <= self.mse_tol)
-
-            # di default, NON richiediamo qualità per early-stop (come prima)
-            hit_s = (s >= target)
-            hit_q = m_ok if self.require_metric_ok_for_stop else True
-            limit = (steps >= self.limite_mosse)
-
-            if hit_s and hit_q:
-                reward = min(1.0, 0.7 + 0.3 * m_term)
-                if register:
-                    self.reward_history.append(float(reward))
-                return float(reward), True
-
-            if not limit:
-                return 0.0, False
-
-            progress = max(0.0, min(1.0, s / max(target, 1e-8)))
-            reward = 0.4 * (progress * (0.5 + 0.5 * m_term))
-            if register:
-                self.reward_history.append(float(reward))
-            return float(reward), True
-
-        def do_action(self, gid: int):
-            """Spegne 1 gate; NIENTE PPL full qui."""
-            if int(self.state[gid].item()) == 0:
-                self.numero_mossa += 1
-                self.last_real_action = gid
-                self.history.appendleft(self.state.clone())
-                return self.state
-
-            self.state[gid] = 0
-            self.numero_mossa += 1
-            self.last_real_action = gid
-            self.history.appendleft(self.state.clone())
-
-            # opzionale: logging surrogato molto leggero (disattivato di default)
-            if bool(self.args.get("log_progressive_metric", False)):
-                _ = self.metric_progressive(self.state, stage_idx=0)
-
-            return self.state
-
-    @torch.no_grad()
-    def self_play_parallel(self):
-        """
-        Lancia num_self_iteration episodi in parallelo usando il modello vittima
-        e la cache del PruneGame condivisi.
-        """
-        episodes = self.num_self_iteration
-        results = []
-
-        if self.parallel_workers <= 1:
-            # fallback sequenziale (riusa self_play classico)
-            for _ in range(episodes):
-                results.append(self.self_play())
-            return results
-
-        def _run_one():
-            env = AlphaZero._EpisodeEnv(self.game, self.args)
-            mcts = MCTS(env, self.model, self.args)
-            traj = []
-            _ = env.reset_game()
-            mcts.last_root = None
-            while True:
-                st = env.state.clone()
-                action = mcts.search(st)
-                root = mcts.last_root
-                N = st.numel()
-                pi = torch.zeros(N, dtype=torch.float32)
-                tot = sum(c.visit_count for c in root.children)
-                if tot > 0:
-                    for c in root.children:
-                        pi[c.action_taken] = c.visit_count / tot
-                enc = env.get_encoded_state(st).cpu()
-                scal = env.get_scalar().cpu().unsqueeze(0)
-                env.do_action(action)
-                reward, done = env.get_value_and_terminated(env.state, depth=env.numero_mossa, register=True)
-                traj.append((enc, scal, pi.cpu(), None))
-                if done:
-                    final_ret = torch.tensor([reward], dtype=torch.float32)
-                    traj = [(e, s, p, final_ret) for (e, s, p, _) in traj]
-                    break
-            return traj
-
-        with ThreadPoolExecutor(max_workers=self.parallel_workers) as ex:
-            futs = [ex.submit(_run_one) for _ in range(episodes)]
-            for f in as_completed(futs):
-                results.append(f.result())
-        return results
-
-    # --------------------
-    # Training
-    # --------------------
     def train_on_memory(self, batch):
         device = next(self.model.parameters()).device
+
         states, scalars, pis, rets = zip(*batch)
-        xx = torch.stack(states).to(device)   # (B,T,N)
+        xx = torch.stack(states).to(device)  # (B,T,N)
         ss = torch.stack(scalars).to(device)  # (B,1)
-        aa = torch.stack(pis).to(device)      # (B,N)
-        rr = torch.stack(rets).to(device)     # (B,1)
+        aa = torch.stack(pis).to(device)  # (B,N)
+        rr = torch.stack(rets).to(device)  # (B,1)
 
         loss, pol, val, ent = self.model.fwd_train(xx, ss, aa, rr, lambda_H=self.lambda_H)
+
         self.optimizer.zero_grad()
         loss.backward()
         clip_grad_norm_(self.model.parameters(), self.grad_clip)
@@ -311,16 +123,138 @@ class AlphaZero:
 
         for it in trange(self.num_episodes, desc="Iterations"):
             self.model.eval()
+            for _ in trange(self.num_self_iteration, desc=f"Self-play {it}", leave=False):
+                episode = self.self_play()
+                self.replay.extend(episode)
+            if not self.replay:
+                print("[warn] replay vuota, skip training")
+                continue
 
-            # --- self-play (parallelo o sequenziale) ---
-            if self.parallel:
-                episodes = self.self_play_parallel()
-                for ep in episodes:
-                    self.replay.extend(ep)
+            self.model.train()
+            for _ in trange(self.num_epochs, desc=f"Train {it}", leave=False):
+                batch = random.sample(list(self.replay), k=min(self.batch_size, len(self.replay)))
+                self.train_on_memory(batch)
+
+            torch.save(self.model.state_dict(), f"models/model_iter{it}.pt")
+
+    # --------------------
+    # PARALLEL LEARN (una sola GPU): più istanze di PruneGame sullo stesso device
+    # con cache metrica condivisa; training centralizzato su self.model
+    # --------------------
+    @torch.no_grad()
+    def _run_episode_on(self, game, policy_model):
+        """Episodio singolo su una istanza di PruneGame, usando un MCTS locale."""
+        mcts = MCTS(game, policy_model, self.args)
+        traj = []
+        _ = game.reset_game()
+        mcts.last_root = None
+
+        while True:
+            st = game.state.clone()
+            action = mcts.search(st)
+            root = mcts.last_root
+
+            N = st.numel()
+            pi = torch.zeros(N, dtype=torch.float32)
+            tot = sum(c.visit_count for c in root.children)
+            if tot > 0:
+                for c in root.children:
+                    pi[c.action_taken] = c.visit_count / tot
+
+            enc = game.get_encoded_state(st).cpu()
+            scal = game.get_scalar().cpu().unsqueeze(0)
+
+            game.do_action(action)
+            reward, done = game.get_value_and_terminated(game.state, depth=game.numero_mossa, register=True)
+            traj.append((enc, scal, pi.cpu(), None))
+            if done:
+                final_ret = torch.tensor([reward], dtype=torch.float32)
+                traj = [(e, s, p, final_ret) for (e, s, p, _) in traj]
+                break
+        return traj
+
+    def parallel_learn(self):
+        """
+        Esegue self-play parallelo creando N istanze di PruneGame *sullo stesso device*
+        (es. 'cuda'), tutte con una cache LRU condivisa per le metriche.
+        Ogni istanza esegue episodi in un thread; al termine si fa il training centrale.
+        """
+        os.makedirs("models", exist_ok=True)
+
+        # device unico (stessa GPU o CPU) da args
+        dev = self.args["device"]
+
+        # quante istanze parallele (tutte sullo stesso device)
+        env_count = max(1, int(self.args.get("parallel_workers", 2)))
+
+        # cache metrica condivisa tra tutte le istanze
+        shared_cache = ThreadSafeLRU(capacity=self.args.get("metric_cache_cap", 20000))
+
+        # dataset comune (dalla istanza base già creata fuori)
+        base_dataset = getattr(self.game, "dataset", None)
+        if base_dataset is None:
+            raise RuntimeError("PruneGame base non inizializzato correttamente (dataset mancante).")
+
+        from prune_game import PruneGame
+        from model import PruneModel
+
+        for it in trange(self.num_episodes, desc="Iterations"):
+            # distribuisci le partite tra le istanze
+            per_env = [self.num_self_iteration // env_count] * env_count
+            for i in range(self.num_self_iteration % env_count):
+                per_env[i] += 1
+
+            # snapshot dei pesi della policy
+            policy_sd = {k: v.detach().cpu() for k, v in self.model.state_dict().items()}
+
+            # costruisci istanze (tutte su dev)
+            workers = []
+            for idx in range(env_count):
+                if per_env[idx] == 0:
+                    continue
+                child_args = dict(self.args)
+                child_args["device"] = dev
+                child_args["shared_metric_cache"] = shared_cache
+                child_args["external_dataset"] = base_dataset  # stessi sample per tutti
+
+                game_i = PruneGame(child_args)
+
+                # policy locale (solo inferenza)
+                num_blocks = game_i.initial_state.numel()
+                history_len = self.args["n_mosse_massimo"]
+                policy_i = PruneModel(num_blocks, history_len).to(dev)
+                policy_i.load_state_dict(policy_sd, strict=True)
+                policy_i.eval()
+
+                workers.append((per_env[idx], game_i, policy_i))
+
+            # lancia i thread
+            episodes_collected = []
+            threads = []
+            results = [None] * len(workers)
+
+            def _worker(idx, quota, g_i, p_i):
+                local_eps = []
+                for _ in range(quota):
+                    ep = self._run_episode_on(g_i, p_i)
+                    local_eps.extend(ep)
+                results[idx] = local_eps
+
+            for idx, (quota, g_i, p_i) in enumerate(workers):
+                th = threading.Thread(target=_worker, args=(idx, quota, g_i, p_i), daemon=True)
+                th.start()
+                threads.append(th)
+            for th in threads:
+                th.join()
+
+            for r in results:
+                if r:
+                    episodes_collected.extend(r)
+
+            if episodes_collected:
+                self.replay.extend(episodes_collected)
             else:
-                for _ in trange(self.num_self_iteration, desc=f"Self-play {it}", leave=False):
-                    episode = self.self_play()
-                    self.replay.extend(episode)
+                print("[warn] nessun episodio raccolto in questa iter parallela")
 
             if not self.replay:
                 print("[warn] replay vuota, skip training")

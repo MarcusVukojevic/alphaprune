@@ -1,5 +1,0 @@
-{'model_name': 'meta-llama/Llama-2-7b-hf', 'name_dataset': 'wikitext', 'device': 'cuda', 'target_sparsity': 0.5, 'n_mosse_massimo': 20, 'eval_mode': 'ppl', 'num_episodes': 50, 'num_self_iteration': 20, 'num_epochs': 5, 'batch_size': 32, 'grad_clip': 1.0, 'entropy_bonus': 0.02, 'lr': 0.0002, 'replay_maxlen': 10000, 'C': 2.0, 'num_searches': 32, 'top_k': 16, 'gamma': 0.97, 'depth_penalty': 0.01, 'root_noise_eps': 0.25, 'root_dirichlet_alpha': 0.3, 'ppl_tol_frac': 0.1, 'ppl_alpha': 0.05, 's_beta': 0.05, 'eps_sparsity_bonus': 0.2}
---> ppl iniziale: 8.031207761318067
-
---> Inizio training AlphaPrune
-
