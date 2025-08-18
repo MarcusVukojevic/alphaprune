@@ -60,8 +60,10 @@ class AlphaZero:
     def self_play(self):
         traj = []
         _ = self.game.reset_game()
-        if hasattr(self.game, "clear_ppl_cache"):
-            self.game.clear_ppl_cache()
+
+        if self.args.get("clear_cache_each_episode", False):
+            self.game.clear_metric_cache()
+        
         self.mcts.last_root = None
 
         while True:

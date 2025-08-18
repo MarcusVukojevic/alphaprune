@@ -21,7 +21,7 @@ if __name__ == "__main__":
         "calib_seq_len" : 50,
 
         # --- Target pruning ---
-        "target_sparsity"  : 0.50,       # frazione di gate OFF desiderata
+        "target_sparsity"  : 0.37,       # frazione di gate OFF desiderata
         "n_mosse_massimo"  : 20,         # orizzonte T
         "eval_mode"        : "ppl",      # "ppl" | "kl" | "mse"
 
@@ -38,7 +38,7 @@ if __name__ == "__main__":
         # --- MCTS ---
         "C"             : 2.0,
         "num_searches"  : 32,
-        "top_k"         : 16,
+        "top_k"         : 8,
         "gamma"         : 0.97,
         "depth_penalty" : 0.01,
         "root_noise_eps": 0.25,
